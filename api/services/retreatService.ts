@@ -380,15 +380,26 @@ async function persistFinancialRecord(
 
 async function ensureRetreatSettingsRecord() {
   const supabase = assertSupabase()
+  const { data: existingSettings, error: selectError } = await supabase
+    .from('configuracoes_retiro')
+    .select('id, valor_inscricao')
+    .eq('id', SETTINGS_ROW_ID)
+    .maybeSingle()
+
+  if (selectError) {
+    throw selectError
+  }
+
+  if (existingSettings) {
+    return existingSettings as RetreatSettingsRow
+  }
+
   const { data, error } = await supabase
     .from('configuracoes_retiro')
-    .upsert(
-      {
-        id: SETTINGS_ROW_ID,
-        valor_inscricao: DEFAULT_RETREAT_FEE,
-      },
-      { onConflict: 'id' },
-    )
+    .insert({
+      id: SETTINGS_ROW_ID,
+      valor_inscricao: DEFAULT_RETREAT_FEE,
+    })
     .select('id, valor_inscricao')
     .single()
 
