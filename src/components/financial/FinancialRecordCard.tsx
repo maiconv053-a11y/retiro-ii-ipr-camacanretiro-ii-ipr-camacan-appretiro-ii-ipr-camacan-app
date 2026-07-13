@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CreditCard, Landmark, Receipt, Wallet } from 'lucide-react'
+import { CreditCard, Download, Landmark, Receipt, Wallet } from 'lucide-react'
 import {
   FinancialUpdate,
   Installment,
@@ -14,6 +14,7 @@ import {
   createInstallments,
   syncInstallmentsAmountPaid,
 } from '@/utils/finance'
+import { downloadBoletoBookletPdf } from '@/utils/boletoPdf'
 import { formatCurrency } from '@/utils/format'
 
 interface FinancialRecordCardProps {
@@ -143,6 +144,14 @@ export function FinancialRecordCard({
     }
   }
 
+  async function handleDownloadBoletoPdf() {
+    await downloadBoletoBookletPdf({
+      participantName: participant.fullName,
+      participantPhone: participant.phone,
+      installments: draft.installments,
+    })
+  }
+
   function getValidationTone() {
     if (participant.financial.validationStatus === 'Validado') {
       return 'green' as const
@@ -169,8 +178,20 @@ export function FinancialRecordCard({
   return (
     <article className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/78 p-5">
       <div className="flex flex-col gap-4 border-b border-emerald-100/10 pb-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h3 className="font-title text-xl text-white">{participant.fullName}</h3>
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h3 className="font-title text-xl text-white">{participant.fullName}</h3>
+            {draft.paymentMethod === 'Boleto' ? (
+              <button
+                type="button"
+                onClick={() => void handleDownloadBoletoPdf()}
+                className="inline-flex items-center gap-2 rounded-2xl border border-amber-200/25 bg-amber-200/10 px-4 py-2 text-sm font-medium text-amber-100 transition hover:border-amber-200/35 hover:bg-amber-200/15"
+              >
+                <Download className="h-4 w-4" />
+                Baixar PDF
+              </button>
+            ) : null}
+          </div>
           <p className="mt-2 text-sm text-slate-400">
             Pago {formatCurrency(participant.financial.amountPaid)} de{' '}
             {formatCurrency(participant.financial.totalAmount)}
