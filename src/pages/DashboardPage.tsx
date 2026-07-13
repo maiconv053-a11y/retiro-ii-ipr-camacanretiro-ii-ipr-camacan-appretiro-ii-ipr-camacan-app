@@ -2,7 +2,6 @@ import {
   AlertTriangle,
   CircleDollarSign,
   ListChecks,
-  Sparkles,
   Users,
 } from 'lucide-react'
 import { StatCard } from '@/components/ui/StatCard'
@@ -34,7 +33,7 @@ export default function DashboardPage() {
   ).length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <SectionHeader
         eyebrow="Painel central"
         title="Operação unificada do retiro"
@@ -80,83 +79,104 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-6 2xl:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-[28px] border border-white/10 bg-[#071120]/82 p-6">
-          <div className="flex items-center justify-between">
+      <div className="grid gap-5 2xl:grid-cols-[1.2fr_0.8fr]">
+        <section className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6">
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="font-title text-[11px] uppercase tracking-[0.3em] text-cyan-300/70">
+              <p className="font-title text-[10px] uppercase tracking-[0.24em] text-cyan-300/58">
                 Radar financeiro
               </p>
               <h2 className="mt-2 font-title text-xl text-white">
                 Participantes com saldo pendente
               </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Foco rápido nas inscrições que ainda precisam de acompanhamento.
+              </p>
             </div>
-            <Sparkles className="h-5 w-5 text-cyan-200" />
+            <StatusBadge
+              label={`${pendingParticipants.length} em aberto`}
+              tone={pendingParticipants.length > 0 ? 'amber' : 'green'}
+            />
           </div>
 
           <div className="mt-5 space-y-3">
-            {pendingParticipants.map((participant) => (
-              <article
-                key={participant.id}
-                className="flex flex-col gap-3 rounded-[22px] border border-white/10 bg-white/[0.03] p-4 md:flex-row md:items-center md:justify-between"
-              >
-                <div>
-                  <h3 className="text-sm font-medium text-white">
-                    {participant.fullName}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Pago {formatCurrency(participant.financial.amountPaid)} de{' '}
-                    {formatCurrency(participant.financial.totalAmount)}
-                  </p>
-                </div>
-                <StatusBadge
-                  label={participant.financial.paymentMethod}
-                  tone="violet"
-                />
+            {pendingParticipants.length === 0 ? (
+              <article className="rounded-[20px] border border-white/8 bg-white/[0.02] p-4 text-sm leading-6 text-slate-400">
+                Nenhum participante com saldo pendente no momento.
               </article>
-            ))}
+            ) : (
+              pendingParticipants.map((participant) => (
+                <article
+                  key={participant.id}
+                  className="flex flex-col gap-3 rounded-[20px] border border-white/8 bg-white/[0.02] p-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div>
+                    <h3 className="text-sm font-medium text-white">
+                      {participant.fullName}
+                    </h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-400">
+                      Pago {formatCurrency(participant.financial.amountPaid)} de{' '}
+                      {formatCurrency(participant.financial.totalAmount)}
+                    </p>
+                  </div>
+                  <StatusBadge
+                    label={participant.financial.paymentMethod}
+                    tone="violet"
+                  />
+                </article>
+              ))
+            )}
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-white/10 bg-[#071120]/82 p-6">
-          <p className="font-title text-[11px] uppercase tracking-[0.3em] text-violet-300/70">
+        <section className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6">
+          <p className="font-title text-[10px] uppercase tracking-[0.24em] text-violet-300/58">
             Operação logística
           </p>
           <h2 className="mt-2 font-title text-xl text-white">
             Próximos pontos de atenção
           </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Itens operacionais mais importantes para a equipe organizadora.
+          </p>
 
           <div className="mt-5 space-y-3">
-            {logisticsTasks.map((task) => (
-              <article
-                key={task.id}
-                className="rounded-[22px] border border-white/10 bg-white/[0.03] p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-medium text-white">{task.title}</h3>
-                    <p className="mt-1 text-sm text-slate-400">{task.owner}</p>
-                  </div>
-                  <StatusBadge
-                    label={
-                      task.status === 'EmAndamento'
-                        ? 'Em andamento'
-                        : task.status === 'Concluida'
-                          ? 'Concluída'
-                          : 'Pendente'
-                    }
-                    tone={
-                      task.status === 'Concluida'
-                        ? 'green'
-                        : task.status === 'EmAndamento'
-                          ? 'cyan'
-                          : 'amber'
-                    }
-                  />
-                </div>
-                <p className="mt-4 text-sm text-slate-400">{task.notes}</p>
+            {logisticsTasks.length === 0 ? (
+              <article className="rounded-[20px] border border-white/8 bg-white/[0.02] p-4 text-sm leading-6 text-slate-400">
+                Ainda não existem tarefas cadastradas para a operação.
               </article>
-            ))}
+            ) : (
+              logisticsTasks.map((task) => (
+                <article
+                  key={task.id}
+                  className="rounded-[20px] border border-white/8 bg-white/[0.02] p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-medium text-white">{task.title}</h3>
+                      <p className="mt-1 text-sm text-slate-400">{task.owner}</p>
+                    </div>
+                    <StatusBadge
+                      label={
+                        task.status === 'EmAndamento'
+                          ? 'Em andamento'
+                          : task.status === 'Concluida'
+                            ? 'Concluída'
+                            : 'Pendente'
+                      }
+                      tone={
+                        task.status === 'Concluida'
+                          ? 'green'
+                          : task.status === 'EmAndamento'
+                            ? 'cyan'
+                            : 'amber'
+                      }
+                    />
+                  </div>
+                  <p className="mt-4 text-sm leading-6 text-slate-400">{task.notes}</p>
+                </article>
+              ))
+            )}
           </div>
         </section>
       </div>

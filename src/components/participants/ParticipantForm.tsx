@@ -112,11 +112,11 @@ export function ParticipantForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-[28px] border border-white/10 bg-[#071120]/85 p-6 shadow-[0_24px_80px_rgba(2,8,23,0.35)]"
+      className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6"
     >
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="font-title text-[11px] uppercase tracking-[0.32em] text-cyan-300/70">
+          <p className="font-title text-[10px] uppercase tracking-[0.24em] text-cyan-300/58">
             {subheading}
           </p>
           <h2 className="mt-2 font-title text-xl text-white">
@@ -131,7 +131,7 @@ export function ParticipantForm({
             disabled={isSubmitting}
               aria-label="Cancelar edição"
               title="Cancelar edição"
-            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-slate-300 transition hover:border-white/20 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 text-slate-300 transition hover:border-white/16 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <RotateCcw className="h-4 w-4" />
             </button>
@@ -141,7 +141,7 @@ export function ParticipantForm({
             disabled={!isValid || isSubmitting}
             aria-label={actionLabel}
             title={actionLabel}
-            className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-3 text-cyan-200 transition hover:border-cyan-400/40 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-cyan-400/20 bg-cyan-400/8 p-3 text-cyan-100 transition hover:border-cyan-400/30 hover:bg-cyan-400/12 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {mode === 'edit' ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
           </button>
@@ -156,7 +156,7 @@ export function ParticipantForm({
           <input
             value={form.fullName}
             onChange={(event) => updateField('fullName', event.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/40 focus:shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
+            className="field-surface w-full"
             placeholder="Digite o nome do participante"
           />
         </label>
@@ -170,7 +170,7 @@ export function ParticipantForm({
             min={1}
             value={form.age}
             onChange={(event) => updateField('age', Number(event.target.value))}
-            className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/40 focus:shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
+            className="field-surface w-full"
           />
         </label>
 
@@ -181,7 +181,7 @@ export function ParticipantForm({
           <input
             value={form.phone}
             onChange={(event) => updateField('phone', formatPhone(event.target.value))}
-            className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/40 focus:shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
+            className="field-surface w-full"
             placeholder="(73) 99999-9999"
           />
         </label>
@@ -196,7 +196,7 @@ export function ParticipantForm({
               updateField('dietaryRestrictions', event.target.value)
             }
             rows={3}
-            className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/40 focus:shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
+            className="field-surface w-full"
             placeholder="Ex.: vegetariano, sem glúten"
           />
         </label>
@@ -211,7 +211,7 @@ export function ParticipantForm({
               updateField('medicalRestrictions', event.target.value)
             }
             rows={3}
-            className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/40 focus:shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
+            className="field-surface w-full"
             placeholder="Ex.: alergias, medicação contínua"
           />
         </label>
@@ -226,10 +226,10 @@ export function ParticipantForm({
                 key={status}
                 type="button"
                 onClick={() => updateField('registrationStatus', status)}
-                className={`rounded-2xl border px-4 py-3 text-xs uppercase tracking-[0.22em] transition ${
+                className={`rounded-2xl border px-4 py-3 text-xs uppercase tracking-[0.16em] transition ${
                   form.registrationStatus === status
-                    ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200'
-                    : 'border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20 hover:text-slate-200'
+                    ? 'border-cyan-400/24 bg-cyan-400/8 text-cyan-100'
+                    : 'border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/16 hover:text-slate-200'
                 }`}
               >
                 {status}
@@ -238,7 +238,7 @@ export function ParticipantForm({
           </div>
         </label>
 
-        <div className="space-y-3 rounded-[24px] border border-white/10 bg-black/20 p-4 md:col-span-2">
+        <div className="space-y-3 rounded-[22px] border border-white/10 bg-white/[0.02] p-4 md:col-span-2">
           <div>
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
               Configuração financeira inicial
@@ -261,7 +261,7 @@ export function ParticipantForm({
                 onChange={(event) =>
                   updateField('totalAmount', Number(event.target.value))
                 }
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/40 focus:shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
+                className="field-surface w-full"
                 placeholder="Ex.: 380"
               />
             </label>
@@ -275,7 +275,7 @@ export function ParticipantForm({
                 onChange={(event) =>
                   setPaymentMethod(event.target.value as PaymentMethod)
                 }
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/40 focus:shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
+                className="field-surface w-full"
               >
                 {paymentOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -296,7 +296,7 @@ export function ParticipantForm({
                 onChange={(event) =>
                   updateField('installmentCount', Number(event.target.value))
                 }
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/40 focus:shadow-[0_0_0_1px_rgba(34,211,238,0.2)]"
+                className="field-surface w-full"
               >
                 {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
                   <option key={count} value={count}>
@@ -321,7 +321,7 @@ export function ParticipantForm({
               type="button"
               onClick={onCancelEdit}
               disabled={isSubmitting}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-white/20 hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-white/16 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancelar
             </button>
@@ -329,7 +329,7 @@ export function ParticipantForm({
           <button
             type="submit"
             disabled={!isValid || isSubmitting}
-            className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-5 py-3 text-sm font-medium text-cyan-100 transition hover:border-cyan-400/40 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-cyan-400/20 bg-cyan-400/8 px-5 py-3 text-sm font-medium text-cyan-100 transition hover:border-cyan-400/30 hover:bg-cyan-400/12 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isSubmitting ? 'Salvando...' : submitLabel}
           </button>

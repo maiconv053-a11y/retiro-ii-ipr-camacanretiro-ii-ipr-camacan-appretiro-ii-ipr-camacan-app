@@ -4,8 +4,10 @@ import type {
   LogisticsTaskInput,
   Participant,
   ParticipantInput,
+  PublicRegistrationInput,
   TaskStatus,
 } from '@shared/types/retreat'
+import { getAuthToken } from '@/services/authStorage'
 
 interface ApiResponse<T> {
   success: boolean
@@ -16,9 +18,11 @@ interface ApiResponse<T> {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getAuthToken()
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
     ...init,
@@ -39,6 +43,13 @@ export function fetchParticipants() {
 
 export function createParticipant(participant: ParticipantInput) {
   return request<Participant[]>('/api/participants', {
+    method: 'POST',
+    body: JSON.stringify(participant),
+  })
+}
+
+export function createPublicRegistration(participant: PublicRegistrationInput) {
+  return request<{ created: boolean }>('/api/public/registrations', {
     method: 'POST',
     body: JSON.stringify(participant),
   })
@@ -65,6 +76,12 @@ export function updateParticipantFinancial(
   return request<Participant[]>(`/api/participants/${participantId}/financial`, {
     method: 'PATCH',
     body: JSON.stringify(update),
+  })
+}
+
+export function validateParticipantPayment(participantId: string) {
+  return request<Participant[]>(`/api/participants/${participantId}/validate-payment`, {
+    method: 'PATCH',
   })
 }
 

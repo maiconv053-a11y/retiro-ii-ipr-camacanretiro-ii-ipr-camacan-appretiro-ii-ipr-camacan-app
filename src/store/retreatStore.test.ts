@@ -10,6 +10,7 @@ vi.mock('@/services/retreatApi', () => ({
   createParticipant: vi.fn(),
   updateParticipant: vi.fn(),
   updateParticipantFinancial: vi.fn(),
+  validateParticipantPayment: vi.fn(),
   createLogisticsTask: vi.fn(),
   updateLogisticsStatus: vi.fn(),
 }))
@@ -25,6 +26,8 @@ const participantsFixture: Participant[] = [
     dietaryRestrictions: 'Sem lactose',
     medicalRestrictions: 'Nenhuma',
     registrationStatus: 'Confirmada',
+    registrationSource: 'Diretoria',
+    termsAccepted: true,
     financial: {
       totalAmount: 380,
       amountPaid: 380,
@@ -33,6 +36,7 @@ const participantsFixture: Participant[] = [
       installments: [
         { id: 'i1', label: '1x', amount: 380, status: 'Paga', dueDate: '2026-08-10' },
       ],
+      validationStatus: 'Validado',
     },
   },
   {
@@ -43,6 +47,8 @@ const participantsFixture: Participant[] = [
     dietaryRestrictions: 'Vegetariano',
     medicalRestrictions: 'Hipertensão controlada',
     registrationStatus: 'Pendente',
+    registrationSource: 'Publica',
+    termsAccepted: true,
     financial: {
       totalAmount: 380,
       amountPaid: 190,
@@ -52,6 +58,7 @@ const participantsFixture: Participant[] = [
         { id: 'i2', label: '1x', amount: 190, status: 'Paga', dueDate: '2026-08-10' },
         { id: 'i3', label: '2x', amount: 190, status: 'Pendente', dueDate: '2026-09-10' },
       ],
+      validationStatus: 'PendenteDeValidacao',
     },
   },
 ]
@@ -99,6 +106,7 @@ describe('retreatStore', () => {
       participantsFixture[0],
     ])
     mockedApi.updateParticipantFinancial.mockResolvedValue(participantsFixture)
+    mockedApi.validateParticipantPayment.mockResolvedValue(participantsFixture)
     mockedApi.createLogisticsTask.mockResolvedValue(logisticsFixture)
     mockedApi.updateLogisticsStatus.mockResolvedValue(logisticsFixture)
   })

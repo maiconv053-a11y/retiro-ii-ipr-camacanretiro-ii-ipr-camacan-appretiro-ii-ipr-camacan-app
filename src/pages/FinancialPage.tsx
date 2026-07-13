@@ -12,6 +12,9 @@ export default function FinancialPage() {
   const updateParticipantFinancial = useRetreatStore(
     (state) => state.updateParticipantFinancial,
   )
+  const validateParticipantPayment = useRetreatStore(
+    (state) => state.validateParticipantPayment,
+  )
   const syncing = useRetreatStore((state) => state.syncing)
 
   const totalExpected = activeParticipants.reduce(
@@ -70,6 +73,7 @@ export default function FinancialPage() {
             key={participant.id}
             participant={participant}
             onSave={updateParticipantFinancial}
+            onValidatePayment={validateParticipantPayment}
             isSaving={syncing}
           />
         ))}

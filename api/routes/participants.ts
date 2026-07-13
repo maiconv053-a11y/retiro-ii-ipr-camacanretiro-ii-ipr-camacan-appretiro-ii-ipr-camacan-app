@@ -1,9 +1,11 @@
 import { Router } from 'express'
 import type { Request, Response } from 'express'
 import type { FinancialUpdate, ParticipantInput } from '../../shared/types/retreat.js'
+import type { DirectorRequest } from '../middleware/requireDirectorAuth.js'
 import {
   createParticipantRecord,
   listParticipants,
+  validateParticipantPaymentRecord,
   updateParticipantFinancialRecord,
   updateParticipantRecord,
 } from '../services/retreatService.js'
@@ -79,6 +81,24 @@ router.patch('/:id/financial', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro ao atualizar financeiro',
+    })
+  }
+})
+
+router.patch('/:id/validate-payment', async (req: DirectorRequest, res: Response) => {
+  try {
+    await validateParticipantPaymentRecord(req.params.id, req.director?.id)
+    const participants = await listParticipants()
+
+    res.status(200).json({
+      success: true,
+      data: participants,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Erro ao validar pagamento do participante',
     })
   }
 })

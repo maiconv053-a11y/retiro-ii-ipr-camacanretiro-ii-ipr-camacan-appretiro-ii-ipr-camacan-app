@@ -13,15 +13,15 @@ interface StatCardProps {
 }
 
 const accentClasses = {
-  cyan: 'from-cyan-400/20 to-transparent text-cyan-200',
-  violet: 'from-violet-400/20 to-transparent text-violet-200',
-  green: 'from-emerald-400/20 to-transparent text-emerald-200',
+  cyan: 'from-cyan-400/12 to-transparent text-cyan-100',
+  violet: 'from-violet-400/12 to-transparent text-violet-100',
+  green: 'from-emerald-400/12 to-transparent text-emerald-100',
 }
 
 const iconAccentClasses = {
-  cyan: 'text-cyan-200',
-  violet: 'text-violet-200',
-  green: 'text-emerald-200',
+  cyan: 'text-cyan-100',
+  violet: 'text-violet-100',
+  green: 'text-emerald-100',
 }
 
 export function StatCard({
@@ -36,18 +36,18 @@ export function StatCard({
   const content = (
     <>
       <div className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${accentClasses[accent]}`} />
-      <div className="mb-6 flex items-center justify-between">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-slate-100">
+      <div className="mb-8 flex items-center justify-between">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-3 text-slate-100">
           {icon}
         </div>
-        <span className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-slate-400">
+        <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-slate-500">
           {to ? ctaLabel : 'Resumo'}
-          <ArrowUpRight className={`h-4 w-4 ${iconAccentClasses[accent]}`} />
+          <ArrowUpRight className={`h-3.5 w-3.5 ${iconAccentClasses[accent]}`} />
         </span>
       </div>
-      <p className="text-xs uppercase tracking-[0.24em] text-slate-400">{label}</p>
-      <p className="mt-3 font-title text-3xl text-white">{value}</p>
-      <p className="mt-2 text-sm text-slate-400">{hint}</p>
+      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="mt-3 font-title text-[2rem] leading-none text-white">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-400">{hint}</p>
     </>
   )
 
@@ -55,7 +55,7 @@ export function StatCard({
     return (
       <Link
         to={to}
-        className="group relative block overflow-hidden rounded-[28px] border border-white/10 bg-[#0a1222]/90 p-5 shadow-[0_24px_80px_rgba(2,8,23,0.45)] transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-[#0c1629] focus:outline-none focus:ring-2 focus:ring-cyan-400/40"
+        className="group relative block overflow-hidden rounded-[24px] border border-white/10 bg-[#08111f]/88 p-5 transition hover:-translate-y-0.5 hover:border-white/16 hover:bg-[#0a1424] focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
       >
         {content}
       </Link>
@@ -63,7 +63,7 @@ export function StatCard({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-[#0a1222]/90 p-5 shadow-[0_24px_80px_rgba(2,8,23,0.45)]">
+    <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[#08111f]/88 p-5">
       {content}
     </div>
   )

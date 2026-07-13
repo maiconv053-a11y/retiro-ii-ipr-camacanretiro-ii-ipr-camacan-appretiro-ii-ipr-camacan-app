@@ -93,6 +93,7 @@ export function normalizeFinancialRecord(update: FinancialUpdate): FinancialReco
     paymentMethod: update.paymentMethod,
     installmentCount,
     installments: syncInstallmentsAmountPaid(baseInstallments, amountPaid),
+    validationStatus: update.validationStatus ?? 'PendenteDeValidacao',
   }
 }
 

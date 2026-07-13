@@ -11,6 +11,8 @@ const participants: Participant[] = [
     dietaryRestrictions: 'Nenhuma',
     medicalRestrictions: 'Nenhuma',
     registrationStatus: 'Confirmada',
+    registrationSource: 'Diretoria',
+    termsAccepted: true,
     financial: {
       totalAmount: 380,
       amountPaid: 380,
@@ -19,6 +21,7 @@ const participants: Participant[] = [
       installments: [
         { id: 'i1', label: '1x', amount: 380, status: 'Paga', dueDate: '2026-08-10' },
       ],
+      validationStatus: 'Validado',
     },
   },
   {
@@ -29,6 +32,8 @@ const participants: Participant[] = [
     dietaryRestrictions: 'Sem lactose',
     medicalRestrictions: 'Nenhuma',
     registrationStatus: 'Pendente',
+    registrationSource: 'Publica',
+    termsAccepted: true,
     financial: {
       totalAmount: 380,
       amountPaid: 100,
@@ -39,6 +44,7 @@ const participants: Participant[] = [
         { id: 'i3', label: '2x', amount: 126.67, status: 'Pendente', dueDate: '2026-09-10' },
         { id: 'i4', label: '3x', amount: 126.66, status: 'Pendente', dueDate: '2026-10-10' },
       ],
+      validationStatus: 'PendenteDeValidacao',
     },
   },
   {
@@ -49,6 +55,8 @@ const participants: Participant[] = [
     dietaryRestrictions: 'Nenhuma',
     medicalRestrictions: 'Nenhuma',
     registrationStatus: 'Cancelada',
+    registrationSource: 'Diretoria',
+    termsAccepted: false,
     financial: {
       totalAmount: 380,
       amountPaid: 50,
@@ -57,6 +65,7 @@ const participants: Participant[] = [
       installments: [
         { id: 'i5', label: '1x', amount: 380, status: 'Pendente', dueDate: '2026-08-10' },
       ],
+      validationStatus: 'Rejeitado',
     },
   },
 ]

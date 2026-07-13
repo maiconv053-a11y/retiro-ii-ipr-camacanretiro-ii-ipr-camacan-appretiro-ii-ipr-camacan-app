@@ -16,6 +16,7 @@ interface RetreatState {
   syncing: boolean
   error: string | null
   initialize: () => Promise<void>
+  reset: () => void
   clearError: () => void
   addParticipant: (participant: ParticipantInput) => Promise<void>
   updateParticipant: (participantId: string, participant: ParticipantInput) => Promise<void>
@@ -23,6 +24,7 @@ interface RetreatState {
     participantId: string,
     update: FinancialUpdate,
   ) => Promise<void>
+  validateParticipantPayment: (participantId: string) => Promise<void>
   addLogisticsTask: (task: LogisticsTaskInput) => Promise<void>
   updateLogisticsStatus: (
     taskId: string,
@@ -41,6 +43,15 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
   loading: false,
   syncing: false,
   error: null,
+  reset: () =>
+    set({
+      participants: [],
+      logisticsTasks: [],
+      initialized: false,
+      loading: false,
+      syncing: false,
+      error: null,
+    }),
   clearError: () => set({ error: null }),
   initialize: async () => {
     if (get().loading || get().initialized) {
@@ -109,6 +120,18 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
         participantId,
         update,
       )
+
+      set({ participants, syncing: false })
+    } catch (error) {
+      set({ syncing: false, error: getErrorMessage(error) })
+      throw error
+    }
+  },
+  validateParticipantPayment: async (participantId) => {
+    set({ syncing: true, error: null })
+
+    try {
+      const participants = await retreatApi.validateParticipantPayment(participantId)
 
       set({ participants, syncing: false })
     } catch (error) {

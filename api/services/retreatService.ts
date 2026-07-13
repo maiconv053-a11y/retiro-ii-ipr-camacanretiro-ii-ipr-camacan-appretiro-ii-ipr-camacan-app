@@ -7,6 +7,8 @@ import type {
   Participant,
   ParticipantInput,
   PaymentMethod,
+  PublicRegistrationInput,
+  ValidationStatus,
 } from '../../shared/types/retreat.js'
 import { assertSupabase } from '../lib/supabase.js'
 
@@ -18,6 +20,8 @@ type ParticipantRow = {
   restricoes_medicas: string | null
   restricoes_alimentares: string | null
   status_inscricao: string
+  termo_aceito: boolean
+  origem_inscricao: string
   financeiro:
     | FinancialRow
     | FinancialRow[]
@@ -33,6 +37,7 @@ type FinancialRow = {
   num_parcelas: number
   parcelas_pagas: number
   status_geral: string
+  status_validacao: string
   financeiro_parcelas:
     | FinancialInstallmentRow[]
     | null
@@ -158,6 +163,36 @@ function fromRegistrationStatus(value: Participant['registrationStatus']) {
   }
 }
 
+function toRegistrationSource(value: string): Participant['registrationSource'] {
+  return value === 'publica' ? 'Publica' : 'Diretoria'
+}
+
+function fromRegistrationSource(value: Participant['registrationSource']) {
+  return value === 'Publica' ? 'publica' : 'diretoria'
+}
+
+function toValidationStatus(value: string): ValidationStatus {
+  switch (value) {
+    case 'validado':
+      return 'Validado'
+    case 'rejeitado':
+      return 'Rejeitado'
+    default:
+      return 'PendenteDeValidacao'
+  }
+}
+
+function fromValidationStatus(value: ValidationStatus) {
+  switch (value) {
+    case 'Validado':
+      return 'validado'
+    case 'Rejeitado':
+      return 'rejeitado'
+    default:
+      return 'pendente_validacao'
+  }
+}
+
 function toTaskStatus(value: string): LogisticsTask['status'] {
   switch (value) {
     case 'concluido':
@@ -197,6 +232,7 @@ function mapFinancialRecord(financial: FinancialRow | null): FinancialRecord {
       paymentMethod: 'PIX',
       installmentCount: 1,
       installments,
+      validationStatus: 'PendenteDeValidacao',
     }
   }
 
@@ -211,6 +247,7 @@ function mapFinancialRecord(financial: FinancialRow | null): FinancialRecord {
       paymentMethod: toPaymentMethod(financial.forma_pagamento),
       installmentCount,
       installments: syncInstallmentsAmountPaid(baseInstallments, financial.valor_pago),
+      validationStatus: toValidationStatus(financial.status_validacao),
     }
   }
 
@@ -230,6 +267,7 @@ function mapFinancialRecord(financial: FinancialRow | null): FinancialRecord {
     paymentMethod: toPaymentMethod(financial.forma_pagamento),
     installmentCount,
     installments,
+    validationStatus: toValidationStatus(financial.status_validacao),
   }
 }
 
@@ -244,6 +282,8 @@ function mapParticipant(row: ParticipantRow): Participant {
     dietaryRestrictions: row.restricoes_alimentares ?? '',
     medicalRestrictions: row.restricoes_medicas ?? '',
     registrationStatus: toRegistrationStatus(row.status_inscricao),
+    registrationSource: toRegistrationSource(row.origem_inscricao),
+    termsAccepted: row.termo_aceito,
     financial,
   }
 }
@@ -271,6 +311,11 @@ async function persistFinancialRecord(
     ? update.installmentCount
     : 1
   const amountPaid = Number((currentAmountPaid ?? update.amountPaid).toFixed(2))
+  const { data: currentFinancial } = await supabase
+    .from('financeiro')
+    .select('status_validacao')
+    .eq('participante_id', participantId)
+    .maybeSingle()
   const installments = syncInstallmentsAmountPaid(
     createInstallments(update.totalAmount, installmentCount),
     amountPaid,
@@ -287,6 +332,10 @@ async function persistFinancialRecord(
         num_parcelas: installmentCount,
         parcelas_pagas: installments.filter((item) => item.status === 'Paga').length,
         status_geral: deriveFinancialStatus(update.totalAmount, amountPaid),
+        status_validacao: fromValidationStatus(
+          update.validationStatus ??
+            toValidationStatus(currentFinancial?.status_validacao ?? 'pendente_validacao'),
+        ),
       },
       {
         onConflict: 'participante_id',
@@ -333,6 +382,8 @@ export async function listParticipants() {
         restricoes_medicas,
         restricoes_alimentares,
         status_inscricao,
+        termo_aceito,
+        origem_inscricao,
         financeiro (
           id,
           participante_id,
@@ -342,6 +393,7 @@ export async function listParticipants() {
           num_parcelas,
           parcelas_pagas,
           status_geral,
+          status_validacao,
           financeiro_parcelas (
             id,
             numero_parcela,
@@ -372,6 +424,9 @@ export async function createParticipantRecord(input: ParticipantInput) {
       restricoes_medicas: input.medicalRestrictions,
       restricoes_alimentares: input.dietaryRestrictions,
       status_inscricao: fromRegistrationStatus(input.registrationStatus),
+      termo_aceito: input.termsAccepted ?? false,
+      termo_aceito_em: input.termsAccepted ? new Date().toISOString() : null,
+      origem_inscricao: fromRegistrationSource(input.registrationSource ?? 'Diretoria'),
     })
     .select('id')
     .single()
@@ -388,6 +443,43 @@ export async function createParticipantRecord(input: ParticipantInput) {
       paymentMethod: input.paymentMethod,
       installmentCount: input.installmentCount,
       installments: [],
+      validationStatus: input.validationStatus ?? 'Validado',
+    },
+    0,
+  )
+}
+
+export async function createPublicRegistrationRecord(input: PublicRegistrationInput) {
+  const supabase = assertSupabase()
+  const { data, error } = await supabase
+    .from('participantes')
+    .insert({
+      nome: input.fullName,
+      idade: input.age,
+      telefone: input.phone,
+      restricoes_medicas: input.medicalRestrictions,
+      restricoes_alimentares: input.dietaryRestrictions,
+      status_inscricao: 'pendente',
+      termo_aceito: input.termsAccepted,
+      termo_aceito_em: input.termsAccepted ? new Date().toISOString() : null,
+      origem_inscricao: 'publica',
+    })
+    .select('id')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  await persistFinancialRecord(
+    data.id,
+    {
+      totalAmount: 380,
+      amountPaid: 0,
+      paymentMethod: input.paymentMethod,
+      installmentCount: input.installmentCount,
+      installments: [],
+      validationStatus: 'PendenteDeValidacao',
     },
     0,
   )
@@ -408,6 +500,9 @@ export async function updateParticipantRecord(
       restricoes_medicas: input.medicalRestrictions,
       restricoes_alimentares: input.dietaryRestrictions,
       status_inscricao: fromRegistrationStatus(input.registrationStatus),
+      termo_aceito: input.termsAccepted ?? false,
+      termo_aceito_em: input.termsAccepted ? new Date().toISOString() : null,
+      origem_inscricao: fromRegistrationSource(input.registrationSource ?? 'Diretoria'),
     })
     .eq('id', participantId)
 
@@ -423,6 +518,7 @@ export async function updateParticipantRecord(
       paymentMethod: input.paymentMethod,
       installmentCount: input.installmentCount,
       installments: [],
+      validationStatus: input.validationStatus,
     },
     currentAmountPaid,
   )
@@ -433,6 +529,38 @@ export async function updateParticipantFinancialRecord(
   update: FinancialUpdate,
 ) {
   await persistFinancialRecord(participantId, update, update.amountPaid)
+}
+
+export async function validateParticipantPaymentRecord(
+  participantId: string,
+  directorId?: string,
+) {
+  const supabase = assertSupabase()
+
+  const { error: financialError } = await supabase
+    .from('financeiro')
+    .update({
+      status_validacao: 'validado',
+      validado_por: directorId ?? null,
+      validado_em: new Date().toISOString(),
+    })
+    .eq('participante_id', participantId)
+
+  if (financialError) {
+    throw financialError
+  }
+
+  const { error: participantError } = await supabase
+    .from('participantes')
+    .update({
+      status_inscricao: 'confirmada',
+    })
+    .eq('id', participantId)
+    .neq('status_inscricao', 'cancelada')
+
+  if (participantError) {
+    throw participantError
+  }
 }
 
 export async function listLogisticsTasks() {

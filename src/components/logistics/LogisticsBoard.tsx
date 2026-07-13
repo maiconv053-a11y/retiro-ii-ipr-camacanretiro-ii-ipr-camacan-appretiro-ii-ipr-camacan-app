@@ -80,11 +80,11 @@ export function LogisticsBoard({
     <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
       <form
         onSubmit={handleSubmit}
-        className="rounded-[28px] border border-white/10 bg-[#071120]/82 p-6"
+        className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6"
       >
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="font-title text-[11px] uppercase tracking-[0.32em] text-cyan-300/70">
+            <p className="font-title text-[10px] uppercase tracking-[0.24em] text-cyan-300/58">
               Controle operacional
             </p>
             <h2 className="mt-2 font-title text-xl text-white">Nova tarefa</h2>
@@ -94,7 +94,7 @@ export function LogisticsBoard({
             disabled={isSubmitting}
             aria-label="Adicionar tarefa"
             title="Adicionar tarefa"
-            className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-3 text-cyan-200 transition hover:border-cyan-400/40 hover:bg-cyan-400/15 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-cyan-400/20 bg-cyan-400/8 p-3 text-cyan-100 transition hover:border-cyan-400/30 hover:bg-cyan-400/12 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ClipboardPlus className="h-4 w-4" />
           </button>
@@ -109,8 +109,8 @@ export function LogisticsBoard({
                 onClick={() => updateField('category', category)}
                 className={`rounded-2xl border px-4 py-3 text-xs uppercase tracking-[0.2em] transition ${
                   form.category === category
-                    ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-200'
-                    : 'border-white/10 text-slate-500 hover:text-slate-200'
+                    ? 'border-cyan-400/24 bg-cyan-400/8 text-cyan-100'
+                    : 'border-white/10 bg-white/[0.02] text-slate-500 hover:border-white/16 hover:text-slate-200'
                 }`}
               >
                 {category}
@@ -121,13 +121,13 @@ export function LogisticsBoard({
           <input
             value={form.title}
             onChange={(event) => updateField('title', event.target.value)}
-            className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none"
+            className="field-surface"
             placeholder="Nome da tarefa ou contrato"
           />
           <input
             value={form.owner}
             onChange={(event) => updateField('owner', event.target.value)}
-            className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none"
+            className="field-surface"
             placeholder="Responsável"
           />
 
@@ -138,14 +138,14 @@ export function LogisticsBoard({
               onChange={(event) =>
                 updateField('estimatedCost', Number(event.target.value))
               }
-              className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none"
+              className="field-surface"
               placeholder="Valor estimado"
             />
             <input
               type="number"
               value={form.actualCost}
               onChange={(event) => updateField('actualCost', Number(event.target.value))}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none"
+              className="field-surface"
               placeholder="Valor gasto"
             />
           </div>
@@ -154,14 +154,14 @@ export function LogisticsBoard({
             value={form.notes}
             onChange={(event) => updateField('notes', event.target.value)}
             rows={4}
-            className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none"
+            className="field-surface"
             placeholder="Observações e detalhes"
           />
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-2xl border border-violet-400/20 bg-violet-400/10 px-5 py-3 text-sm font-medium text-violet-100 transition hover:border-violet-400/40"
+            className="rounded-2xl border border-violet-400/20 bg-violet-400/8 px-5 py-3 text-sm font-medium text-violet-100 transition hover:border-violet-400/30 hover:bg-violet-400/12"
           >
             {isSubmitting ? 'Salvando...' : 'Adicionar ao checklist'}
           </button>
@@ -172,7 +172,7 @@ export function LogisticsBoard({
         {(['Compras', 'Contratos'] as const).map((category) => (
           <section
             key={category}
-            className="rounded-[28px] border border-white/10 bg-[#071120]/80 p-6"
+            className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -207,7 +207,7 @@ export function LogisticsBoard({
               {groupedTasks[category].map((task) => (
                 <article
                   key={task.id}
-                  className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4"
+                className="rounded-[20px] border border-white/8 bg-white/[0.02] p-4"
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
@@ -237,7 +237,7 @@ export function LogisticsBoard({
                           ).catch(() => undefined)
                         }
                         disabled={isSubmitting}
-                        className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none"
+                        className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white outline-none"
                       >
                         {statusOptions.map((status) => (
                           <option key={status} value={status}>

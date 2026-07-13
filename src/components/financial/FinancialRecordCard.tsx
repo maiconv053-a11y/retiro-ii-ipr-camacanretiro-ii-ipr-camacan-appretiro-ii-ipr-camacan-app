@@ -17,6 +17,7 @@ import { formatCurrency } from '@/utils/format'
 interface FinancialRecordCardProps {
   participant: Participant
   onSave: (participantId: string, update: FinancialUpdate) => Promise<void> | void
+  onValidatePayment?: (participantId: string) => Promise<void> | void
   isSaving?: boolean
 }
 
@@ -34,6 +35,7 @@ const paymentOptions: Array<{
 export function FinancialRecordCard({
   participant,
   onSave,
+  onValidatePayment,
   isSaving = false,
 }: FinancialRecordCardProps) {
   const [draft, setDraft] = useState<FinancialUpdate>(participant.financial)
@@ -124,8 +126,43 @@ export function FinancialRecordCard({
     }
   }
 
+  async function validatePayment() {
+    if (!onValidatePayment) {
+      return
+    }
+
+    try {
+      await onValidatePayment(participant.id)
+    } catch {
+      return
+    }
+  }
+
+  function getValidationTone() {
+    if (participant.financial.validationStatus === 'Validado') {
+      return 'green' as const
+    }
+
+    if (participant.financial.validationStatus === 'Rejeitado') {
+      return 'rose' as const
+    }
+
+    return 'amber' as const
+  }
+
+  function getValidationLabel() {
+    switch (participant.financial.validationStatus) {
+      case 'Validado':
+        return 'Pagamento validado'
+      case 'Rejeitado':
+        return 'Validação rejeitada'
+      default:
+        return 'Pendente de validação'
+    }
+  }
+
   return (
-    <article className="rounded-[28px] border border-white/10 bg-[#071120]/82 p-5">
+    <article className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-5">
       <div className="flex flex-col gap-4 border-b border-white/10 pb-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h3 className="font-title text-xl text-white">{participant.fullName}</h3>
@@ -134,10 +171,13 @@ export function FinancialRecordCard({
             {formatCurrency(participant.financial.totalAmount)}
           </p>
         </div>
-        <StatusBadge
-          label={pendingAmount > 0 ? 'Saldo pendente' : 'Quitado'}
-          tone={pendingAmount > 0 ? 'amber' : 'green'}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge
+            label={pendingAmount > 0 ? 'Saldo pendente' : 'Quitado'}
+            tone={pendingAmount > 0 ? 'amber' : 'green'}
+          />
+          <StatusBadge label={getValidationLabel()} tone={getValidationTone()} />
+        </div>
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
@@ -168,7 +208,7 @@ export function FinancialRecordCard({
                     }
                   })
                 }
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none"
+                className="field-surface w-full"
               />
             </label>
 
@@ -193,7 +233,7 @@ export function FinancialRecordCard({
                     }
                   })
                 }
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none"
+                className="field-surface w-full"
               />
             </label>
           </div>
@@ -206,8 +246,8 @@ export function FinancialRecordCard({
                 onClick={() => setMethod(value)}
                 className={`flex items-center gap-3 rounded-[22px] border px-4 py-3 text-left transition ${
                   draft.paymentMethod === value
-                    ? 'border-cyan-400/30 bg-cyan-400/10 text-cyan-100'
-                    : 'border-white/10 bg-white/[0.02] text-slate-400 hover:text-slate-100'
+                    ? 'border-cyan-400/24 bg-cyan-400/8 text-cyan-100'
+                    : 'border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/16 hover:text-slate-100'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -217,7 +257,7 @@ export function FinancialRecordCard({
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+        <div className="rounded-[22px] border border-white/10 bg-white/[0.02] p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -231,7 +271,7 @@ export function FinancialRecordCard({
               value={draft.installmentCount}
               disabled={!requiresInstallments(draft.paymentMethod)}
               onChange={(event) => setInstallmentCount(Number(event.target.value))}
-              className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none disabled:opacity-40"
+              className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white outline-none disabled:opacity-40"
             >
               {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
                 <option key={count} value={count}>
@@ -247,7 +287,7 @@ export function FinancialRecordCard({
                 key={`${participant.id}-${installment.id}`}
                 type="button"
                 onClick={() => toggleInstallment(index)}
-                className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left"
+                className="flex w-full items-center justify-between rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 text-left"
               >
                 <div>
                   <p className="text-sm text-white">
@@ -268,17 +308,37 @@ export function FinancialRecordCard({
       </div>
 
       <div className="mt-5 flex flex-col gap-4 border-t border-white/10 pt-4 md:flex-row md:items-center md:justify-between">
-        <div className="text-sm text-slate-400">
-          Saldo aberto: <span className="text-white">{formatCurrency(pendingAmount)}</span>
+        <div className="space-y-1 text-sm text-slate-400">
+          <p>
+            Saldo aberto: <span className="text-white">{formatCurrency(pendingAmount)}</span>
+          </p>
+          <p>
+            Origem da inscrição:{' '}
+            <span className="text-white">
+              {participant.registrationSource === 'Publica' ? 'Área pública' : 'Diretoria'}
+            </span>
+          </p>
         </div>
-        <button
-          type="button"
-          onClick={saveChanges}
-          disabled={isSaving}
-          className="rounded-2xl border border-violet-400/20 bg-violet-400/10 px-5 py-3 text-sm font-medium text-violet-100 transition hover:border-violet-400/40"
-        >
-          {isSaving ? 'Salvando...' : 'Atualizar financeiro'}
-        </button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          {participant.financial.validationStatus !== 'Validado' ? (
+            <button
+              type="button"
+              onClick={validatePayment}
+              disabled={isSaving || !onValidatePayment}
+              className="rounded-2xl border border-emerald-400/20 bg-emerald-400/8 px-5 py-3 text-sm font-medium text-emerald-100 transition hover:border-emerald-400/30 hover:bg-emerald-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isSaving ? 'Validando...' : 'Validar pagamento'}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={saveChanges}
+            disabled={isSaving}
+            className="rounded-2xl border border-violet-400/20 bg-violet-400/8 px-5 py-3 text-sm font-medium text-violet-100 transition hover:border-violet-400/30 hover:bg-violet-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {isSaving ? 'Salvando...' : 'Atualizar financeiro'}
+          </button>
+        </div>
       </div>
     </article>
   )

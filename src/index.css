@@ -31,8 +31,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(34, 211, 238, 0.16), transparent 22%),
-    radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 18%),
+    radial-gradient(circle at top left, rgba(34, 211, 238, 0.08), transparent 24%),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.07), transparent 20%),
+    linear-gradient(180deg, rgba(7, 12, 24, 0.92), rgba(2, 6, 17, 1)),
     #020611;
 }
 
@@ -83,5 +84,17 @@ textarea {
 @layer utilities {
   .font-title {
     font-family: 'Oxanium', sans-serif;
+  }
+
+  .panel-surface {
+    @apply rounded-[24px] border border-white/8 bg-white/[0.025];
+  }
+
+  .panel-surface-strong {
+    @apply rounded-[28px] border border-white/10 bg-[#08111f]/88;
+  }
+
+  .field-surface {
+    @apply rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400/30 focus:bg-white/[0.03];
   }
 }
