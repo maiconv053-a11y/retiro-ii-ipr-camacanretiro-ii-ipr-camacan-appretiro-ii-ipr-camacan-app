@@ -646,6 +646,49 @@ export async function updateParticipantFinancialRecord(
   await persistFinancialRecord(participantId, update, update.amountPaid)
 }
 
+export async function deleteParticipantRecord(participantId: string) {
+  const supabase = assertSupabase()
+  const { data: financialRows, error: financialSelectError } = await supabase
+    .from('financeiro')
+    .select('id')
+    .eq('participante_id', participantId)
+
+  if (financialSelectError) {
+    throw financialSelectError
+  }
+
+  const financialIds = (financialRows ?? []).map((row) => row.id)
+
+  if (financialIds.length > 0) {
+    const { error: installmentsDeleteError } = await supabase
+      .from('financeiro_parcelas')
+      .delete()
+      .in('financeiro_id', financialIds)
+
+    if (installmentsDeleteError) {
+      throw installmentsDeleteError
+    }
+  }
+
+  const { error: financialDeleteError } = await supabase
+    .from('financeiro')
+    .delete()
+    .eq('participante_id', participantId)
+
+  if (financialDeleteError) {
+    throw financialDeleteError
+  }
+
+  const { error: participantDeleteError } = await supabase
+    .from('participantes')
+    .delete()
+    .eq('id', participantId)
+
+  if (participantDeleteError) {
+    throw participantDeleteError
+  }
+}
+
 export async function validateParticipantPaymentRecord(
   participantId: string,
   directorId?: string,
@@ -720,6 +763,15 @@ export async function updateLogisticsTaskStatusRecord(
       status: fromTaskStatus(status),
     })
     .eq('id', taskId)
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function deleteLogisticsTaskRecord(taskId: string) {
+  const supabase = assertSupabase()
+  const { error } = await supabase.from('checklist_organizacao').delete().eq('id', taskId)
 
   if (error) {
     throw error

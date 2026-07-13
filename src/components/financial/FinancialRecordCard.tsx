@@ -167,8 +167,8 @@ export function FinancialRecordCard({
   }
 
   return (
-    <article className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-5">
-      <div className="flex flex-col gap-4 border-b border-white/10 pb-4 md:flex-row md:items-center md:justify-between">
+    <article className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/78 p-5">
+      <div className="flex flex-col gap-4 border-b border-emerald-100/10 pb-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h3 className="font-title text-xl text-white">{participant.fullName}</h3>
           <p className="mt-2 text-sm text-slate-400">
@@ -251,8 +251,8 @@ export function FinancialRecordCard({
                 onClick={() => setMethod(value)}
                 className={`flex items-center gap-3 rounded-[22px] border px-4 py-3 text-left transition ${
                   draft.paymentMethod === value
-                    ? 'border-cyan-400/24 bg-cyan-400/8 text-cyan-100'
-                    : 'border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/16 hover:text-slate-100'
+                    ? 'border-emerald-300/24 bg-emerald-300/10 text-emerald-100'
+                    : 'border-emerald-100/10 bg-[#0b1713]/80 text-slate-400 hover:border-emerald-200/20 hover:text-slate-100'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -262,10 +262,10 @@ export function FinancialRecordCard({
           </div>
         </div>
 
-        <div className="rounded-[22px] border border-white/10 bg-white/[0.02] p-4">
+        <div className="rounded-[22px] border border-emerald-100/10 bg-[#0b1713]/82 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-xs uppercase tracking-[0.2em] text-emerald-200/45">
                 Parcelamento
               </p>
               <p className="mt-1 text-sm text-slate-300">
@@ -276,7 +276,7 @@ export function FinancialRecordCard({
               value={draft.installmentCount}
               disabled={!requiresInstallments(draft.paymentMethod)}
               onChange={(event) => setInstallmentCount(Number(event.target.value))}
-              className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white outline-none disabled:opacity-40"
+              className="rounded-2xl border border-emerald-100/10 bg-[#102019] px-3 py-2 text-sm text-white outline-none disabled:opacity-40"
             >
               {Array.from(
                 { length: getMaxInstallmentsForMethod(draft.paymentMethod) },
@@ -295,7 +295,7 @@ export function FinancialRecordCard({
                 key={`${participant.id}-${installment.id}`}
                 type="button"
                 onClick={() => toggleInstallment(index)}
-                className="flex w-full items-center justify-between rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 text-left"
+                className="flex w-full items-center justify-between rounded-2xl border border-emerald-100/10 bg-[#102019]/78 px-4 py-3 text-left"
               >
                 <div>
                   <p className="text-sm text-white">
@@ -315,7 +315,7 @@ export function FinancialRecordCard({
         </div>
       </div>
 
-      <div className="mt-5 flex flex-col gap-4 border-t border-white/10 pt-4 md:flex-row md:items-center md:justify-between">
+      <div className="mt-5 flex flex-col gap-4 border-t border-emerald-100/10 pt-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1 text-sm text-slate-400">
           <p>
             Saldo aberto: <span className="text-white">{formatCurrency(pendingAmount)}</span>
@@ -342,7 +342,7 @@ export function FinancialRecordCard({
             type="button"
             onClick={saveChanges}
             disabled={isSaving}
-            className="rounded-2xl border border-violet-400/20 bg-violet-400/8 px-5 py-3 text-sm font-medium text-violet-100 transition hover:border-violet-400/30 hover:bg-violet-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-5 py-3 text-sm font-medium text-emerald-100 transition hover:border-emerald-300/30 hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isSaving ? 'Salvando...' : 'Atualizar financeiro'}
           </button>

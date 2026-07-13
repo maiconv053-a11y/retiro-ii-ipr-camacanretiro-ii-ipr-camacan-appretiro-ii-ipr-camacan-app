@@ -3,6 +3,7 @@ import type { Request, Response } from 'express'
 import type { FinancialUpdate, ParticipantInput } from '../../shared/types/retreat.js'
 import {
   createParticipantRecord,
+  deleteParticipantRecord,
   listParticipants,
   validateParticipantPaymentRecord,
   updateParticipantFinancialRecord,
@@ -98,6 +99,23 @@ router.patch('/:id/validate-payment', async (req: Request, res: Response) => {
       success: false,
       error:
         error instanceof Error ? error.message : 'Erro ao validar pagamento do participante',
+    })
+  }
+})
+
+router.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    await deleteParticipantRecord(req.params.id)
+    const participants = await listParticipants()
+
+    res.status(200).json({
+      success: true,
+      data: participants,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro ao excluir participante',
     })
   }
 })

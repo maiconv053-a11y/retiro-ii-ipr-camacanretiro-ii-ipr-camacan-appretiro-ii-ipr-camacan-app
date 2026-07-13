@@ -22,6 +22,7 @@ interface RetreatState {
   clearError: () => void
   addParticipant: (participant: ParticipantInput) => Promise<void>
   updateParticipant: (participantId: string, participant: ParticipantInput) => Promise<void>
+  deleteParticipant: (participantId: string) => Promise<void>
   updateParticipantFinancial: (
     participantId: string,
     update: FinancialUpdate,
@@ -33,6 +34,7 @@ interface RetreatState {
     taskId: string,
     status: LogisticsTask['status'],
   ) => Promise<void>
+  deleteLogisticsTask: (taskId: string) => Promise<void>
 }
 
 function getErrorMessage(error: unknown) {
@@ -123,6 +125,17 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
       throw error
     }
   },
+  deleteParticipant: async (participantId) => {
+    set({ syncing: true, error: null })
+
+    try {
+      const participants = await retreatApi.deleteParticipant(participantId)
+      set({ participants, syncing: false })
+    } catch (error) {
+      set({ syncing: false, error: getErrorMessage(error) })
+      throw error
+    }
+  },
   updateParticipantFinancial: async (participantId, update) => {
     set({ syncing: true, error: null })
 
@@ -181,6 +194,17 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
 
     try {
       const logisticsTasks = await retreatApi.updateLogisticsStatus(taskId, status)
+      set({ logisticsTasks, syncing: false })
+    } catch (error) {
+      set({ syncing: false, error: getErrorMessage(error) })
+      throw error
+    }
+  },
+  deleteLogisticsTask: async (taskId) => {
+    set({ syncing: true, error: null })
+
+    try {
+      const logisticsTasks = await retreatApi.deleteLogisticsTask(taskId)
       set({ logisticsTasks, syncing: false })
     } catch (error) {
       set({ syncing: false, error: getErrorMessage(error) })

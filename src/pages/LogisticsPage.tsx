@@ -9,11 +9,24 @@ export default function LogisticsPage() {
   const updateLogisticsStatus = useRetreatStore(
     (state) => state.updateLogisticsStatus,
   )
+  const deleteLogisticsTask = useRetreatStore((state) => state.deleteLogisticsTask)
   const syncing = useRetreatStore((state) => state.syncing)
 
   const completedTasks = logisticsTasks.filter(
     (task) => task.status === 'Concluida',
   ).length
+
+  async function handleDeleteTask(taskId: string, taskTitle: string) {
+    const confirmed = window.confirm(
+      `Deseja excluir "${taskTitle}" do checklist? Essa ação não pode ser desfeita.`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    await deleteLogisticsTask(taskId)
+  }
 
   return (
     <div className="space-y-6">
@@ -33,6 +46,7 @@ export default function LogisticsPage() {
         tasks={logisticsTasks}
         onAddTask={addLogisticsTask}
         onStatusChange={updateLogisticsStatus}
+        onDeleteTask={handleDeleteTask}
         isSubmitting={syncing}
       />
     </div>

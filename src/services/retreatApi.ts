@@ -103,6 +103,12 @@ export function validateParticipantPayment(participantId: string) {
   })
 }
 
+export function deleteParticipant(participantId: string) {
+  return request<Participant[]>(`/api/participants/${participantId}`, {
+    method: 'DELETE',
+  })
+}
+
 export function fetchLogisticsTasks() {
   return request<LogisticsTask[]>('/api/logistics')
 }
@@ -118,5 +124,11 @@ export function updateLogisticsStatus(taskId: string, status: TaskStatus) {
   return request<LogisticsTask[]>(`/api/logistics/${taskId}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
+  })
+}
+
+export function deleteLogisticsTask(taskId: string) {
+  return request<LogisticsTask[]>(`/api/logistics/${taskId}`, {
+    method: 'DELETE',
   })
 }

@@ -1,3 +1,5 @@
+import type { PaymentMethod } from '@shared/types/retreat'
+
 export function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -29,4 +31,17 @@ export function slugify(value: string) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
+}
+
+export function formatPaymentMethodLabel(method: PaymentMethod) {
+  switch (method) {
+    case 'PIX':
+      return 'PIX'
+    case 'Dinheiro':
+      return 'Dinheiro'
+    case 'Boleto':
+      return 'Boleto'
+    case 'CartaoCredito':
+      return 'Cartão de crédito'
+  }
 }

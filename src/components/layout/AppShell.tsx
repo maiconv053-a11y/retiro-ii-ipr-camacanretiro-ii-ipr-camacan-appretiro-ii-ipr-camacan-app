@@ -22,11 +22,11 @@ export function AppShell() {
   }, [initialize])
 
   return (
-    <div className="min-h-screen bg-[#020611] text-slate-100">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(168,85,247,0.06),transparent_20%),linear-gradient(180deg,rgba(2,6,23,0.94),rgba(2,6,23,1))]" />
+    <div className="min-h-screen bg-[#06110d] text-slate-100">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.08),transparent_24%),radial-gradient(circle_at_top_right,rgba(74,222,128,0.08),transparent_22%),linear-gradient(180deg,rgba(8,20,16,0.95),rgba(6,17,13,1))]" />
 
       <div className="relative mx-auto flex min-h-screen max-w-[1480px] gap-5 px-4 pb-28 pt-4 md:px-6 md:pb-8">
-        <aside className="sticky top-4 hidden h-[calc(100vh-2rem)] w-[256px] shrink-0 rounded-[28px] border border-white/10 bg-[#08111d]/88 p-4 xl:flex xl:flex-col">
+        <aside className="sticky top-4 hidden h-[calc(100vh-2rem)] w-[256px] shrink-0 rounded-[28px] border border-emerald-100/10 bg-[#0b1713]/90 p-4 xl:flex xl:flex-col">
           <div className="rounded-[22px] border border-white/10 bg-white/[0.02] p-5">
             <p className="font-title text-[10px] uppercase tracking-[0.32em] text-cyan-300/58">
               Retiro 2026
@@ -38,7 +38,7 @@ export function AppShell() {
               Controle unificado de inscrições, finanças e logística em um painel
               limpo e responsivo.
             </p>
-            <div className="mt-4 rounded-[18px] border border-white/10 bg-[#060d18] px-4 py-3">
+            <div className="mt-4 rounded-[18px] border border-emerald-100/10 bg-[#091510] px-4 py-3">
               <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
                 Área interna
               </p>
@@ -106,7 +106,7 @@ export function AppShell() {
         </main>
       </div>
 
-      <nav className="fixed inset-x-4 bottom-4 z-20 rounded-[24px] border border-white/10 bg-[#08111d]/92 p-2 backdrop-blur xl:hidden">
+      <nav className="fixed inset-x-4 bottom-4 z-20 rounded-[24px] border border-emerald-100/10 bg-[#0b1713]/92 p-2 backdrop-blur xl:hidden">
         <div className="grid grid-cols-4 gap-2">
           {navItems.map(({ label, path, icon: Icon }) => (
             <NavLink

@@ -1,8 +1,8 @@
-import { Pencil, Search } from 'lucide-react'
+import { Pencil, Search, Trash2 } from 'lucide-react'
 import type { Participant, RegistrationStatus } from '@shared/types/retreat'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { filterParticipants } from '@/components/participants/participantsFilter'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatPaymentMethodLabel } from '@/utils/format'
 
 interface ParticipantsTableProps {
   participants: Participant[]
@@ -11,6 +11,8 @@ interface ParticipantsTableProps {
   onQueryChange: (value: string) => void
   onStatusFilterChange: (value: 'Todos' | RegistrationStatus) => void
   onEditParticipant: (participant: Participant) => void
+  onDeleteParticipant: (participant: Participant) => Promise<void> | void
+  isSubmitting?: boolean
 }
 
 const statusToneMap = {
@@ -26,6 +28,19 @@ const filters: Array<'Todos' | RegistrationStatus> = [
   'Cancelada',
 ]
 
+const filterLabels: Record<'Todos' | RegistrationStatus, string> = {
+  Todos: 'Todos',
+  Confirmada: 'QUITADOS',
+  Pendente: 'Pendente',
+  Cancelada: 'Cancelada',
+}
+
+const registrationStatusLabels: Record<RegistrationStatus, string> = {
+  Confirmada: 'QUITADA',
+  Pendente: 'Pendente',
+  Cancelada: 'Cancelada',
+}
+
 export function ParticipantsTable({
   participants,
   query,
@@ -33,24 +48,24 @@ export function ParticipantsTable({
   onQueryChange,
   onStatusFilterChange,
   onEditParticipant,
+  onDeleteParticipant,
+  isSubmitting = false,
 }: ParticipantsTableProps) {
   const filteredParticipants = filterParticipants(participants, query, statusFilter)
 
   return (
-    <section className="rounded-[28px] border border-white/10 bg-[#071120]/80 p-6">
+    <section className="rounded-[28px] border border-emerald-100/10 bg-[#102019]/78 p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="font-title text-[11px] uppercase tracking-[0.32em] text-violet-300/70">
-            Busca rápida
-          </p>
+          <p className="font-title text-[11px] uppercase tracking-[0.32em] text-emerald-200/60">BUSCA RÁPIDA</p>
           <h2 className="mt-2 font-title text-xl text-white">
             Participantes cadastrados
           </h2>
         </div>
 
         <div className="flex flex-col gap-3 md:flex-row">
-          <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-slate-300">
-            <Search className="h-4 w-4 text-slate-500" />
+          <label className="flex items-center gap-3 rounded-2xl border border-emerald-100/10 bg-[#0b1713]/82 px-4 py-3 text-slate-300">
+            <Search className="h-4 w-4 text-emerald-200/45" />
             <input
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
@@ -67,20 +82,20 @@ export function ParticipantsTable({
                 onClick={() => onStatusFilterChange(filter)}
                 className={`rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.22em] transition ${
                   statusFilter === filter
-                    ? 'border-violet-400/30 bg-violet-400/10 text-violet-200'
-                    : 'border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-200'
+                    ? 'border-emerald-300/30 bg-emerald-300/10 text-emerald-100'
+                    : 'border-emerald-100/10 bg-[#0b1713]/65 text-slate-500 hover:border-emerald-200/20 hover:text-slate-200'
                 }`}
               >
-                {filter}
+                {filterLabels[filter]}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="mt-6 hidden overflow-hidden rounded-[24px] border border-white/10 lg:block">
+      <div className="mt-6 hidden overflow-hidden rounded-[24px] border border-emerald-100/10 lg:block">
         <table className="min-w-full divide-y divide-white/10 text-left text-sm">
-          <thead className="bg-white/[0.02] text-xs uppercase tracking-[0.24em] text-slate-500">
+          <thead className="bg-[#0b1713]/80 text-xs uppercase tracking-[0.24em] text-emerald-200/45">
             <tr>
               <th className="px-4 py-3 font-medium">Participante</th>
               <th className="px-4 py-3 font-medium">Contato</th>
@@ -108,7 +123,7 @@ export function ParticipantsTable({
                 </td>
                 <td className="px-4 py-4">
                   <StatusBadge
-                    label={participant.registrationStatus}
+                    label={registrationStatusLabels[participant.registrationStatus]}
                     tone={statusToneMap[participant.registrationStatus]}
                   />
                 </td>
@@ -116,18 +131,30 @@ export function ParticipantsTable({
                   <p>{formatCurrency(participant.financial.amountPaid)}</p>
                   <p className="mt-1 text-xs text-slate-500">
                     de {formatCurrency(participant.financial.totalAmount)} ·{' '}
-                    {participant.financial.paymentMethod}
+                    {formatPaymentMethodLabel(participant.financial.paymentMethod)}
                   </p>
                 </td>
                 <td className="px-4 py-4 text-right">
-                  <button
-                    type="button"
-                    onClick={() => onEditParticipant(participant)}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-300 transition hover:border-cyan-400/30 hover:bg-cyan-400/10 hover:text-cyan-100"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                    Editar
-                  </button>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onEditParticipant(participant)}
+                      disabled={isSubmitting}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-300 transition hover:border-cyan-400/30 hover:bg-cyan-400/10 hover:text-cyan-100 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteParticipant(participant)}
+                      disabled={isSubmitting}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-4 py-2 text-xs uppercase tracking-[0.2em] text-rose-100 transition hover:border-rose-400/30 hover:bg-rose-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Excluir
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -139,7 +166,7 @@ export function ParticipantsTable({
         {filteredParticipants.map((participant) => (
           <article
             key={participant.id}
-            className="rounded-[24px] border border-white/10 bg-white/[0.03] p-4"
+            className="rounded-[24px] border border-emerald-100/10 bg-[#0b1713]/82 p-4"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -149,7 +176,7 @@ export function ParticipantsTable({
                 </p>
               </div>
               <StatusBadge
-                label={participant.registrationStatus}
+                label={registrationStatusLabels[participant.registrationStatus]}
                 tone={statusToneMap[participant.registrationStatus]}
               />
             </div>
@@ -162,15 +189,30 @@ export function ParticipantsTable({
                 Pago: {formatCurrency(participant.financial.amountPaid)} de{' '}
                 {formatCurrency(participant.financial.totalAmount)}
               </p>
-              <p>Forma de pagamento: {participant.financial.paymentMethod}</p>
-              <button
-                type="button"
-                onClick={() => onEditParticipant(participant)}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-300 transition hover:border-cyan-400/30 hover:bg-cyan-400/10 hover:text-cyan-100"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-                Editar participante
-              </button>
+              <p>
+                Forma de pagamento:{' '}
+                {formatPaymentMethodLabel(participant.financial.paymentMethod)}
+              </p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => onEditParticipant(participant)}
+                  disabled={isSubmitting}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-300 transition hover:border-cyan-400/30 hover:bg-cyan-400/10 hover:text-cyan-100 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Editar participante
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDeleteParticipant(participant)}
+                  disabled={isSubmitting}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-4 py-3 text-xs uppercase tracking-[0.2em] text-rose-100 transition hover:border-rose-400/30 hover:bg-rose-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Excluir participante
+                </button>
+              </div>
             </div>
           </article>
         ))}

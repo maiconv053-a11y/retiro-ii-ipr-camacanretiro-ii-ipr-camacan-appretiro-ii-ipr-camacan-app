@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { ClipboardPlus } from 'lucide-react'
+import { ClipboardPlus, Trash2 } from 'lucide-react'
 import type { LogisticsTask, LogisticsTaskInput, TaskStatus } from '@shared/types/retreat'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { formatCurrency } from '@/utils/format'
@@ -8,6 +8,7 @@ interface LogisticsBoardProps {
   tasks: LogisticsTask[]
   onAddTask: (task: LogisticsTaskInput) => Promise<void> | void
   onStatusChange: (taskId: string, status: TaskStatus) => Promise<void> | void
+  onDeleteTask: (taskId: string, taskTitle: string) => Promise<void> | void
   isSubmitting?: boolean
 }
 
@@ -29,10 +30,22 @@ const statusTone = {
   Concluida: 'green',
 } as const
 
+function formatTaskStatusLabel(status: TaskStatus) {
+  switch (status) {
+    case 'EmAndamento':
+      return 'Em Andamento'
+    case 'Concluida':
+      return 'Concluída'
+    default:
+      return 'Pendente'
+  }
+}
+
 export function LogisticsBoard({
   tasks,
   onAddTask,
   onStatusChange,
+  onDeleteTask,
   isSubmitting = false,
 }: LogisticsBoardProps) {
   const [form, setForm] = useState<LogisticsTaskInput>(initialTask)
@@ -80,11 +93,11 @@ export function LogisticsBoard({
     <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
       <form
         onSubmit={handleSubmit}
-        className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6"
+        className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/82 p-6"
       >
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="font-title text-[10px] uppercase tracking-[0.24em] text-cyan-300/58">
+            <p className="font-title text-[10px] uppercase tracking-[0.24em] text-emerald-200/60">
               Controle operacional
             </p>
             <h2 className="mt-2 font-title text-xl text-white">Nova tarefa</h2>
@@ -94,7 +107,7 @@ export function LogisticsBoard({
             disabled={isSubmitting}
             aria-label="Adicionar tarefa"
             title="Adicionar tarefa"
-            className="rounded-2xl border border-cyan-400/20 bg-cyan-400/8 p-3 text-cyan-100 transition hover:border-cyan-400/30 hover:bg-cyan-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-3 text-emerald-100 transition hover:border-emerald-300/30 hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ClipboardPlus className="h-4 w-4" />
           </button>
@@ -109,8 +122,8 @@ export function LogisticsBoard({
                 onClick={() => updateField('category', category)}
                 className={`rounded-2xl border px-4 py-3 text-xs uppercase tracking-[0.2em] transition ${
                   form.category === category
-                    ? 'border-cyan-400/24 bg-cyan-400/8 text-cyan-100'
-                    : 'border-white/10 bg-white/[0.02] text-slate-500 hover:border-white/16 hover:text-slate-200'
+                    ? 'border-emerald-300/25 bg-emerald-300/10 text-emerald-100'
+                    : 'border-emerald-100/10 bg-[#0b1713]/80 text-slate-500 hover:border-emerald-200/20 hover:text-slate-200'
                 }`}
               >
                 {category}
@@ -132,22 +145,32 @@ export function LogisticsBoard({
           />
 
           <div className="grid gap-4 md:grid-cols-2">
-            <input
-              type="number"
-              value={form.estimatedCost}
-              onChange={(event) =>
-                updateField('estimatedCost', Number(event.target.value))
-              }
-              className="field-surface"
-              placeholder="Valor estimado"
-            />
-            <input
-              type="number"
-              value={form.actualCost}
-              onChange={(event) => updateField('actualCost', Number(event.target.value))}
-              className="field-surface"
-              placeholder="Valor gasto"
-            />
+            <label className="grid gap-2">
+              <input
+                type="number"
+                value={form.estimatedCost}
+                onChange={(event) =>
+                  updateField('estimatedCost', Number(event.target.value))
+                }
+                className="field-surface"
+                placeholder="Valor estimado"
+              />
+              <span className="px-1 text-xs text-slate-400">
+                Valor previsto antes da compra ou da assinatura do contrato.
+              </span>
+            </label>
+            <label className="grid gap-2">
+              <input
+                type="number"
+                value={form.actualCost}
+                onChange={(event) => updateField('actualCost', Number(event.target.value))}
+                className="field-surface"
+                placeholder="Valor gasto"
+              />
+              <span className="px-1 text-xs text-slate-400">
+                Valor realmente pago depois que a compra ou contrato acontecer.
+              </span>
+            </label>
           </div>
 
           <textarea
@@ -161,7 +184,7 @@ export function LogisticsBoard({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-2xl border border-violet-400/20 bg-violet-400/8 px-5 py-3 text-sm font-medium text-violet-100 transition hover:border-violet-400/30 hover:bg-violet-400/12"
+            className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-5 py-3 text-sm font-medium text-emerald-100 transition hover:border-emerald-300/30 hover:bg-emerald-300/15"
           >
             {isSubmitting ? 'Salvando...' : 'Adicionar ao checklist'}
           </button>
@@ -172,11 +195,11 @@ export function LogisticsBoard({
         {(['Compras', 'Contratos'] as const).map((category) => (
           <section
             key={category}
-            className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6"
+            className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-6"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-title text-[11px] uppercase tracking-[0.3em] text-slate-500">
+                <p className="font-title text-[11px] uppercase tracking-[0.3em] text-emerald-200/45">
                   {category === 'Compras' ? 'Mercado e materiais' : 'Fornecedores e acordos'}
                 </p>
                 <h3 className="mt-2 font-title text-xl text-white">{category}</h3>
@@ -207,7 +230,7 @@ export function LogisticsBoard({
               {groupedTasks[category].map((task) => (
                 <article
                   key={task.id}
-                className="rounded-[20px] border border-white/8 bg-white/[0.02] p-4"
+                className="rounded-[20px] border border-emerald-100/10 bg-[#0b1713]/82 p-4"
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
@@ -220,13 +243,7 @@ export function LogisticsBoard({
 
                     <div className="flex flex-col gap-2">
                       <StatusBadge
-                        label={
-                          task.status === 'EmAndamento'
-                            ? 'Em andamento'
-                            : task.status === 'Concluida'
-                              ? 'Concluída'
-                              : 'Pendente'
-                        }
+                        label={formatTaskStatusLabel(task.status)}
                         tone={statusTone[task.status]}
                       />
                       <select
@@ -237,14 +254,27 @@ export function LogisticsBoard({
                           ).catch(() => undefined)
                         }
                         disabled={isSubmitting}
-                        className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white outline-none"
+                        className="rounded-2xl border border-emerald-100/10 bg-[#102019] px-3 py-2 text-sm text-white outline-none"
                       >
                         {statusOptions.map((status) => (
                           <option key={status} value={status}>
-                            {status}
+                            {formatTaskStatusLabel(status)}
                           </option>
                         ))}
                       </select>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void Promise.resolve(onDeleteTask(task.id, task.title)).catch(
+                            () => undefined,
+                          )
+                        }
+                        disabled={isSubmitting}
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-3 py-2 text-sm text-rose-100 transition hover:border-rose-400/30 hover:bg-rose-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Excluir
+                      </button>
                     </div>
                   </div>
 

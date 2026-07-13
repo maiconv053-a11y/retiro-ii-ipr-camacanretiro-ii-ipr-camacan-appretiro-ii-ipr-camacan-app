@@ -18,6 +18,7 @@ export default function ParticipantsPage() {
   ).length
   const addParticipant = useRetreatStore((state) => state.addParticipant)
   const updateParticipant = useRetreatStore((state) => state.updateParticipant)
+  const deleteParticipant = useRetreatStore((state) => state.deleteParticipant)
   const syncing = useRetreatStore((state) => state.syncing)
   const [query, setQuery] = useState('')
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null)
@@ -49,6 +50,22 @@ export default function ParticipantsPage() {
     await addParticipant(values)
   }
 
+  async function handleDeleteParticipant(participant: Participant) {
+    const confirmed = window.confirm(
+      `Deseja excluir o participante "${participant.fullName}"? Essa ação remove também o financeiro vinculado.`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    await deleteParticipant(participant.id)
+
+    if (editingParticipant?.id === participant.id) {
+      setEditingParticipant(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -78,6 +95,8 @@ export default function ParticipantsPage() {
           onQueryChange={setQuery}
           onStatusFilterChange={setStatusFilter}
           onEditParticipant={setEditingParticipant}
+          onDeleteParticipant={handleDeleteParticipant}
+          isSubmitting={syncing}
         />
       </div>
     </div>

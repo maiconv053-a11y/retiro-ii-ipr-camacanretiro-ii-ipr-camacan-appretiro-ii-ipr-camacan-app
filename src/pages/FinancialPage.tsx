@@ -41,7 +41,7 @@ export default function FinancialPage() {
       />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <div className="rounded-[24px] border border-white/10 bg-[#071120]/80 p-5">
+        <div className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-5">
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
             Total previsto
           </p>
@@ -49,7 +49,7 @@ export default function FinancialPage() {
             {formatCurrency(totalExpected)}
           </p>
         </div>
-        <div className="rounded-[24px] border border-white/10 bg-[#071120]/80 p-5">
+        <div className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-5">
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
             Total pago
           </p>
@@ -57,7 +57,7 @@ export default function FinancialPage() {
             {formatCurrency(totalPaid)}
           </p>
         </div>
-        <div className="rounded-[24px] border border-white/10 bg-[#071120]/80 p-5">
+        <div className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-5">
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
             Saldo em aberto
           </p>

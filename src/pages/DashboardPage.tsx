@@ -6,11 +6,12 @@ import {
   ListChecks,
   Users,
 } from 'lucide-react'
+import logoRetiro from '@/assets/logo-retiro.png'
 import { StatCard } from '@/components/ui/StatCard'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useRetreatStore } from '@/store/retreatStore'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatPaymentMethodLabel } from '@/utils/format'
 
 export default function DashboardPage() {
   const participants = useRetreatStore((state) => state.participants)
@@ -53,10 +54,20 @@ export default function DashboardPage() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        eyebrow="Painel central"
-        title="Operação unificada do retiro"
-        description="Acompanhe inscrições, recebimentos e tarefas críticas em uma única superfície com leitura instantânea."
-        action={<StatusBadge label="Modo sincronizado" tone="cyan" />}
+        title={
+          <span className="relative block min-h-[6rem] w-full md:min-h-[7rem]">
+            <span className="absolute left-8 top-1/2 flex h-24 w-24 -translate-y-1/2 items-center justify-center rounded-[24px] border border-amber-200/30 bg-[#f4ead7] p-2 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] md:left-16 md:h-28 md:w-28">
+              <img
+                src={logoRetiro}
+                alt="Logo Retiro 2027"
+                className="h-full w-full object-contain"
+              />
+            </span>
+            <span className="flex min-h-[6rem] w-full items-center justify-center px-24 text-center md:min-h-[7rem] md:px-32">
+              <span>Operação Retiro</span>
+            </span>
+          </span>
+        }
       />
 
       <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
@@ -185,7 +196,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                   <StatusBadge
-                    label={participant.financial.paymentMethod}
+                    label={formatPaymentMethodLabel(participant.financial.paymentMethod)}
                     tone="violet"
                   />
                 </article>

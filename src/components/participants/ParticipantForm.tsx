@@ -39,6 +39,12 @@ const registrationOptions: RegistrationStatus[] = [
   'Cancelada',
 ]
 
+const registrationLabels: Record<RegistrationStatus, string> = {
+  Confirmada: 'QUITADA',
+  Pendente: 'Pendente',
+  Cancelada: 'Cancelada',
+}
+
 const paymentOptions: Array<{ value: PaymentMethod; label: string }> = [
   { value: 'PIX', label: 'PIX' },
   { value: 'Dinheiro', label: 'Dinheiro' },
@@ -239,7 +245,7 @@ export function ParticipantForm({
                     : 'border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/16 hover:text-slate-200'
                 }`}
               >
-                {status}
+                {registrationLabels[status]}
               </button>
             ))}
           </div>

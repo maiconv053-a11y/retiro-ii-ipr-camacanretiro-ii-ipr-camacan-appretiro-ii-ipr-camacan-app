@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { CreditCard, Landmark, Receipt, ShieldCheck, Wallet } from 'lucide-react'
+import { CreditCard, Landmark, Receipt, Wallet } from 'lucide-react'
 import {
   getMaxInstallmentsForMethod,
   normalizeInstallmentCount,
@@ -11,6 +11,7 @@ import {
   createPublicRegistration,
   fetchPublicRetreatSettings,
 } from '@/services/retreatApi'
+import logoRetiro from '@/assets/logo-retiro.png'
 import { formatCurrency, formatPhone } from '@/utils/format'
 
 const initialForm: PublicRegistrationInput = {
@@ -51,7 +52,7 @@ const paymentOptions: Array<{
   {
     value: 'CartaoCredito',
     label: 'Cartão de Crédito',
-    description: 'Permite parcelamento em até 10x.',
+    description: 'Permite parcelamento em até 12x.',
     icon: CreditCard,
   },
 ]
@@ -144,17 +145,23 @@ export default function PublicRegistrationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020611] px-4 py-8 text-slate-100 md:px-6">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.08),transparent_26%),radial-gradient(circle_at_top_right,rgba(168,85,247,0.07),transparent_22%),linear-gradient(180deg,rgba(2,6,23,0.95),rgba(2,6,23,1))]" />
+    <div className="min-h-screen bg-[#06110d] px-4 pb-8 pt-2 text-slate-100 md:px-6 md:pb-8 md:pt-3">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.08),transparent_24%),radial-gradient(circle_at_top_right,rgba(74,222,128,0.08),transparent_22%),linear-gradient(180deg,rgba(8,20,16,0.95),rgba(6,17,13,1))]" />
 
-      <div className="relative mx-auto grid max-w-6xl gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <section className="rounded-[28px] border border-white/10 bg-[#08111d]/88 p-6 md:p-8">
-          <p className="font-title text-[10px] uppercase tracking-[0.32em] text-cyan-300/60">
-            Área pública
-          </p>
-          <h1 className="mt-4 font-title text-3xl leading-tight text-white md:text-4xl">
-            Auto-inscrição do Retiro da II IPR de Camacan
-          </h1>
+      <div className="relative mx-auto max-w-6xl">
+        <div className="mb-4 flex justify-center">
+          <div className="flex h-36 w-36 items-center justify-center rounded-[32px] border border-amber-200/30 bg-[#f4ead7] p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] md:h-40 md:w-40">
+            <img
+              src={logoRetiro}
+              alt="Logo Retiro 2027"
+              className="h-full w-full object-contain"
+            />
+          </div>
+        </div>
+
+        <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+        <section className="rounded-[28px] border border-emerald-100/10 bg-[#0b1713]/90 p-6 md:p-8">
+          <h1 className="mt-4 font-title text-3xl leading-tight text-white md:text-4xl">Inscrição do Retiro da II IPR de Camacan</h1>
           <p className="mt-4 max-w-xl text-sm leading-7 text-slate-400">
             Preencha seus dados, escolha a forma de pagamento e confirme o termo de
             compromisso. A inscrição entra no banco online e aguarda validação da
@@ -173,19 +180,6 @@ export default function PublicRegistrationPage() {
                 Registrado automaticamente com status pendente de validação.
               </p>
             </div>
-
-            <div className="rounded-[24px] border border-emerald-400/14 bg-emerald-400/[0.04] p-5">
-              <div className="flex items-start gap-3">
-                <ShieldCheck className="mt-1 h-5 w-5 text-emerald-300" />
-                <div>
-                  <p className="text-sm font-medium text-white">Fluxo seguro</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-300">
-                    Participantes enviam apenas a própria inscrição. A diretoria valida
-                    pagamentos no painel interno da organização.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="mt-8 rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
@@ -203,7 +197,7 @@ export default function PublicRegistrationPage() {
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-[28px] border border-white/10 bg-[#08111f]/88 p-6 md:p-8"
+          className="rounded-[28px] border border-emerald-100/10 bg-[#0d1814]/90 p-6 md:p-8"
         >
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 md:col-span-2">
@@ -274,7 +268,7 @@ export default function PublicRegistrationPage() {
             </label>
           </div>
 
-          <section className="mt-6 rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
+          <section className="mt-6 rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-5">
             <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
@@ -345,7 +339,7 @@ export default function PublicRegistrationPage() {
             <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
               Termo de compromisso
             </p>
-            <div className="mt-4 h-56 overflow-y-auto rounded-[20px] border border-white/8 bg-[#060d18] p-4 text-sm leading-7 text-slate-300">
+            <div className="mt-4 h-56 overflow-y-auto rounded-[20px] border border-emerald-100/10 bg-[#0b1713] p-4 text-sm leading-7 text-slate-300">
               <p>
                 Ao confirmar esta inscrição, declaro que as informações prestadas são
                 verdadeiras e me comprometo a participar do retiro com responsabilidade,
@@ -367,7 +361,7 @@ export default function PublicRegistrationPage() {
               </p>
             </div>
 
-            <label className="mt-4 flex items-start gap-3 rounded-[20px] border border-white/8 bg-white/[0.02] p-4">
+            <label className="mt-4 flex items-start gap-3 rounded-[20px] border border-emerald-100/10 bg-[#0b1713]/70 p-4">
               <input
                 type="checkbox"
                 checked={form.termsAccepted}
@@ -406,6 +400,7 @@ export default function PublicRegistrationPage() {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   )
