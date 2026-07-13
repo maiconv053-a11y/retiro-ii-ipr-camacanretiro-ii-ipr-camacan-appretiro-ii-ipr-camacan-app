@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Pencil, Plus, RotateCcw } from 'lucide-react'
-import type {
+import {
+  getMaxInstallmentsForMethod,
+  normalizeInstallmentCount,
+  requiresInstallments,
   ParticipantInput,
   PaymentMethod,
   RegistrationStatus,
@@ -43,10 +46,6 @@ const paymentOptions: Array<{ value: PaymentMethod; label: string }> = [
   { value: 'CartaoCredito', label: 'Cartão' },
 ]
 
-function requiresInstallments(method: PaymentMethod) {
-  return method === 'Boleto' || method === 'CartaoCredito'
-}
-
 export function ParticipantForm({
   onSubmit,
   initialValues,
@@ -66,7 +65,8 @@ export function ParticipantForm({
       form.fullName.trim().length > 3 &&
       form.phone.trim().length >= 14 &&
       form.totalAmount > 0 &&
-      form.installmentCount > 0,
+      form.installmentCount > 0 &&
+      form.installmentCount <= getMaxInstallmentsForMethod(form.paymentMethod),
     [form],
   )
 
@@ -103,9 +103,12 @@ export function ParticipantForm({
 
   function setPaymentMethod(paymentMethod: PaymentMethod) {
     updateField('paymentMethod', paymentMethod)
-    if (!requiresInstallments(paymentMethod)) {
-      updateField('installmentCount', 1)
-    }
+    updateField(
+      'installmentCount',
+      requiresInstallments(paymentMethod)
+        ? normalizeInstallmentCount(paymentMethod, form.installmentCount)
+        : 1,
+    )
   }
 
   const heading = mode === 'edit' ? 'Editar participante' : 'Cadastro de participante'
@@ -249,6 +252,7 @@ export function ParticipantForm({
             </span>
             <p className="mt-1 text-sm text-slate-500">
               Defina o valor total do débito e a forma de pagamento escolhida já na inscrição.
+              Boleto vai até 7x e cartão vai até 12x.
             </p>
           </div>
 
@@ -302,7 +306,10 @@ export function ParticipantForm({
                 }
                 className="field-surface w-full"
               >
-                {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
+                {Array.from(
+                  { length: getMaxInstallmentsForMethod(form.paymentMethod) },
+                  (_, index) => index + 1,
+                ).map((count) => (
                   <option key={count} value={count}>
                     {count}x
                   </option>

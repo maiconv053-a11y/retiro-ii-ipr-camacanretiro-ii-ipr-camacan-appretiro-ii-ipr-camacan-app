@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CreditCard, Landmark, Receipt, ShieldCheck, Wallet } from 'lucide-react'
-import type { PaymentMethod, PublicRegistrationInput } from '@shared/types/retreat'
+import {
+  getMaxInstallmentsForMethod,
+  normalizeInstallmentCount,
+  type PaymentMethod,
+  type PublicRegistrationInput,
+  requiresInstallments,
+} from '@shared/types/retreat'
 import {
   createPublicRegistration,
   fetchPublicRetreatSettings,
@@ -50,10 +56,6 @@ const paymentOptions: Array<{
   },
 ]
 
-function requiresInstallments(method: PaymentMethod) {
-  return method === 'Boleto' || method === 'CartaoCredito'
-}
-
 export default function PublicRegistrationPage() {
   const [form, setForm] = useState<PublicRegistrationInput>(initialForm)
   const [retreatFee, setRetreatFee] = useState<number | null>(null)
@@ -100,7 +102,9 @@ export default function PublicRegistrationPage() {
     setForm((current) => ({
       ...current,
       paymentMethod: method,
-      installmentCount: requiresInstallments(method) ? current.installmentCount : 1,
+      installmentCount: requiresInstallments(method)
+        ? normalizeInstallmentCount(method, current.installmentCount)
+        : 1,
     }))
   }
 
@@ -284,7 +288,7 @@ export default function PublicRegistrationPage() {
                 </p>
               </div>
               <p className="text-sm text-slate-500">
-                Parcelamento liberado para boleto e cartão.
+                Boleto até 7x e cartão de crédito até 12x.
               </p>
             </div>
 
@@ -322,7 +326,10 @@ export default function PublicRegistrationPage() {
                   className="field-surface w-full"
                   disabled={isLoadingRetreatFee}
                 >
-                  {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
+                  {Array.from(
+                    { length: getMaxInstallmentsForMethod(form.paymentMethod) },
+                    (_, index) => index + 1,
+                  ).map((count) => (
                     <option key={count} value={count}>
                       {isLoadingRetreatFee
                         ? `${count}x`

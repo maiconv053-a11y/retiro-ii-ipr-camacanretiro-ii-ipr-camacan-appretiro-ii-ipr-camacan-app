@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CreditCard, Landmark, Receipt, Wallet } from 'lucide-react'
-import type {
+import {
   FinancialUpdate,
   Installment,
   Participant,
   PaymentMethod,
+  getMaxInstallmentsForMethod,
+  normalizeInstallmentCount,
+  requiresInstallments,
 } from '@shared/types/retreat'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import {
   createInstallments,
-  requiresInstallments,
   syncInstallmentsAmountPaid,
 } from '@/utils/finance'
 import { formatCurrency } from '@/utils/format'
@@ -51,7 +53,7 @@ export function FinancialRecordCard({
 
   function setMethod(method: PaymentMethod) {
     const installmentCount = requiresInstallments(method)
-      ? draft.installmentCount || 1
+      ? normalizeInstallmentCount(method, draft.installmentCount || 1)
       : 1
 
     setDraft({
@@ -74,8 +76,11 @@ export function FinancialRecordCard({
   function setInstallmentCount(count: number) {
     setDraft((current) => ({
       ...current,
-      installmentCount: count,
-      installments: createInstallments(current.totalAmount, count).map(
+      installmentCount: normalizeInstallmentCount(current.paymentMethod, count),
+      installments: createInstallments(
+        current.totalAmount,
+        normalizeInstallmentCount(current.paymentMethod, count),
+      ).map(
         (installment, index): Installment => ({
           ...installment,
           status:
@@ -264,7 +269,7 @@ export function FinancialRecordCard({
                 Parcelamento
               </p>
               <p className="mt-1 text-sm text-slate-300">
-                Ative para boleto ou cartão.
+                Boleto até 7x e cartão de crédito até 12x.
               </p>
             </div>
             <select
@@ -273,7 +278,10 @@ export function FinancialRecordCard({
               onChange={(event) => setInstallmentCount(Number(event.target.value))}
               className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white outline-none disabled:opacity-40"
             >
-              {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
+              {Array.from(
+                { length: getMaxInstallmentsForMethod(draft.paymentMethod) },
+                (_, index) => index + 1,
+              ).map((count) => (
                 <option key={count} value={count}>
                   {count}x
                 </option>

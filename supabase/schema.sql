@@ -44,7 +44,7 @@ create table if not exists public.financeiro (
   valor_pago numeric(10, 2) not null default 0 check (valor_pago >= 0),
   forma_pagamento text not null
     check (forma_pagamento in ('pix', 'dinheiro', 'boleto', 'cartao')),
-  num_parcelas integer not null default 1 check (num_parcelas between 1 and 10),
+  num_parcelas integer not null default 1 check (num_parcelas between 1 and 12),
   parcelas_pagas integer not null default 0 check (parcelas_pagas >= 0),
   status_geral text not null default 'pendente'
     check (status_geral in ('pendente', 'parcial', 'quitado')),
@@ -91,6 +91,22 @@ begin
       add constraint participantes_origem_inscricao_check
       check (origem_inscricao in ('publica', 'diretoria'));
   end if;
+end $$;
+
+do $$
+begin
+  if exists (
+    select 1
+    from pg_constraint
+    where conname = 'financeiro_num_parcelas_check'
+  ) then
+    alter table public.financeiro
+      drop constraint financeiro_num_parcelas_check;
+  end if;
+
+  alter table public.financeiro
+    add constraint financeiro_num_parcelas_check
+    check (num_parcelas between 1 and 12);
 end $$;
 
 do $$

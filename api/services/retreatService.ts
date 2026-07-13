@@ -11,6 +11,10 @@ import type {
   RetreatSettings,
   ValidationStatus,
 } from '../../shared/types/retreat.js'
+import {
+  normalizeInstallmentCount,
+  requiresInstallments,
+} from '../../shared/types/retreat.js'
 import { assertSupabase } from '../lib/supabase.js'
 
 type ParticipantRow = {
@@ -83,12 +87,8 @@ function createInstallments(totalAmount: number, installmentCount: number): Inst
         ? Number((totalAmount - baseAmount * (safeCount - 1)).toFixed(2))
         : baseAmount,
     status: 'Pendente',
-    dueDate: `2026-${String(index + 8).padStart(2, '0')}-10`,
+    dueDate: new Date(Date.UTC(2026, 7 + index, 10)).toISOString().slice(0, 10),
   }))
-}
-
-function requiresInstallments(method: PaymentMethod) {
-  return method === 'Boleto' || method === 'CartaoCredito'
 }
 
 function syncInstallmentsAmountPaid(installments: Installment[], amountPaid: number) {
@@ -245,7 +245,8 @@ function mapFinancialRecord(financial: FinancialRow | null): FinancialRecord {
     }
   }
 
-  const installmentCount = Math.max(financial.num_parcelas, 1)
+  const paymentMethod = toPaymentMethod(financial.forma_pagamento)
+  const installmentCount = normalizeInstallmentCount(paymentMethod, financial.num_parcelas)
   const baseInstallments = createInstallments(financial.valor_total, installmentCount)
   const parcelRows = financial.financeiro_parcelas ?? []
 
@@ -253,7 +254,7 @@ function mapFinancialRecord(financial: FinancialRow | null): FinancialRecord {
     return {
       totalAmount: financial.valor_total,
       amountPaid: financial.valor_pago,
-      paymentMethod: toPaymentMethod(financial.forma_pagamento),
+      paymentMethod,
       installmentCount,
       installments: syncInstallmentsAmountPaid(baseInstallments, financial.valor_pago),
       validationStatus: toValidationStatus(financial.status_validacao),
@@ -273,7 +274,7 @@ function mapFinancialRecord(financial: FinancialRow | null): FinancialRecord {
   return {
     totalAmount: financial.valor_total,
     amountPaid: financial.valor_pago,
-    paymentMethod: toPaymentMethod(financial.forma_pagamento),
+    paymentMethod,
     installmentCount,
     installments,
     validationStatus: toValidationStatus(financial.status_validacao),
@@ -317,7 +318,7 @@ async function persistFinancialRecord(
 ) {
   const supabase = assertSupabase()
   const installmentCount = requiresInstallments(update.paymentMethod)
-    ? update.installmentCount
+    ? normalizeInstallmentCount(update.paymentMethod, update.installmentCount)
     : 1
   const amountPaid = Number((currentAmountPaid ?? update.amountPaid).toFixed(2))
   const { data: currentFinancial } = await supabase

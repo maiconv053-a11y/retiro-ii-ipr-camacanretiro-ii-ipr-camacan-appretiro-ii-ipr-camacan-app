@@ -1,3 +1,8 @@
+import {
+  getMaxInstallmentsForMethod,
+  normalizeInstallmentCount,
+  requiresInstallments,
+} from '@shared/types/retreat'
 import type {
   FinancialRecord,
   FinancialUpdate,
@@ -5,10 +10,6 @@ import type {
   InstallmentStatus,
   PaymentMethod,
 } from '@shared/types/retreat'
-
-export function requiresInstallments(method: PaymentMethod) {
-  return method === 'Boleto' || method === 'CartaoCredito'
-}
 
 export function createInstallments(
   totalAmount: number,
@@ -25,8 +26,15 @@ export function createInstallments(
         ? Number((totalAmount - baseAmount * (safeCount - 1)).toFixed(2))
         : baseAmount,
     status: index === 0 ? ('Paga' as const) : ('Pendente' as const),
-    dueDate: `2026-${String(index + 8).padStart(2, '0')}-10`,
+    dueDate: new Date(Date.UTC(2026, 7 + index, 10)).toISOString().slice(0, 10),
   }))
+}
+
+export function getInstallmentOptions(method: PaymentMethod) {
+  return Array.from(
+    { length: getMaxInstallmentsForMethod(method) },
+    (_, index) => index + 1,
+  )
 }
 
 export function syncInstallmentsAmountPaid(
@@ -72,7 +80,7 @@ export function deriveFinancialStatus(
 
 export function normalizeFinancialRecord(update: FinancialUpdate): FinancialRecord {
   const installmentCount = requiresInstallments(update.paymentMethod)
-    ? update.installmentCount
+    ? normalizeInstallmentCount(update.paymentMethod, update.installmentCount)
     : 1
   const baseInstallments = createInstallments(update.totalAmount, installmentCount)
   const incomingInstallments = update.installments.length

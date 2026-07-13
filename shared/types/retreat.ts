@@ -2,6 +2,29 @@ export type RegistrationStatus = 'Confirmada' | 'Pendente' | 'Cancelada'
 
 export type PaymentMethod = 'PIX' | 'Dinheiro' | 'Boleto' | 'CartaoCredito'
 
+export const MAX_INSTALLMENTS_BY_METHOD: Record<PaymentMethod, number> = {
+  PIX: 1,
+  Dinheiro: 1,
+  Boleto: 7,
+  CartaoCredito: 12,
+}
+
+export function requiresInstallments(method: PaymentMethod) {
+  return method === 'Boleto' || method === 'CartaoCredito'
+}
+
+export function getMaxInstallmentsForMethod(method: PaymentMethod) {
+  return MAX_INSTALLMENTS_BY_METHOD[method]
+}
+
+export function normalizeInstallmentCount(
+  method: PaymentMethod,
+  installmentCount: number,
+) {
+  const safeCount = Math.max(1, Math.trunc(installmentCount || 1))
+  return Math.min(safeCount, getMaxInstallmentsForMethod(method))
+}
+
 export type InstallmentStatus = 'Paga' | 'Pendente'
 
 export type TaskStatus = 'Pendente' | 'EmAndamento' | 'Concluida'
