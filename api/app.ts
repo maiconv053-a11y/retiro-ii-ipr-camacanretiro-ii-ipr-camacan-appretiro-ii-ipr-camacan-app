@@ -8,11 +8,9 @@ import express, {
   type NextFunction,
 } from 'express'
 import cors from 'cors'
-import authRoutes from './routes/auth.js'
 import publicRoutes from './routes/public.js'
 import participantsRoutes from './routes/participants.js'
 import logisticsRoutes from './routes/logistics.js'
-import { requireDirectorAuth } from './middleware/requireDirectorAuth.js'
 
 const app: express.Application = express()
 
@@ -23,10 +21,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 /**
  * API Routes
  */
-app.use('/api/auth', authRoutes)
 app.use('/api/public', publicRoutes)
-app.use('/api/participants', requireDirectorAuth, participantsRoutes)
-app.use('/api/logistics', requireDirectorAuth, logisticsRoutes)
+app.use('/api/participants', participantsRoutes)
+app.use('/api/logistics', logisticsRoutes)
 
 /**
  * health

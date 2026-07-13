@@ -47,7 +47,7 @@ export default function DashboardPage() {
           value={String(activeParticipants.length)}
           hint={`${activeParticipants.filter((item) => item.registrationStatus === 'Confirmada').length} confirmados`}
           icon={<Users className="h-5 w-5" />}
-          to="/participantes"
+          to="/diretoria/participantes"
           ctaLabel="Abrir participantes"
         />
         <StatCard
@@ -56,7 +56,7 @@ export default function DashboardPage() {
           hint={`Meta atual ${formatCurrency(totalExpected)}`}
           accent="violet"
           icon={<CircleDollarSign className="h-5 w-5" />}
-          to="/financeiro"
+          to="/diretoria/financeiro"
           ctaLabel="Abrir financeiro"
         />
         <StatCard
@@ -65,7 +65,7 @@ export default function DashboardPage() {
           hint="Participantes com saldo em aberto"
           accent="green"
           icon={<AlertTriangle className="h-5 w-5" />}
-          to="/financeiro"
+          to="/diretoria/financeiro"
           ctaLabel="Ver cobranças"
         />
         <StatCard
@@ -74,7 +74,7 @@ export default function DashboardPage() {
           hint="Tarefas concluídas pela organização"
           accent="violet"
           icon={<ListChecks className="h-5 w-5" />}
-          to="/logistica"
+          to="/diretoria/logistica"
           ctaLabel="Abrir logística"
         />
       </div>

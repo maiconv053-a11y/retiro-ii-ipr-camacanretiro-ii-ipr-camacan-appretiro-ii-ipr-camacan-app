@@ -1,7 +1,6 @@
 import { Router } from 'express'
 import type { Request, Response } from 'express'
 import type { FinancialUpdate, ParticipantInput } from '../../shared/types/retreat.js'
-import type { DirectorRequest } from '../middleware/requireDirectorAuth.js'
 import {
   createParticipantRecord,
   listParticipants,
@@ -85,9 +84,9 @@ router.patch('/:id/financial', async (req: Request, res: Response) => {
   }
 })
 
-router.patch('/:id/validate-payment', async (req: DirectorRequest, res: Response) => {
+router.patch('/:id/validate-payment', async (req: Request, res: Response) => {
   try {
-    await validateParticipantPaymentRecord(req.params.id, req.director?.id)
+    await validateParticipantPaymentRecord(req.params.id)
     const participants = await listParticipants()
 
     res.status(200).json({

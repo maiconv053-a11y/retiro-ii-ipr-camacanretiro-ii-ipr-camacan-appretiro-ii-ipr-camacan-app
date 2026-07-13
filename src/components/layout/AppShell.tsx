@@ -1,8 +1,7 @@
 import { useEffect } from 'react'
-import { CreditCard, LayoutDashboard, ListChecks, LogOut, Users } from 'lucide-react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { CreditCard, LayoutDashboard, ListChecks, Users } from 'lucide-react'
+import { NavLink, Outlet } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/store/authStore'
 import { useRetreatStore } from '@/store/retreatStore'
 
 const navItems = [
@@ -13,24 +12,14 @@ const navItems = [
 ]
 
 export function AppShell() {
-  const navigate = useNavigate()
   const initialize = useRetreatStore((state) => state.initialize)
-  const reset = useRetreatStore((state) => state.reset)
   const loading = useRetreatStore((state) => state.loading)
   const syncing = useRetreatStore((state) => state.syncing)
   const error = useRetreatStore((state) => state.error)
-  const user = useAuthStore((state) => state.user)
-  const logout = useAuthStore((state) => state.logout)
 
   useEffect(() => {
     void initialize()
   }, [initialize])
-
-  async function handleLogout() {
-    await logout()
-    reset()
-    navigate('/diretoria/login', { replace: true })
-  }
 
   return (
     <div className="min-h-screen bg-[#020611] text-slate-100">
@@ -51,10 +40,12 @@ export function AppShell() {
             </p>
             <div className="mt-4 rounded-[18px] border border-white/10 bg-[#060d18] px-4 py-3">
               <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
-                Sessão ativa
+                Área interna
               </p>
-              <p className="mt-2 text-sm text-white">{user?.name ?? 'Diretoria'}</p>
-              <p className="mt-1 text-xs text-slate-400">{user?.email ?? ''}</p>
+              <p className="mt-2 text-sm text-white">Painel da organização</p>
+              <p className="mt-1 text-xs text-slate-400">
+                Gestão interna sem etapa de autenticação.
+              </p>
             </div>
           </div>
 
@@ -107,14 +98,6 @@ export function AppShell() {
             {error ? (
               <p className="mt-3 text-xs leading-5 text-rose-200/80">{error}</p>
             ) : null}
-            <button
-              type="button"
-              onClick={() => void handleLogout()}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200 transition hover:border-white/16 hover:bg-white/[0.06]"
-            >
-              <LogOut className="h-4 w-4" />
-              Sair da diretoria
-            </button>
           </div>
         </aside>
 

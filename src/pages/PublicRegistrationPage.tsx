@@ -159,7 +159,7 @@ export default function PublicRegistrationPage() {
                   <p className="text-sm font-medium text-white">Fluxo seguro</p>
                   <p className="mt-2 text-sm leading-6 text-slate-300">
                     Participantes enviam apenas a própria inscrição. A diretoria valida
-                    pagamentos na área privada protegida por login.
+                    pagamentos no painel interno da organização.
                   </p>
                 </div>
               </div>
