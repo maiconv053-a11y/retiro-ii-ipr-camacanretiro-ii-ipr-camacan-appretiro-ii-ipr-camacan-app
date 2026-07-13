@@ -7,9 +7,12 @@ import { createInstallments } from '@/utils/finance'
 vi.mock('@/services/retreatApi', () => ({
   fetchParticipants: vi.fn(),
   fetchLogisticsTasks: vi.fn(),
+  fetchRetreatSettings: vi.fn(),
+  fetchPublicRetreatSettings: vi.fn(),
   createParticipant: vi.fn(),
   updateParticipant: vi.fn(),
   updateParticipantFinancial: vi.fn(),
+  updateRetreatFee: vi.fn(),
   validateParticipantPayment: vi.fn(),
   createLogisticsTask: vi.fn(),
   updateLogisticsStatus: vi.fn(),
@@ -82,6 +85,9 @@ describe('retreatStore', () => {
     useRetreatStore.setState({
       participants: [],
       logisticsTasks: [],
+      settings: {
+        retreatFee: 380,
+      },
       initialized: false,
       loading: false,
       syncing: false,
@@ -90,6 +96,7 @@ describe('retreatStore', () => {
 
     mockedApi.fetchParticipants.mockResolvedValue(participantsFixture)
     mockedApi.fetchLogisticsTasks.mockResolvedValue(logisticsFixture)
+    mockedApi.fetchRetreatSettings.mockResolvedValue({ retreatFee: 380 })
     mockedApi.createParticipant.mockResolvedValue([
       {
         ...participantsFixture[0],
@@ -106,6 +113,19 @@ describe('retreatStore', () => {
       participantsFixture[0],
     ])
     mockedApi.updateParticipantFinancial.mockResolvedValue(participantsFixture)
+    mockedApi.updateRetreatFee.mockResolvedValue({
+      settings: { retreatFee: 450 },
+      participants: participantsFixture.map((participant) => ({
+        ...participant,
+        financial: {
+          ...participant.financial,
+          totalAmount:
+            participant.financial.amountPaid < participant.financial.totalAmount
+              ? 450
+              : participant.financial.totalAmount,
+        },
+      })),
+    })
     mockedApi.validateParticipantPayment.mockResolvedValue(participantsFixture)
     mockedApi.createLogisticsTask.mockResolvedValue(logisticsFixture)
     mockedApi.updateLogisticsStatus.mockResolvedValue(logisticsFixture)
@@ -116,8 +136,10 @@ describe('retreatStore', () => {
 
     expect(mockedApi.fetchParticipants).toHaveBeenCalledTimes(1)
     expect(mockedApi.fetchLogisticsTasks).toHaveBeenCalledTimes(1)
+    expect(mockedApi.fetchRetreatSettings).toHaveBeenCalledTimes(1)
     expect(useRetreatStore.getState().participants).toHaveLength(2)
     expect(useRetreatStore.getState().logisticsTasks).toHaveLength(1)
+    expect(useRetreatStore.getState().settings.retreatFee).toBe(380)
     expect(useRetreatStore.getState().initialized).toBe(true)
   })
 
@@ -171,5 +193,13 @@ describe('retreatStore', () => {
 
     expect(installments).toHaveLength(3)
     expect(Number(total.toFixed(2))).toBe(380)
+  })
+
+  it('atualiza o valor do retiro e sincroniza participantes pendentes', async () => {
+    await useRetreatStore.getState().updateRetreatFee(450)
+
+    expect(mockedApi.updateRetreatFee).toHaveBeenCalledWith(450)
+    expect(useRetreatStore.getState().settings.retreatFee).toBe(450)
+    expect(useRetreatStore.getState().participants[1].financial.totalAmount).toBe(450)
   })
 })

@@ -5,12 +5,14 @@ import type {
   LogisticsTaskInput,
   Participant,
   ParticipantInput,
+  RetreatSettings,
 } from '@shared/types/retreat'
 import * as retreatApi from '@/services/retreatApi'
 
 interface RetreatState {
   participants: Participant[]
   logisticsTasks: LogisticsTask[]
+  settings: RetreatSettings
   initialized: boolean
   loading: boolean
   syncing: boolean
@@ -25,6 +27,7 @@ interface RetreatState {
     update: FinancialUpdate,
   ) => Promise<void>
   validateParticipantPayment: (participantId: string) => Promise<void>
+  updateRetreatFee: (retreatFee: number) => Promise<void>
   addLogisticsTask: (task: LogisticsTaskInput) => Promise<void>
   updateLogisticsStatus: (
     taskId: string,
@@ -39,6 +42,9 @@ function getErrorMessage(error: unknown) {
 export const useRetreatStore = create<RetreatState>((set, get) => ({
   participants: [],
   logisticsTasks: [],
+  settings: {
+    retreatFee: 380,
+  },
   initialized: false,
   loading: false,
   syncing: false,
@@ -47,6 +53,9 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
     set({
       participants: [],
       logisticsTasks: [],
+      settings: {
+        retreatFee: 380,
+      },
       initialized: false,
       loading: false,
       syncing: false,
@@ -61,14 +70,16 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
     set({ loading: true, error: null })
 
     try {
-      const [participants, logisticsTasks] = await Promise.all([
+      const [participants, logisticsTasks, settings] = await Promise.all([
         retreatApi.fetchParticipants(),
         retreatApi.fetchLogisticsTasks(),
+        retreatApi.fetchRetreatSettings(),
       ])
 
       set({
         participants,
         logisticsTasks,
+        settings,
         initialized: true,
         loading: false,
         error: null,
@@ -134,6 +145,21 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
       const participants = await retreatApi.validateParticipantPayment(participantId)
 
       set({ participants, syncing: false })
+    } catch (error) {
+      set({ syncing: false, error: getErrorMessage(error) })
+      throw error
+    }
+  },
+  updateRetreatFee: async (retreatFee) => {
+    set({ syncing: true, error: null })
+
+    try {
+      const data = await retreatApi.updateRetreatFee(retreatFee)
+      set({
+        participants: data.participants,
+        settings: data.settings,
+        syncing: false,
+      })
     } catch (error) {
       set({ syncing: false, error: getErrorMessage(error) })
       throw error

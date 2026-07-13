@@ -5,6 +5,7 @@ import type {
   Participant,
   ParticipantInput,
   PublicRegistrationInput,
+  RetreatSettings,
   TaskStatus,
 } from '@shared/types/retreat'
 
@@ -12,6 +13,11 @@ interface ApiResponse<T> {
   success: boolean
   data: T
   error?: string
+}
+
+interface RetreatFeeUpdateResponse {
+  settings: RetreatSettings
+  participants: Participant[]
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
@@ -49,6 +55,21 @@ export function createPublicRegistration(participant: PublicRegistrationInput) {
   return request<{ created: boolean }>('/api/public/registrations', {
     method: 'POST',
     body: JSON.stringify(participant),
+  })
+}
+
+export function fetchPublicRetreatSettings() {
+  return request<RetreatSettings>('/api/public/settings')
+}
+
+export function fetchRetreatSettings() {
+  return request<RetreatSettings>('/api/settings')
+}
+
+export function updateRetreatFee(retreatFee: number) {
+  return request<RetreatFeeUpdateResponse>('/api/settings/retreat-fee', {
+    method: 'PATCH',
+    body: JSON.stringify({ retreatFee }),
   })
 }
 

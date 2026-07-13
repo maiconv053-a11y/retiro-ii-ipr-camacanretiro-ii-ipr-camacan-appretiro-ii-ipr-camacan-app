@@ -8,6 +8,7 @@ import type {
   ParticipantInput,
   PaymentMethod,
   PublicRegistrationInput,
+  RetreatSettings,
   ValidationStatus,
 } from '../../shared/types/retreat.js'
 import { assertSupabase } from '../lib/supabase.js'
@@ -61,6 +62,14 @@ type LogisticsRow = {
   status: string
   observacoes: string | null
 }
+
+type RetreatSettingsRow = {
+  id: string
+  valor_inscricao: number
+}
+
+const DEFAULT_RETREAT_FEE = 380
+const SETTINGS_ROW_ID = 'principal'
 
 function createInstallments(totalAmount: number, installmentCount: number): Installment[] {
   const safeCount = Math.max(1, installmentCount)
@@ -369,6 +378,99 @@ async function persistFinancialRecord(
   }
 }
 
+async function ensureRetreatSettingsRecord() {
+  const supabase = assertSupabase()
+  const { data, error } = await supabase
+    .from('configuracoes_retiro')
+    .upsert(
+      {
+        id: SETTINGS_ROW_ID,
+        valor_inscricao: DEFAULT_RETREAT_FEE,
+      },
+      { onConflict: 'id' },
+    )
+    .select('id, valor_inscricao')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data as RetreatSettingsRow
+}
+
+function mapRetreatSettings(row: RetreatSettingsRow): RetreatSettings {
+  return {
+    retreatFee: Number(row.valor_inscricao),
+  }
+}
+
+async function loadRetreatFee() {
+  const settings = await ensureRetreatSettingsRecord()
+  return Number(settings.valor_inscricao)
+}
+
+async function recalculateFutureInvoices(newRetreatFee: number) {
+  const participants = await listParticipants()
+
+  for (const participant of participants) {
+    const currentFinancial = participant.financial
+    const hasOpenBalance = currentFinancial.amountPaid < currentFinancial.totalAmount
+
+    if (!hasOpenBalance) {
+      continue
+    }
+
+    const newInstallments = syncInstallmentsAmountPaid(
+      createInstallments(newRetreatFee, currentFinancial.installmentCount),
+      currentFinancial.amountPaid,
+    )
+
+    await persistFinancialRecord(
+      participant.id,
+      {
+        totalAmount: newRetreatFee,
+        amountPaid: currentFinancial.amountPaid,
+        paymentMethod: currentFinancial.paymentMethod,
+        installmentCount: currentFinancial.installmentCount,
+        installments: newInstallments,
+        validationStatus: currentFinancial.validationStatus,
+      },
+      currentFinancial.amountPaid,
+    )
+  }
+}
+
+export async function getRetreatSettings() {
+  const settings = await ensureRetreatSettingsRecord()
+  return mapRetreatSettings(settings)
+}
+
+export async function updateRetreatFee(newRetreatFee: number) {
+  const supabase = assertSupabase()
+  const normalizedFee = Number(newRetreatFee.toFixed(2))
+
+  const { data, error } = await supabase
+    .from('configuracoes_retiro')
+    .upsert(
+      {
+        id: SETTINGS_ROW_ID,
+        valor_inscricao: normalizedFee,
+      },
+      { onConflict: 'id' },
+    )
+    .select('id, valor_inscricao')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  await recalculateFutureInvoices(normalizedFee)
+
+  return mapRetreatSettings(data as RetreatSettingsRow)
+}
+
 export async function listParticipants() {
   const supabase = assertSupabase()
   const { data, error } = await supabase
@@ -451,6 +553,7 @@ export async function createParticipantRecord(input: ParticipantInput) {
 
 export async function createPublicRegistrationRecord(input: PublicRegistrationInput) {
   const supabase = assertSupabase()
+  const retreatFee = await loadRetreatFee()
   const { data, error } = await supabase
     .from('participantes')
     .insert({
@@ -474,7 +577,7 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
   await persistFinancialRecord(
     data.id,
     {
-      totalAmount: 380,
+      totalAmount: retreatFee,
       amountPaid: 0,
       paymentMethod: input.paymentMethod,
       installmentCount: input.installmentCount,

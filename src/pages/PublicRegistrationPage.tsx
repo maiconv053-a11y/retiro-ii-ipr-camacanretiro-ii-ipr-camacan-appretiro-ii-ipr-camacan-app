@@ -1,10 +1,11 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { CreditCard, Landmark, Receipt, ShieldCheck, Wallet } from 'lucide-react'
 import type { PaymentMethod, PublicRegistrationInput } from '@shared/types/retreat'
-import { createPublicRegistration } from '@/services/retreatApi'
+import {
+  createPublicRegistration,
+  fetchPublicRetreatSettings,
+} from '@/services/retreatApi'
 import { formatCurrency, formatPhone } from '@/utils/format'
-
-const REGISTRATION_FEE = 380
 
 const initialForm: PublicRegistrationInput = {
   fullName: '',
@@ -55,9 +56,23 @@ function requiresInstallments(method: PaymentMethod) {
 
 export default function PublicRegistrationPage() {
   const [form, setForm] = useState<PublicRegistrationInput>(initialForm)
+  const [retreatFee, setRetreatFee] = useState(380)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const settings = await fetchPublicRetreatSettings()
+        setRetreatFee(settings.retreatFee)
+      } catch {
+        return
+      }
+    }
+
+    void loadSettings()
+  }, [])
 
   const isValid = useMemo(
     () =>
@@ -145,7 +160,7 @@ export default function PublicRegistrationPage() {
                 Valor da inscrição
               </p>
               <p className="mt-3 font-title text-3xl text-white">
-                {formatCurrency(REGISTRATION_FEE)}
+                {formatCurrency(retreatFee)}
               </p>
               <p className="mt-2 text-sm text-slate-400">
                 Registrado automaticamente com status pendente de validação.
@@ -259,7 +274,7 @@ export default function PublicRegistrationPage() {
                   Escolha do pagamento
                 </p>
                 <p className="mt-1 text-sm text-slate-400">
-                  Valor total previsto: {formatCurrency(REGISTRATION_FEE)}
+                  Valor total previsto: {formatCurrency(retreatFee)}
                 </p>
               </div>
               <p className="text-sm text-slate-500">
@@ -302,7 +317,7 @@ export default function PublicRegistrationPage() {
                 >
                   {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
                     <option key={count} value={count}>
-                      {count}x de {formatCurrency(REGISTRATION_FEE / count)}
+                      {count}x de {formatCurrency(retreatFee / count)}
                     </option>
                   ))}
                 </select>

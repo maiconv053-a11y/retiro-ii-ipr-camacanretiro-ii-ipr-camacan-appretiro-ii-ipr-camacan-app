@@ -13,6 +13,13 @@ create table if not exists public.diretoria_usuarios (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+create table if not exists public.configuracoes_retiro (
+  id text primary key default 'principal',
+  valor_inscricao numeric(10, 2) not null default 380 check (valor_inscricao > 0),
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
 create table if not exists public.participantes (
   id uuid primary key default gen_random_uuid(),
   nome text not null,
@@ -125,6 +132,10 @@ create unique index if not exists diretoria_usuarios_email_idx
 create index if not exists checklist_categoria_idx
   on public.checklist_organizacao (categoria);
 
+insert into public.configuracoes_retiro (id, valor_inscricao)
+values ('principal', 380)
+on conflict (id) do nothing;
+
 create or replace function public.set_updated_at()
 returns trigger as $$
 begin
@@ -157,20 +168,29 @@ before update on public.checklist_organizacao
 for each row
 execute function public.set_updated_at();
 
+drop trigger if exists configuracoes_retiro_set_updated_at on public.configuracoes_retiro;
+create trigger configuracoes_retiro_set_updated_at
+before update on public.configuracoes_retiro
+for each row
+execute function public.set_updated_at();
+
 alter table public.participantes enable row level security;
 alter table public.financeiro enable row level security;
 alter table public.financeiro_parcelas enable row level security;
 alter table public.checklist_organizacao enable row level security;
 alter table public.diretoria_usuarios enable row level security;
+alter table public.configuracoes_retiro enable row level security;
 
 revoke all on table public.participantes from anon, authenticated;
 revoke all on table public.financeiro from anon, authenticated;
 revoke all on table public.financeiro_parcelas from anon, authenticated;
 revoke all on table public.checklist_organizacao from anon, authenticated;
 revoke all on table public.diretoria_usuarios from anon, authenticated;
+revoke all on table public.configuracoes_retiro from anon, authenticated;
 
 comment on table public.participantes is 'Participantes do retiro';
 comment on table public.financeiro is 'Resumo financeiro por participante';
 comment on table public.financeiro_parcelas is 'Detalhamento das parcelas de boleto/cartão';
 comment on table public.checklist_organizacao is 'Checklist operacional da organização';
 comment on table public.diretoria_usuarios is 'Usuarios autorizados a acessar a area privada da diretoria';
+comment on table public.configuracoes_retiro is 'Configuracoes centrais do retiro, incluindo valor fixo da inscricao';

@@ -12,6 +12,7 @@ import { useRetreatStore } from '@/store/retreatStore'
 
 export default function ParticipantsPage() {
   const participants = useRetreatStore((state) => state.participants)
+  const retreatFee = useRetreatStore((state) => state.settings.retreatFee)
   const activeParticipantsCount = participants.filter(
     (participant) => participant.registrationStatus !== 'Cancelada',
   ).length
@@ -62,6 +63,7 @@ export default function ParticipantsPage() {
       <div className="grid gap-6 2xl:grid-cols-[0.78fr_1.22fr]">
         <ParticipantForm
           onSubmit={handleSubmit}
+          defaultTotalAmount={retreatFee}
           mode={editingParticipant ? 'edit' : 'create'}
           initialValues={
             editingParticipant ? mapParticipantToInput(editingParticipant) : undefined

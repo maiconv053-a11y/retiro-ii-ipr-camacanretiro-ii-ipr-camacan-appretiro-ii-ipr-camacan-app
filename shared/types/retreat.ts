@@ -78,6 +78,10 @@ export interface FinancialUpdate {
   validationStatus?: ValidationStatus
 }
 
+export interface RetreatSettings {
+  retreatFee: number
+}
+
 export interface LogisticsTask {
   id: string
   category: 'Compras' | 'Contratos'

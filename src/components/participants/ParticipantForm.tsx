@@ -10,21 +10,24 @@ import { formatPhone } from '@/utils/format'
 interface ParticipantFormProps {
   onSubmit: (participant: ParticipantInput) => Promise<void> | void
   initialValues?: ParticipantInput
+  defaultTotalAmount?: number
   mode?: 'create' | 'edit'
   onCancelEdit?: () => void
   isSubmitting?: boolean
 }
 
-const initialState: ParticipantInput = {
-  fullName: '',
-  age: 18,
-  phone: '',
-  dietaryRestrictions: '',
-  medicalRestrictions: '',
-  registrationStatus: 'Pendente',
-  totalAmount: 380,
-  paymentMethod: 'PIX',
-  installmentCount: 1,
+function createInitialState(defaultTotalAmount: number): ParticipantInput {
+  return {
+    fullName: '',
+    age: 18,
+    phone: '',
+    dietaryRestrictions: '',
+    medicalRestrictions: '',
+    registrationStatus: 'Pendente',
+    totalAmount: defaultTotalAmount,
+    paymentMethod: 'PIX',
+    installmentCount: 1,
+  }
 }
 
 const registrationOptions: RegistrationStatus[] = [
@@ -47,15 +50,16 @@ function requiresInstallments(method: PaymentMethod) {
 export function ParticipantForm({
   onSubmit,
   initialValues,
+  defaultTotalAmount = 380,
   mode = 'create',
   onCancelEdit,
   isSubmitting = false,
 }: ParticipantFormProps) {
-  const [form, setForm] = useState<ParticipantInput>(initialState)
+  const [form, setForm] = useState<ParticipantInput>(() => createInitialState(defaultTotalAmount))
 
   useEffect(() => {
-    setForm(initialValues ?? initialState)
-  }, [initialValues])
+    setForm(initialValues ?? createInitialState(defaultTotalAmount))
+  }, [defaultTotalAmount, initialValues])
 
   const isValid = useMemo(
     () =>
@@ -93,7 +97,7 @@ export function ParticipantForm({
     }
 
     if (mode === 'create') {
-      setForm(initialState)
+      setForm(createInitialState(defaultTotalAmount))
     }
   }
 
@@ -262,7 +266,7 @@ export function ParticipantForm({
                   updateField('totalAmount', Number(event.target.value))
                 }
                 className="field-surface w-full"
-                placeholder="Ex.: 380"
+                placeholder={`Ex.: ${defaultTotalAmount}`}
               />
             </label>
 

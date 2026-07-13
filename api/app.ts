@@ -11,6 +11,7 @@ import cors from 'cors'
 import publicRoutes from './routes/public.js'
 import participantsRoutes from './routes/participants.js'
 import logisticsRoutes from './routes/logistics.js'
+import settingsRoutes from './routes/settings.js'
 
 const app: express.Application = express()
 
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
  * API Routes
  */
 app.use('/api/public', publicRoutes)
+app.use('/api/settings', settingsRoutes)
 app.use('/api/participants', participantsRoutes)
 app.use('/api/logistics', logisticsRoutes)
 

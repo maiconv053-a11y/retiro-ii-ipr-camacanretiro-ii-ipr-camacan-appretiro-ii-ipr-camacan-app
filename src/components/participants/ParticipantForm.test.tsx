@@ -8,7 +8,7 @@ describe('ParticipantForm', () => {
     const onSubmit = vi.fn()
     const user = userEvent.setup()
 
-    render(<ParticipantForm onSubmit={onSubmit} />)
+    render(<ParticipantForm onSubmit={onSubmit} defaultTotalAmount={450} />)
 
     await user.type(screen.getByLabelText('Nome completo'), 'Carlos Eduardo')
     await user.type(screen.getByLabelText('Telefone'), '73999887766')
@@ -19,7 +19,7 @@ describe('ParticipantForm', () => {
       expect.objectContaining({
         fullName: 'Carlos Eduardo',
         phone: '(73) 99988-7766',
-        totalAmount: 380,
+        totalAmount: 450,
         paymentMethod: 'PIX',
       }),
     )

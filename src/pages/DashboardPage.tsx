@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import {
   AlertTriangle,
   CircleDollarSign,
+  PencilLine,
   ListChecks,
   Users,
 } from 'lucide-react'
@@ -13,6 +15,10 @@ import { formatCurrency } from '@/utils/format'
 export default function DashboardPage() {
   const participants = useRetreatStore((state) => state.participants)
   const logisticsTasks = useRetreatStore((state) => state.logisticsTasks)
+  const retreatFee = useRetreatStore((state) => state.settings.retreatFee)
+  const updateRetreatFee = useRetreatStore((state) => state.updateRetreatFee)
+  const syncing = useRetreatStore((state) => state.syncing)
+  const [feeDraft, setFeeDraft] = useState(retreatFee)
   const activeParticipants = participants.filter(
     (participant) => participant.registrationStatus !== 'Cancelada',
   )
@@ -31,6 +37,18 @@ export default function DashboardPage() {
   const completedTasks = logisticsTasks.filter(
     (task) => task.status === 'Concluida',
   ).length
+
+  useEffect(() => {
+    setFeeDraft(retreatFee)
+  }, [retreatFee])
+
+  async function handleRetreatFeeUpdate() {
+    if (!Number.isFinite(feeDraft) || feeDraft <= 0) {
+      return
+    }
+
+    await updateRetreatFee(feeDraft)
+  }
 
   return (
     <div className="space-y-5">
@@ -78,6 +96,53 @@ export default function DashboardPage() {
           ctaLabel="Abrir logística"
         />
       </div>
+
+      <section className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="font-title text-[10px] uppercase tracking-[0.24em] text-cyan-300/58">
+              Configuração central
+            </p>
+            <h2 className="mt-2 font-title text-xl text-white">
+              Valor fixo do retiro
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Ao atualizar este valor, a inscrição pública passa a exibir o novo total e
+              as parcelas futuras dos participantes com saldo pendente são recalculadas
+              automaticamente.
+            </p>
+          </div>
+
+          <div className="flex w-full flex-col gap-3 lg:max-w-xl lg:flex-row lg:items-end">
+            <label className="flex-1 space-y-2">
+              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                Novo valor do retiro
+              </span>
+              <input
+                type="number"
+                min={1}
+                step="0.01"
+                value={feeDraft}
+                onChange={(event) => setFeeDraft(Number(event.target.value))}
+                className="field-surface w-full"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void handleRetreatFeeUpdate()}
+              disabled={syncing || !Number.isFinite(feeDraft) || feeDraft <= 0}
+              className="flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/8 px-5 py-3 text-sm font-medium text-cyan-100 transition hover:border-cyan-400/30 hover:bg-cyan-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <PencilLine className="h-4 w-4" />
+              {syncing ? 'Atualizando valor...' : 'Salvar novo valor'}
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-[20px] border border-white/8 bg-white/[0.02] px-4 py-4 text-sm text-slate-300">
+          Valor atual publicado: <span className="text-white">{formatCurrency(retreatFee)}</span>
+        </div>
+      </section>
 
       <div className="grid gap-5 2xl:grid-cols-[1.2fr_0.8fr]">
         <section className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6">
