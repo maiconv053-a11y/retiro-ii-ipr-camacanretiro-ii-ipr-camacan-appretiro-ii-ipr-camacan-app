@@ -148,6 +148,9 @@ export function FinancialRecordCard({
     await downloadBoletoBookletPdf({
       participantName: participant.fullName,
       participantPhone: participant.phone,
+      participantEmail: participant.email,
+      participantChurch: participant.church,
+      participantCity: participant.city,
       installments: draft.installments,
     })
   }

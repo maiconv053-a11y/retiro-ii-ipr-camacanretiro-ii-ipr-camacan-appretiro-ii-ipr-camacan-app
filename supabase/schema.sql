@@ -25,6 +25,9 @@ create table if not exists public.participantes (
   nome text not null,
   idade integer not null check (idade > 0),
   telefone text not null,
+  email text,
+  igreja text,
+  cidade text,
   restricoes_medicas text,
   restricoes_alimentares text,
   status_inscricao text not null default 'pendente'
@@ -71,6 +74,9 @@ create unique index if not exists financeiro_parcelas_unq
   on public.financeiro_parcelas (financeiro_id, numero_parcela);
 
 alter table public.participantes
+  add column if not exists email text,
+  add column if not exists igreja text,
+  add column if not exists cidade text,
   add column if not exists termo_aceito boolean not null default false,
   add column if not exists termo_aceito_em timestamptz,
   add column if not exists origem_inscricao text not null default 'diretoria';

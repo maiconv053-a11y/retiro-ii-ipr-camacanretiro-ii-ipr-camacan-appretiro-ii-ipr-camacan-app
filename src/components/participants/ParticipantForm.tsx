@@ -24,6 +24,9 @@ function createInitialState(defaultTotalAmount: number): ParticipantInput {
     fullName: '',
     age: 18,
     phone: '',
+    email: '',
+    church: '',
+    city: '',
     dietaryRestrictions: '',
     medicalRestrictions: '',
     registrationStatus: 'Pendente',
@@ -70,6 +73,9 @@ export function ParticipantForm({
     () =>
       form.fullName.trim().length > 3 &&
       form.phone.trim().length >= 14 &&
+      form.email.trim().length >= 5 &&
+      form.church.trim().length >= 2 &&
+      form.city.trim().length >= 2 &&
       form.totalAmount > 0 &&
       form.installmentCount > 0 &&
       form.installmentCount <= getMaxInstallmentsForMethod(form.paymentMethod),
@@ -97,6 +103,9 @@ export function ParticipantForm({
       await onSubmit({
         ...form,
         fullName: form.fullName.trim(),
+        email: form.email.trim(),
+        church: form.church.trim(),
+        city: form.city.trim(),
       })
     } catch {
       return
@@ -196,6 +205,43 @@ export function ParticipantForm({
             onChange={(event) => updateField('phone', formatPhone(event.target.value))}
             className="field-surface w-full"
             placeholder="(73) 99999-9999"
+          />
+        </label>
+
+        <label className="space-y-2">
+          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+            E-mail
+          </span>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(event) => updateField('email', event.target.value)}
+            className="field-surface w-full"
+            placeholder="nome@email.com"
+          />
+        </label>
+
+        <label className="space-y-2">
+          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+            Qual a sua igreja
+          </span>
+          <input
+            value={form.church}
+            onChange={(event) => updateField('church', event.target.value)}
+            className="field-surface w-full"
+            placeholder="Ex.: II IPR de Camacan"
+          />
+        </label>
+
+        <label className="space-y-2">
+          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+            Cidade onde mora
+          </span>
+          <input
+            value={form.city}
+            onChange={(event) => updateField('city', event.target.value)}
+            className="field-surface w-full"
+            placeholder="Ex.: Camacan - BA"
           />
         </label>
 
@@ -330,7 +376,7 @@ export function ParticipantForm({
         <p className="text-sm text-slate-400">
           {isValid
             ? 'Pronto para salvar. O perfil financeiro inicial será criado ou atualizado automaticamente.'
-            : 'Preencha nome, telefone, valor total e forma de pagamento para liberar o cadastro.'}
+            : 'Preencha nome, telefone, e-mail, igreja, cidade, valor total e forma de pagamento para liberar o cadastro.'}
         </p>
         <div className="flex items-center gap-3">
           {mode === 'edit' && onCancelEdit ? (

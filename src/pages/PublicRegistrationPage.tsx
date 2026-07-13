@@ -18,6 +18,9 @@ const initialForm: PublicRegistrationInput = {
   fullName: '',
   age: 18,
   phone: '',
+  email: '',
+  church: '',
+  city: '',
   dietaryRestrictions: '',
   medicalRestrictions: '',
   paymentMethod: 'PIX',
@@ -85,6 +88,9 @@ export default function PublicRegistrationPage() {
       form.fullName.trim().length >= 4 &&
       form.age > 0 &&
       form.phone.trim().length >= 14 &&
+      form.email.trim().length >= 5 &&
+      form.church.trim().length >= 2 &&
+      form.city.trim().length >= 2 &&
       form.termsAccepted,
     [form],
   )
@@ -125,6 +131,9 @@ export default function PublicRegistrationPage() {
       await createPublicRegistration({
         ...form,
         fullName: form.fullName.trim(),
+        email: form.email.trim(),
+        church: form.church.trim(),
+        city: form.city.trim(),
         dietaryRestrictions: form.dietaryRestrictions.trim(),
         medicalRestrictions: form.medicalRestrictions.trim(),
       })
@@ -234,6 +243,43 @@ export default function PublicRegistrationPage() {
                 onChange={(event) => updateField('phone', formatPhone(event.target.value))}
                 className="field-surface w-full"
                 placeholder="(73) 99999-9999"
+              />
+            </label>
+
+            <label className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                E-mail
+              </span>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(event) => updateField('email', event.target.value)}
+                className="field-surface w-full"
+                placeholder="nome@email.com"
+              />
+            </label>
+
+            <label className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                Qual a sua igreja
+              </span>
+              <input
+                value={form.church}
+                onChange={(event) => updateField('church', event.target.value)}
+                className="field-surface w-full"
+                placeholder="Ex.: II IPR de Camacan"
+              />
+            </label>
+
+            <label className="space-y-2">
+              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                Cidade onde mora
+              </span>
+              <input
+                value={form.city}
+                onChange={(event) => updateField('city', event.target.value)}
+                className="field-surface w-full"
+                placeholder="Ex.: Camacan - BA"
               />
             </label>
 

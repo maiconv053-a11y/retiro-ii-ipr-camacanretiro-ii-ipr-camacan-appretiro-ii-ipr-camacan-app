@@ -58,6 +58,9 @@ export interface Participant {
   fullName: string
   age: number
   phone: string
+  email: string
+  church: string
+  city: string
   dietaryRestrictions: string
   medicalRestrictions: string
   registrationStatus: RegistrationStatus
@@ -70,6 +73,9 @@ export interface ParticipantInput {
   fullName: string
   age: number
   phone: string
+  email: string
+  church: string
+  city: string
   dietaryRestrictions: string
   medicalRestrictions: string
   registrationStatus: RegistrationStatus
@@ -85,6 +91,9 @@ export interface PublicRegistrationInput {
   fullName: string
   age: number
   phone: string
+  email: string
+  church: string
+  city: string
   dietaryRestrictions: string
   medicalRestrictions: string
   paymentMethod: PaymentMethod

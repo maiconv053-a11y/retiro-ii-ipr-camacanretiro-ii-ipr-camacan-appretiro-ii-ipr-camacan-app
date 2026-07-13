@@ -70,7 +70,7 @@ export function ParticipantsTable({
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
               className="w-full bg-transparent text-sm outline-none placeholder:text-slate-500 md:min-w-64"
-              placeholder="Buscar por nome ou telefone"
+              placeholder="Buscar por nome, telefone, e-mail, igreja ou cidade"
             />
           </label>
 
@@ -99,6 +99,7 @@ export function ParticipantsTable({
             <tr>
               <th className="px-4 py-3 font-medium">Participante</th>
               <th className="px-4 py-3 font-medium">Contato</th>
+              <th className="px-4 py-3 font-medium">Igreja e cidade</th>
               <th className="px-4 py-3 font-medium">Restrições</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Financeiro</th>
@@ -114,7 +115,14 @@ export function ParticipantsTable({
                     {participant.age} anos
                   </p>
                 </td>
-                <td className="px-4 py-4 text-slate-300">{participant.phone}</td>
+                <td className="px-4 py-4 text-slate-300">
+                  <p>{participant.phone}</p>
+                  <p className="mt-1 text-xs text-slate-500">{participant.email || 'Sem e-mail'}</p>
+                </td>
+                <td className="px-4 py-4 text-slate-300">
+                  <p>{participant.church || 'Igreja não informada'}</p>
+                  <p className="mt-1 text-xs text-slate-500">{participant.city || 'Cidade não informada'}</p>
+                </td>
                 <td className="px-4 py-4 text-slate-300">
                   <p>{participant.dietaryRestrictions || 'Nenhuma'}</p>
                   <p className="mt-1 text-xs text-slate-500">
@@ -174,6 +182,7 @@ export function ParticipantsTable({
                 <p className="mt-1 text-sm text-slate-400">
                   {participant.age} anos · {participant.phone}
                 </p>
+                <p className="mt-1 text-sm text-slate-500">{participant.email || 'Sem e-mail'}</p>
               </div>
               <StatusBadge
                 label={registrationStatusLabels[participant.registrationStatus]}
@@ -181,6 +190,12 @@ export function ParticipantsTable({
               />
             </div>
             <div className="mt-4 grid gap-3 text-sm text-slate-300">
+              <p>
+                Igreja: {participant.church || 'Não informada'}
+              </p>
+              <p>
+                Cidade: {participant.city || 'Não informada'}
+              </p>
               <p>
                 Alimentação: {participant.dietaryRestrictions || 'Nenhuma'}
               </p>

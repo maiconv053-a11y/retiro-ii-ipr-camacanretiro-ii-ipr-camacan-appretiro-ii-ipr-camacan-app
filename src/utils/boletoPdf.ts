@@ -6,6 +6,9 @@ import { formatCurrency } from '@/utils/format'
 interface BoletoPdfInput {
   participantName: string
   participantPhone: string
+  participantEmail: string
+  participantChurch: string
+  participantCity: string
   installments: Installment[]
 }
 
@@ -54,6 +57,9 @@ async function loadImageAsDataUrl(src: string) {
 export async function downloadBoletoBookletPdf({
   participantName,
   participantPhone,
+  participantEmail,
+  participantChurch,
+  participantCity,
   installments,
 }: BoletoPdfInput) {
   const pdf = new jsPDF({
@@ -95,19 +101,31 @@ export async function downloadBoletoBookletPdf({
 
   pdf.setDrawColor(214, 211, 209)
   pdf.setFillColor(248, 250, 252)
-  pdf.roundedRect(margin, y, contentWidth, 18, 3, 3, 'FD')
+  pdf.roundedRect(margin, y, contentWidth, 44, 3, 3, 'FD')
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(10)
   pdf.setTextColor(100, 116, 139)
   pdf.text('PARTICIPANTE', margin + 4, y + 6)
   pdf.text('TELEFONE', margin + contentWidth / 2, y + 6)
+  pdf.text('E-MAIL', margin + 4, y + 20)
+  pdf.text('IGREJA', margin + contentWidth / 2, y + 20)
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(12)
   pdf.setTextColor(15, 23, 42)
   pdf.text(participantName, margin + 4, y + 13)
   pdf.text(participantPhone || '-', margin + contentWidth / 2, y + 13)
+  pdf.text(participantEmail || '-', margin + 4, y + 27)
+  pdf.text(participantChurch || '-', margin + contentWidth / 2, y + 27)
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(10)
+  pdf.setTextColor(100, 116, 139)
+  pdf.text('CIDADE', margin + 4, y + 34)
+  pdf.setFont('helvetica', 'normal')
+  pdf.setFontSize(12)
+  pdf.setTextColor(15, 23, 42)
+  pdf.text(participantCity || '-', margin + 4, y + 41)
 
-  y += 28
+  y += 42
 
   installments.forEach((installment, index) => {
     if (y + 28 > pageHeight - margin) {

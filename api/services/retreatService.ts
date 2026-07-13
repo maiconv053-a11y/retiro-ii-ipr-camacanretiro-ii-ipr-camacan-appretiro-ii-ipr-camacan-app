@@ -22,6 +22,9 @@ type ParticipantRow = {
   nome: string
   idade: number
   telefone: string
+  email: string | null
+  igreja: string | null
+  cidade: string | null
   restricoes_medicas: string | null
   restricoes_alimentares: string | null
   status_inscricao: string
@@ -289,6 +292,9 @@ function mapParticipant(row: ParticipantRow): Participant {
     fullName: row.nome,
     age: row.idade,
     phone: row.telefone,
+    email: row.email ?? '',
+    church: row.igreja ?? '',
+    city: row.cidade ?? '',
     dietaryRestrictions: row.restricoes_alimentares ?? '',
     medicalRestrictions: row.restricoes_medicas ?? '',
     registrationStatus: toRegistrationStatus(row.status_inscricao),
@@ -493,6 +499,9 @@ export async function listParticipants() {
         nome,
         idade,
         telefone,
+        email,
+        igreja,
+        cidade,
         restricoes_medicas,
         restricoes_alimentares,
         status_inscricao,
@@ -535,6 +544,9 @@ export async function createParticipantRecord(input: ParticipantInput) {
       nome: input.fullName,
       idade: input.age,
       telefone: input.phone,
+      email: input.email,
+      igreja: input.church,
+      cidade: input.city,
       restricoes_medicas: input.medicalRestrictions,
       restricoes_alimentares: input.dietaryRestrictions,
       status_inscricao: fromRegistrationStatus(input.registrationStatus),
@@ -572,6 +584,9 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
       nome: input.fullName,
       idade: input.age,
       telefone: input.phone,
+      email: input.email,
+      igreja: input.church,
+      cidade: input.city,
       restricoes_medicas: input.medicalRestrictions,
       restricoes_alimentares: input.dietaryRestrictions,
       status_inscricao: 'pendente',
@@ -612,6 +627,9 @@ export async function updateParticipantRecord(
       nome: input.fullName,
       idade: input.age,
       telefone: input.phone,
+      email: input.email,
+      igreja: input.church,
+      cidade: input.city,
       restricoes_medicas: input.medicalRestrictions,
       restricoes_alimentares: input.dietaryRestrictions,
       status_inscricao: fromRegistrationStatus(input.registrationStatus),
