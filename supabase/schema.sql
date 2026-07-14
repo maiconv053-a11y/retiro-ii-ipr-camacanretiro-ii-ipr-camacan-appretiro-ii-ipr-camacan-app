@@ -74,6 +74,31 @@ create table if not exists public.financeiro_parcelas (
 create unique index if not exists financeiro_parcelas_unq
   on public.financeiro_parcelas (financeiro_id, numero_parcela);
 
+create index if not exists financeiro_parcelas_vencimento_status_idx
+  on public.financeiro_parcelas (vencimento, status);
+
+create table if not exists public.cobranca_notificacoes (
+  id uuid primary key default gen_random_uuid(),
+  parcela_id uuid not null references public.financeiro_parcelas(id) on delete cascade,
+  participante_id uuid not null references public.participantes(id) on delete cascade,
+  tipo text not null
+    check (tipo in ('lembrete_vencimento')),
+  canal text not null
+    check (canal in ('whatsapp', 'email')),
+  data_referencia date not null,
+  destinatario text not null,
+  provider text,
+  status text not null
+    check (status in ('enviado', 'erro')),
+  conteudo jsonb,
+  provider_response jsonb,
+  erro text,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create unique index if not exists cobranca_notificacoes_unq
+  on public.cobranca_notificacoes (parcela_id, canal, tipo, data_referencia);
+
 alter table public.participantes
   add column if not exists email text,
   add column if not exists igreja text,
@@ -217,6 +242,7 @@ execute function public.set_updated_at();
 alter table public.participantes enable row level security;
 alter table public.financeiro enable row level security;
 alter table public.financeiro_parcelas enable row level security;
+alter table public.cobranca_notificacoes enable row level security;
 alter table public.checklist_organizacao enable row level security;
 alter table public.diretoria_usuarios enable row level security;
 alter table public.configuracoes_retiro enable row level security;
@@ -224,6 +250,7 @@ alter table public.configuracoes_retiro enable row level security;
 revoke all on table public.participantes from anon, authenticated;
 revoke all on table public.financeiro from anon, authenticated;
 revoke all on table public.financeiro_parcelas from anon, authenticated;
+revoke all on table public.cobranca_notificacoes from anon, authenticated;
 revoke all on table public.checklist_organizacao from anon, authenticated;
 revoke all on table public.diretoria_usuarios from anon, authenticated;
 revoke all on table public.configuracoes_retiro from anon, authenticated;
@@ -231,6 +258,7 @@ revoke all on table public.configuracoes_retiro from anon, authenticated;
 comment on table public.participantes is 'Participantes do retiro';
 comment on table public.financeiro is 'Resumo financeiro por participante';
 comment on table public.financeiro_parcelas is 'Detalhamento das parcelas de boleto/cartão';
+comment on table public.cobranca_notificacoes is 'Histórico de disparos automáticos de cobrança';
 comment on table public.checklist_organizacao is 'Checklist operacional da organização';
 comment on table public.diretoria_usuarios is 'Usuarios autorizados a acessar a area privada da diretoria';
 comment on table public.configuracoes_retiro is 'Configuracoes centrais do retiro, incluindo valor fixo da inscricao';
