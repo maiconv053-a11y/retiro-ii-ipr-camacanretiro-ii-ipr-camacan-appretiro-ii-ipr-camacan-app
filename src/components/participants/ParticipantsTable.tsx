@@ -112,7 +112,7 @@ export function ParticipantsTable({
                 <td className="px-4 py-4">
                   <p className="font-medium text-white">{participant.fullName}</p>
                   <p className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">
-                    {participant.age} anos
+                    {participant.ageAtEvent} anos
                   </p>
                 </td>
                 <td className="px-4 py-4 text-slate-300">
@@ -180,7 +180,7 @@ export function ParticipantsTable({
               <div>
                 <h3 className="font-medium text-white">{participant.fullName}</h3>
                 <p className="mt-1 text-sm text-slate-400">
-                  {participant.age} anos · {participant.phone}
+                  {participant.ageAtEvent} anos · {participant.phone}
                 </p>
                 <p className="mt-1 text-sm text-slate-500">{participant.email || 'Sem e-mail'}</p>
               </div>

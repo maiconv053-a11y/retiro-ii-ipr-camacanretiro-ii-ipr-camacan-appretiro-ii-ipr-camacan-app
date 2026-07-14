@@ -5,6 +5,7 @@ import type {
   Participant,
   ParticipantInput,
   PublicRegistrationInput,
+  PublicRegistrationSuccessSummary,
   RetreatSettings,
   TaskStatus,
 } from '@shared/types/retreat'
@@ -52,7 +53,7 @@ export function createParticipant(participant: ParticipantInput) {
 }
 
 export function createPublicRegistration(participant: PublicRegistrationInput) {
-  return request<{ created: boolean }>('/api/public/registrations', {
+  return request<{ summary: PublicRegistrationSuccessSummary }>('/api/public/registrations', {
     method: 'POST',
     body: JSON.stringify(participant),
   })

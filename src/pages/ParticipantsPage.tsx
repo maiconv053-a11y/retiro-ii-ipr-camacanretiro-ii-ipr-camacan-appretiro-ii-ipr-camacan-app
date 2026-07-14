@@ -6,6 +6,7 @@ import type {
 } from '@shared/types/retreat'
 import { ParticipantForm } from '@/components/participants/ParticipantForm'
 import { ParticipantsTable } from '@/components/participants/ParticipantsTable'
+import { PageTopLogo } from '@/components/ui/PageTopLogo'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useRetreatStore } from '@/store/retreatStore'
@@ -29,7 +30,7 @@ export default function ParticipantsPage() {
   function mapParticipantToInput(participant: Participant): ParticipantInput {
     return {
       fullName: participant.fullName,
-      age: participant.age,
+      birthDate: participant.birthDate,
       phone: participant.phone,
       email: participant.email,
       church: participant.church,
@@ -71,6 +72,7 @@ export default function ParticipantsPage() {
 
   return (
     <div className="space-y-6">
+      <PageTopLogo />
       <SectionHeader
         eyebrow="Módulo 1"
         title="Inscrição e gerenciamento de participantes"

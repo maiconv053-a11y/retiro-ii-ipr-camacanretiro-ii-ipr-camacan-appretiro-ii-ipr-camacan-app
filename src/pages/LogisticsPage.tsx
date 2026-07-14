@@ -1,4 +1,5 @@
 import { LogisticsBoard } from '@/components/logistics/LogisticsBoard'
+import { PageTopLogo } from '@/components/ui/PageTopLogo'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useRetreatStore } from '@/store/retreatStore'
@@ -30,6 +31,7 @@ export default function LogisticsPage() {
 
   return (
     <div className="space-y-6">
+      <PageTopLogo />
       <SectionHeader
         eyebrow="Módulo 3"
         title="Checklist e logística da organização"

@@ -24,12 +24,12 @@ router.get('/settings', async (_req: Request, res: Response) => {
 
 router.post('/registrations', async (req: Request, res: Response) => {
   try {
-    await createPublicRegistrationRecord(req.body as PublicRegistrationInput)
+    const summary = await createPublicRegistrationRecord(req.body as PublicRegistrationInput)
 
     res.status(201).json({
       success: true,
       data: {
-        created: true,
+        summary,
       },
     })
   } catch (error) {

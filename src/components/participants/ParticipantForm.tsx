@@ -22,7 +22,7 @@ interface ParticipantFormProps {
 function createInitialState(defaultTotalAmount: number): ParticipantInput {
   return {
     fullName: '',
-    age: 18,
+    birthDate: '',
     phone: '',
     email: '',
     church: '',
@@ -58,7 +58,7 @@ const paymentOptions: Array<{ value: PaymentMethod; label: string }> = [
 export function ParticipantForm({
   onSubmit,
   initialValues,
-  defaultTotalAmount = 380,
+  defaultTotalAmount = 750,
   mode = 'create',
   onCancelEdit,
   isSubmitting = false,
@@ -72,11 +72,12 @@ export function ParticipantForm({
   const isValid = useMemo(
     () =>
       form.fullName.trim().length > 3 &&
+      form.birthDate.trim().length === 10 &&
       form.phone.trim().length >= 14 &&
       form.email.trim().length >= 5 &&
       form.church.trim().length >= 2 &&
       form.city.trim().length >= 2 &&
-      form.totalAmount > 0 &&
+      form.totalAmount >= 0 &&
       form.installmentCount > 0 &&
       form.installmentCount <= getMaxInstallmentsForMethod(form.paymentMethod),
     [form],
@@ -185,13 +186,13 @@ export function ParticipantForm({
 
         <label className="space-y-2">
           <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-            Idade
+            Data de nascimento
           </span>
           <input
-            type="number"
-            min={1}
-            value={form.age}
-            onChange={(event) => updateField('age', Number(event.target.value))}
+            type="date"
+            value={form.birthDate}
+            lang="pt-BR"
+            onChange={(event) => updateField('birthDate', event.target.value)}
             className="field-surface w-full"
           />
         </label>
@@ -315,7 +316,7 @@ export function ParticipantForm({
               </span>
               <input
                 type="number"
-                min={1}
+                min={0}
                 step="0.01"
                 value={form.totalAmount}
                 onChange={(event) =>

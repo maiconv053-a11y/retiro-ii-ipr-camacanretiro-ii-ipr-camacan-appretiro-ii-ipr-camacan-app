@@ -8,27 +8,17 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({
-  eyebrow,
   title,
-  description,
   action,
 }: SectionHeaderProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-[24px] border border-emerald-100/10 bg-[#102019]/82 p-6 md:flex-row md:items-end md:justify-between">
-      <div className="w-full space-y-2">
-        {eyebrow ? (
-          <p className="font-title text-[10px] uppercase tracking-[0.28em] text-cyan-300/58">
-            {eyebrow}
-          </p>
-        ) : null}
+    <div className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/82 p-6">
+      <div className="flex flex-col items-center gap-4 text-center">
         <h1 className="w-full font-title text-[1.9rem] leading-tight text-white md:text-[2.2rem]">
           {title}
         </h1>
-        {description ? (
-          <p className="max-w-2xl text-sm leading-6 text-slate-400">{description}</p>
-        ) : null}
+        {action ?? null}
       </div>
-      {action ?? null}
     </div>
   )
 }

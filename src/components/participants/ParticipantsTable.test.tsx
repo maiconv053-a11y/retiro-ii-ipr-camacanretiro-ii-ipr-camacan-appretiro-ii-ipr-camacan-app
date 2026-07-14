@@ -6,7 +6,8 @@ const participants: Participant[] = [
   {
     id: '1',
     fullName: 'João da Silva',
-    age: 24,
+    birthDate: '2002-06-10',
+    ageAtEvent: 24,
     phone: '(73) 99999-0001',
     email: 'joao@email.com',
     church: 'II IPR de Camacan',
@@ -30,7 +31,8 @@ const participants: Participant[] = [
   {
     id: '2',
     fullName: 'Maria Souza',
-    age: 29,
+    birthDate: '1997-01-10',
+    ageAtEvent: 29,
     phone: '(73) 98888-0002',
     email: 'maria@email.com',
     church: 'IPR Central',
@@ -56,7 +58,8 @@ const participants: Participant[] = [
   {
     id: '3',
     fullName: 'Paulo Cancelado',
-    age: 40,
+    birthDate: '1986-03-12',
+    ageAtEvent: 40,
     phone: '(73) 97777-0003',
     email: 'paulo@email.com',
     church: 'IPR Esperança',

@@ -24,7 +24,8 @@ const participantsFixture: Participant[] = [
   {
     id: 'participant-1',
     fullName: 'Ana Clara Santos',
-    age: 23,
+    birthDate: '2003-02-10',
+    ageAtEvent: 23,
     phone: '(73) 99911-2233',
     email: 'ana@email.com',
     church: 'II IPR de Camacan',
@@ -48,7 +49,8 @@ const participantsFixture: Participant[] = [
   {
     id: 'participant-2',
     fullName: 'Mateus Oliveira',
-    age: 31,
+    birthDate: '1995-01-15',
+    ageAtEvent: 31,
     phone: '(73) 98877-1144',
     email: 'mateus@email.com',
     church: 'IPR Central',
@@ -152,7 +154,7 @@ describe('retreatStore', () => {
   it('cria participante usando a API e atualiza o estado local', async () => {
     await useRetreatStore.getState().addParticipant({
       fullName: 'Novo Participante',
-      age: 27,
+      birthDate: '2000-01-01',
       phone: '(73) 99999-9999',
       email: 'novo@email.com',
       church: 'II IPR de Camacan',
@@ -174,7 +176,7 @@ describe('retreatStore', () => {
 
     await useRetreatStore.getState().updateParticipant('participant-2', {
       fullName: 'Mateus Oliveira Atualizado',
-      age: 32,
+      birthDate: '1994-01-15',
       phone: '(73) 97777-1111',
       email: 'mateus.atualizado@email.com',
       church: 'IPR Renovada',

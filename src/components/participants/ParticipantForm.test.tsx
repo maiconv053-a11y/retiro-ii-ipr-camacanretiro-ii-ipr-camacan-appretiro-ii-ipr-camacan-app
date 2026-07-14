@@ -11,6 +11,7 @@ describe('ParticipantForm', () => {
     render(<ParticipantForm onSubmit={onSubmit} defaultTotalAmount={450} />)
 
     await user.type(screen.getByLabelText('Nome completo'), 'Carlos Eduardo')
+    await user.type(screen.getByLabelText('Data de nascimento'), '2000-01-01')
     await user.type(screen.getByLabelText('Telefone'), '73999887766')
     await user.type(screen.getByLabelText('E-mail'), 'carlos@email.com')
     await user.type(screen.getByLabelText('Qual a sua igreja'), 'II IPR de Camacan')

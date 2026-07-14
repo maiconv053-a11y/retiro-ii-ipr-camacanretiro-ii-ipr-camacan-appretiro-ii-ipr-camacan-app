@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { CreditCard, Landmark, Receipt, Wallet } from 'lucide-react'
 import {
   getMaxInstallmentsForMethod,
@@ -8,15 +9,24 @@ import {
   requiresInstallments,
 } from '@shared/types/retreat'
 import {
-  createPublicRegistration,
-  fetchPublicRetreatSettings,
-} from '@/services/retreatApi'
+  BASE_REGISTRATION_FEE,
+  computeRegistrationPricing,
+  EVENT_DATE_ISO,
+  getMonthsAvailableUntilEvent,
+} from '@/utils/registrationPricing'
+import { createPublicRegistration, fetchPublicRetreatSettings } from '@/services/retreatApi'
 import logoRetiro from '@/assets/logo-retiro.png'
-import { formatCurrency, formatPhone } from '@/utils/format'
+import {
+  formatBrazilianDateInput,
+  formatCurrency,
+  formatIsoDatePtBr,
+  formatPhone,
+  parseBrazilianDateInputToIso,
+} from '@/utils/format'
 
 const initialForm: PublicRegistrationInput = {
   fullName: '',
-  age: 18,
+  birthDate: '',
   phone: '',
   email: '',
   church: '',
@@ -62,37 +72,57 @@ const paymentOptions: Array<{
 
 export default function PublicRegistrationPage() {
   const [form, setForm] = useState<PublicRegistrationInput>(initialForm)
-  const [retreatFee, setRetreatFee] = useState<number | null>(null)
+  const [birthDateInput, setBirthDateInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const [retreatFee, setRetreatFee] = useState(BASE_REGISTRATION_FEE)
+  const navigate = useNavigate()
+  const monthsAvailableForBoleto = useMemo(() => getMonthsAvailableUntilEvent(new Date()), [])
 
   useEffect(() => {
-    async function loadSettings() {
-      try {
-        const settings = await fetchPublicRetreatSettings()
-        setRetreatFee(settings.retreatFee)
-      } catch {
-        return
-      }
-    }
+    let active = true
 
-    void loadSettings()
+    fetchPublicRetreatSettings()
+      .then((settings) => {
+        if (active && Number.isFinite(settings.retreatFee) && settings.retreatFee > 0) {
+          setRetreatFee(settings.retreatFee)
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      active = false
+    }
   }, [])
 
-  const resolvedRetreatFee = retreatFee ?? 0
-  const isLoadingRetreatFee = retreatFee === null
+  const pricing = useMemo(() => {
+    if (!form.birthDate) {
+      return null
+    }
+
+    try {
+      return computeRegistrationPricing({
+        birthDateIso: form.birthDate,
+        paymentMethod: form.paymentMethod,
+        installmentCount: form.installmentCount,
+        baseFee: retreatFee,
+      })
+    } catch {
+      return null
+    }
+  }, [form.birthDate, form.installmentCount, form.paymentMethod, retreatFee])
 
   const isValid = useMemo(
     () =>
       form.fullName.trim().length >= 4 &&
-      form.age > 0 &&
+      form.birthDate.trim().length === 10 &&
       form.phone.trim().length >= 14 &&
       form.email.trim().length >= 5 &&
       form.church.trim().length >= 2 &&
       form.city.trim().length >= 2 &&
-      form.termsAccepted,
-    [form],
+      form.termsAccepted &&
+      pricing !== null,
+    [form, pricing],
   )
 
   function updateField<Key extends keyof PublicRegistrationInput>(
@@ -105,12 +135,25 @@ export default function PublicRegistrationPage() {
     }))
   }
 
+  function updateBirthDateInput(value: string) {
+    const formatted = formatBrazilianDateInput(value)
+    const birthDateIso = parseBrazilianDateInputToIso(formatted)
+    const normalizedBirthDateIso =
+      birthDateIso && birthDateIso <= EVENT_DATE_ISO ? birthDateIso : ''
+
+    setBirthDateInput(formatted)
+    updateField('birthDate', normalizedBirthDateIso)
+  }
+
   function setPaymentMethod(method: PaymentMethod) {
     setForm((current) => ({
       ...current,
       paymentMethod: method,
       installmentCount: requiresInstallments(method)
-        ? normalizeInstallmentCount(method, current.installmentCount)
+        ? Math.min(
+            normalizeInstallmentCount(method, current.installmentCount),
+            method === 'Boleto' ? monthsAvailableForBoleto : Infinity,
+          )
         : 1,
     }))
   }
@@ -125,10 +168,9 @@ export default function PublicRegistrationPage() {
 
     setSubmitting(true)
     setError(null)
-    setSuccess(null)
 
     try {
-      await createPublicRegistration({
+      const response = await createPublicRegistration({
         ...form,
         fullName: form.fullName.trim(),
         email: form.email.trim(),
@@ -138,10 +180,15 @@ export default function PublicRegistrationPage() {
         medicalRestrictions: form.medicalRestrictions.trim(),
       })
 
-      setSuccess(
-        'Inscrição enviada com sucesso. O pagamento ficou como pendente de validação pela diretoria.',
-      )
+      const payload = {
+        ...response.summary,
+        fullName: form.fullName.trim(),
+      }
+
+      sessionStorage.setItem('publicRegistrationSummary', JSON.stringify(payload))
+      navigate('/sucesso', { replace: true, state: payload })
       setForm(initialForm)
+      setBirthDateInput('')
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -180,14 +227,31 @@ export default function PublicRegistrationPage() {
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             <div className="rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
               <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
-                Valor da inscrição
+                Valor integral
               </p>
               <p className="mt-3 font-title text-3xl text-white">
-                {isLoadingRetreatFee ? 'Carregando...' : formatCurrency(resolvedRetreatFee)}
+                {formatCurrency(retreatFee)}
               </p>
-              <p className="mt-2 text-sm text-slate-400">
-                Registrado automaticamente com status pendente de validação.
-              </p>
+              {pricing ? (
+                <div className="mt-3 space-y-1 text-sm text-slate-400">
+                  <p>
+                    Data do evento:{' '}
+                    <span className="text-slate-200">{formatIsoDatePtBr(EVENT_DATE_ISO)}</span>
+                  </p>
+                  <p>
+                    Idade no evento:{' '}
+                    <span className="text-slate-200">{pricing.ageAtEvent} anos</span>
+                  </p>
+                  <p>
+                    Valor final:{' '}
+                    <span className="text-white">{formatCurrency(pricing.totalAmount)}</span>
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-slate-400">
+                  Preencha a data de nascimento para calcular o valor final.
+                </p>
+              )}
             </div>
           </div>
 
@@ -223,15 +287,21 @@ export default function PublicRegistrationPage() {
 
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                Idade
+                Data de nascimento
               </span>
               <input
-                type="number"
-                min={1}
-                value={form.age}
-                onChange={(event) => updateField('age', Number(event.target.value))}
+                type="text"
+                inputMode="numeric"
+                autoComplete="bday"
+                maxLength={10}
+                value={birthDateInput}
+                onChange={(event) => updateBirthDateInput(event.target.value)}
                 className="field-surface w-full"
+                placeholder="dd/mm/aaaa"
               />
+              <span className="text-xs text-slate-500">
+                Digite a data no formato brasileiro: dd/mm/aaaa.
+              </span>
             </label>
 
             <label className="space-y-2">
@@ -322,9 +392,7 @@ export default function PublicRegistrationPage() {
                 </p>
                 <p className="mt-1 text-sm text-slate-400">
                   Valor total previsto:{' '}
-                  {isLoadingRetreatFee
-                    ? 'Carregando...'
-                    : formatCurrency(resolvedRetreatFee)}
+                  {pricing ? formatCurrency(pricing.totalAmount) : '—'}
                 </p>
               </div>
               <p className="text-sm text-slate-500">
@@ -364,18 +432,49 @@ export default function PublicRegistrationPage() {
                     updateField('installmentCount', Number(event.target.value))
                   }
                   className="field-surface w-full"
-                  disabled={isLoadingRetreatFee}
+                  disabled={!form.birthDate}
                 >
                   {Array.from(
-                    { length: getMaxInstallmentsForMethod(form.paymentMethod) },
+                    {
+                      length:
+                        form.paymentMethod === 'Boleto'
+                          ? Math.min(
+                              getMaxInstallmentsForMethod(form.paymentMethod),
+                              monthsAvailableForBoleto,
+                            )
+                          : getMaxInstallmentsForMethod(form.paymentMethod),
+                    },
                     (_, index) => index + 1,
-                  ).map((count) => (
-                    <option key={count} value={count}>
-                      {isLoadingRetreatFee
-                        ? `${count}x`
-                        : `${count}x de ${formatCurrency(resolvedRetreatFee / count)}`}
-                    </option>
-                  ))}
+                  ).map((count) => {
+                    const label = (() => {
+                      if (!form.birthDate) {
+                        return `${count}x`
+                      }
+
+                      try {
+                        const optionPricing = computeRegistrationPricing({
+                          birthDateIso: form.birthDate,
+                          paymentMethod: form.paymentMethod,
+                          installmentCount: count,
+                          baseFee: retreatFee,
+                        })
+
+                        if (form.paymentMethod === 'CartaoCredito') {
+                          return `${count}x de ${formatCurrency(optionPricing.installmentAmounts[0])} (total ${formatCurrency(optionPricing.totalAmount)})`
+                        }
+
+                        return `${count}x de ${formatCurrency(optionPricing.installmentAmounts[0])}`
+                      } catch {
+                        return `${count}x`
+                      }
+                    })()
+
+                    return (
+                      <option key={count} value={count}>
+                        {label}
+                      </option>
+                    )
+                  })}
                 </select>
               </label>
             ) : null}
@@ -423,12 +522,6 @@ export default function PublicRegistrationPage() {
           {error ? (
             <div className="mt-6 rounded-[20px] border border-rose-400/20 bg-rose-400/[0.06] px-4 py-3 text-sm text-rose-100">
               {error}
-            </div>
-          ) : null}
-
-          {success ? (
-            <div className="mt-6 rounded-[20px] border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-3 text-sm text-emerald-100">
-              {success}
             </div>
           ) : null}
 

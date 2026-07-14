@@ -56,7 +56,8 @@ export interface FinancialRecord {
 export interface Participant {
   id: string
   fullName: string
-  age: number
+  birthDate: string
+  ageAtEvent: number
   phone: string
   email: string
   church: string
@@ -71,7 +72,7 @@ export interface Participant {
 
 export interface ParticipantInput {
   fullName: string
-  age: number
+  birthDate: string
   phone: string
   email: string
   church: string
@@ -89,7 +90,7 @@ export interface ParticipantInput {
 
 export interface PublicRegistrationInput {
   fullName: string
-  age: number
+  birthDate: string
   phone: string
   email: string
   church: string
@@ -99,6 +100,17 @@ export interface PublicRegistrationInput {
   paymentMethod: PaymentMethod
   installmentCount: number
   termsAccepted: boolean
+}
+
+export interface PublicRegistrationSuccessSummary {
+  participantId: string
+  paymentMethod: PaymentMethod
+  installmentCount: number
+  totalAmount: number
+  installmentAmounts: number[]
+  dueDates: string[] | null
+  cardInstallmentLabel: string | null
+  ageAtEvent: number
 }
 
 export interface FinancialUpdate {

@@ -8,6 +8,7 @@ import type {
   ParticipantInput,
   PaymentMethod,
   PublicRegistrationInput,
+  PublicRegistrationSuccessSummary,
   RetreatSettings,
   ValidationStatus,
 } from '../../shared/types/retreat.js'
@@ -15,12 +16,18 @@ import {
   normalizeInstallmentCount,
   requiresInstallments,
 } from '../../shared/types/retreat.js'
+import {
+  calculateAgeOnDate,
+  computeRegistrationPricing,
+  EVENT_DATE,
+} from '../../shared/utils/registrationPricing.js'
 import { assertSupabase } from '../lib/supabase.js'
 
 type ParticipantRow = {
   id: string
   nome: string
   idade: number
+  birth_date: string | null
   telefone: string
   email: string | null
   igreja: string | null
@@ -75,7 +82,7 @@ type RetreatSettingsRow = {
   valor_inscricao: number
 }
 
-const DEFAULT_RETREAT_FEE = 380
+const DEFAULT_RETREAT_FEE = 750
 const SETTINGS_ROW_ID = 'principal'
 
 function createInstallments(totalAmount: number, installmentCount: number): Installment[] {
@@ -290,7 +297,8 @@ function mapParticipant(row: ParticipantRow): Participant {
   return {
     id: row.id,
     fullName: row.nome,
-    age: row.idade,
+    birthDate: row.birth_date ?? '',
+    ageAtEvent: row.idade,
     phone: row.telefone,
     email: row.email ?? '',
     church: row.igreja ?? '',
@@ -301,6 +309,64 @@ function mapParticipant(row: ParticipantRow): Participant {
     registrationSource: toRegistrationSource(row.origem_inscricao),
     termsAccepted: row.termo_aceito,
     financial,
+  }
+}
+
+async function persistFinancialRecordFromPlan(params: {
+  participantId: string
+  paymentMethod: PaymentMethod
+  validationStatus: ValidationStatus
+  totalAmount: number
+  installmentAmounts: number[]
+  dueDates: string[] | null
+}) {
+  const supabase = assertSupabase()
+  const normalizedTotalAmount = Number(params.totalAmount.toFixed(2))
+  const amountPaid = 0
+  const installmentCount = Math.max(1, params.installmentAmounts.length)
+
+  const { data: financial, error: financialError } = await supabase
+    .from('financeiro')
+    .upsert(
+      {
+        participante_id: params.participantId,
+        valor_total: normalizedTotalAmount,
+        valor_pago: amountPaid,
+        forma_pagamento: fromPaymentMethod(params.paymentMethod),
+        num_parcelas: installmentCount,
+        parcelas_pagas: 0,
+        status_geral: deriveFinancialStatus(normalizedTotalAmount, amountPaid),
+        status_validacao: fromValidationStatus(params.validationStatus),
+      },
+      {
+        onConflict: 'participante_id',
+      },
+    )
+    .select('id')
+    .single()
+
+  if (financialError) {
+    throw financialError
+  }
+
+  await supabase.from('financeiro_parcelas').delete().eq('financeiro_id', financial.id)
+
+  const parcelPayload = params.installmentAmounts.map((amount, index) => ({
+    financeiro_id: financial.id,
+    numero_parcela: index + 1,
+    valor_parcela: Number(amount.toFixed(2)),
+    status: 'pendente',
+    vencimento: params.dueDates ? params.dueDates[index] ?? null : null,
+  }))
+
+  if (parcelPayload.length > 0) {
+    const { error: parcelError } = await supabase
+      .from('financeiro_parcelas')
+      .insert(parcelPayload)
+
+    if (parcelError) {
+      throw parcelError
+    }
   }
 }
 
@@ -498,6 +564,7 @@ export async function listParticipants() {
         id,
         nome,
         idade,
+        birth_date,
         telefone,
         email,
         igreja,
@@ -538,11 +605,13 @@ export async function listParticipants() {
 
 export async function createParticipantRecord(input: ParticipantInput) {
   const supabase = assertSupabase()
+  const ageAtEvent = calculateAgeOnDate(input.birthDate, EVENT_DATE)
   const { data, error } = await supabase
     .from('participantes')
     .insert({
       nome: input.fullName,
-      idade: input.age,
+      idade: ageAtEvent,
+      birth_date: input.birthDate,
       telefone: input.phone,
       email: input.email,
       igreja: input.church,
@@ -577,12 +646,17 @@ export async function createParticipantRecord(input: ParticipantInput) {
 
 export async function createPublicRegistrationRecord(input: PublicRegistrationInput) {
   const supabase = assertSupabase()
-  const retreatFee = await loadRetreatFee()
+  const pricing = computeRegistrationPricing({
+    birthDateIso: input.birthDate,
+    paymentMethod: input.paymentMethod,
+    installmentCount: input.installmentCount,
+  })
   const { data, error } = await supabase
     .from('participantes')
     .insert({
       nome: input.fullName,
-      idade: input.age,
+      idade: pricing.ageAtEvent,
+      birth_date: input.birthDate,
       telefone: input.phone,
       email: input.email,
       igreja: input.church,
@@ -601,18 +675,25 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
     throw error
   }
 
-  await persistFinancialRecord(
-    data.id,
-    {
-      totalAmount: retreatFee,
-      amountPaid: 0,
-      paymentMethod: input.paymentMethod,
-      installmentCount: input.installmentCount,
-      installments: [],
-      validationStatus: 'PendenteDeValidacao',
-    },
-    0,
-  )
+  await persistFinancialRecordFromPlan({
+    participantId: data.id,
+    paymentMethod: pricing.paymentMethod,
+    validationStatus: 'PendenteDeValidacao',
+    totalAmount: pricing.totalAmount,
+    installmentAmounts: pricing.installmentAmounts,
+    dueDates: pricing.dueDates,
+  })
+
+  return {
+    participantId: data.id,
+    paymentMethod: pricing.paymentMethod,
+    installmentCount: pricing.installmentCount,
+    totalAmount: pricing.totalAmount,
+    installmentAmounts: pricing.installmentAmounts,
+    dueDates: pricing.dueDates,
+    cardInstallmentLabel: pricing.cardInstallmentLabel,
+    ageAtEvent: pricing.ageAtEvent,
+  } satisfies PublicRegistrationSuccessSummary
 }
 
 export async function updateParticipantRecord(
@@ -621,11 +702,13 @@ export async function updateParticipantRecord(
   currentAmountPaid: number,
 ) {
   const supabase = assertSupabase()
+  const ageAtEvent = calculateAgeOnDate(input.birthDate, EVENT_DATE)
   const { error } = await supabase
     .from('participantes')
     .update({
       nome: input.fullName,
-      idade: input.age,
+      idade: ageAtEvent,
+      birth_date: input.birthDate,
       telefone: input.phone,
       email: input.email,
       igreja: input.church,

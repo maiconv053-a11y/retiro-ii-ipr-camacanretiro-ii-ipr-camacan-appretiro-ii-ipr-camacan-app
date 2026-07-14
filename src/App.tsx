@@ -5,12 +5,14 @@ import FinancialPage from '@/pages/FinancialPage'
 import LogisticsPage from '@/pages/LogisticsPage'
 import ParticipantsPage from '@/pages/ParticipantsPage'
 import PublicRegistrationPage from '@/pages/PublicRegistrationPage'
+import PublicRegistrationSuccessPage from '@/pages/PublicRegistrationSuccessPage'
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<PublicRegistrationPage />} />
+        <Route path="/sucesso" element={<PublicRegistrationSuccessPage />} />
 
         <Route element={<AppShell />}>
           <Route path="/diretoria" element={<DashboardPage />} />

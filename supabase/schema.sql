@@ -15,7 +15,7 @@ create table if not exists public.diretoria_usuarios (
 
 create table if not exists public.configuracoes_retiro (
   id text primary key default 'principal',
-  valor_inscricao numeric(10, 2) not null default 380 check (valor_inscricao > 0),
+  valor_inscricao numeric(10, 2) not null default 750 check (valor_inscricao > 0),
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -23,7 +23,8 @@ create table if not exists public.configuracoes_retiro (
 create table if not exists public.participantes (
   id uuid primary key default gen_random_uuid(),
   nome text not null,
-  idade integer not null check (idade > 0),
+  idade integer not null check (idade >= 0),
+  birth_date date,
   telefone text not null,
   email text,
   igreja text,
@@ -77,9 +78,26 @@ alter table public.participantes
   add column if not exists email text,
   add column if not exists igreja text,
   add column if not exists cidade text,
+  add column if not exists birth_date date,
   add column if not exists termo_aceito boolean not null default false,
   add column if not exists termo_aceito_em timestamptz,
   add column if not exists origem_inscricao text not null default 'diretoria';
+
+do $$
+begin
+  if exists (
+    select 1
+    from pg_constraint
+    where conname = 'participantes_idade_check'
+  ) then
+    alter table public.participantes
+      drop constraint participantes_idade_check;
+  end if;
+
+  alter table public.participantes
+    add constraint participantes_idade_check
+    check (idade >= 0);
+end $$;
 
 alter table public.financeiro
   add column if not exists status_validacao text not null default 'pendente_validacao',
@@ -155,7 +173,7 @@ create index if not exists checklist_categoria_idx
   on public.checklist_organizacao (categoria);
 
 insert into public.configuracoes_retiro (id, valor_inscricao)
-values ('principal', 380)
+values ('principal', 750)
 on conflict (id) do nothing;
 
 create or replace function public.set_updated_at()
