@@ -5,6 +5,7 @@ import {
   createLogisticsTaskRecord,
   deleteLogisticsTaskRecord,
   listLogisticsTasks,
+  updateLogisticsTaskRecord,
   updateLogisticsTaskStatusRecord,
 } from '../services/retreatService.js'
 
@@ -39,6 +40,24 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Erro ao criar tarefa logística',
+    })
+  }
+})
+
+router.patch('/:id', async (req: Request, res: Response) => {
+  try {
+    const payload = req.body as LogisticsTaskInput
+    await updateLogisticsTaskRecord(req.params.id, payload)
+    const tasks = await listLogisticsTasks()
+
+    res.status(200).json({
+      success: true,
+      data: tasks,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro ao atualizar tarefa logística',
     })
   }
 })

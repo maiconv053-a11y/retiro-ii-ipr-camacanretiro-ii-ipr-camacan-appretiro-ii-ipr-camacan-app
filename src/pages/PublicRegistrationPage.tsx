@@ -13,9 +13,11 @@ import {
   computeRegistrationPricing,
   EVENT_DATE_ISO,
   getMonthsAvailableUntilEvent,
+  PAYMENT_DEADLINE_ISO,
 } from '@/utils/registrationPricing'
 import { createPublicRegistration, fetchPublicRetreatSettings } from '@/services/retreatApi'
 import logoRetiro from '@/assets/logo-retiro.png'
+import { PrettySelect } from '@/components/ui/PrettySelect'
 import {
   formatBrazilianDateInput,
   formatCurrency,
@@ -112,6 +114,43 @@ export default function PublicRegistrationPage() {
     }
   }, [form.birthDate, form.installmentCount, form.paymentMethod, retreatFee])
 
+  const installmentOptions = useMemo(() => {
+    const maxInstallments =
+      form.paymentMethod === 'Boleto'
+        ? Math.min(getMaxInstallmentsForMethod(form.paymentMethod), monthsAvailableForBoleto)
+        : getMaxInstallmentsForMethod(form.paymentMethod)
+
+    return Array.from({ length: maxInstallments }, (_, index) => index + 1).map((count) => {
+      const label = (() => {
+        if (!form.birthDate) {
+          return `${count}x`
+        }
+
+        try {
+          const optionPricing = computeRegistrationPricing({
+            birthDateIso: form.birthDate,
+            paymentMethod: form.paymentMethod,
+            installmentCount: count,
+            baseFee: retreatFee,
+          })
+
+          if (form.paymentMethod === 'CartaoCredito') {
+            return `${count}x de ${formatCurrency(optionPricing.installmentAmounts[0])} (total ${formatCurrency(optionPricing.totalAmount)})`
+          }
+
+          return `${count}x de ${formatCurrency(optionPricing.installmentAmounts[0])}`
+        } catch {
+          return `${count}x`
+        }
+      })()
+
+      return {
+        value: count,
+        label,
+      }
+    })
+  }, [form.birthDate, form.paymentMethod, monthsAvailableForBoleto, retreatFee])
+
   const isValid = useMemo(
     () =>
       form.fullName.trim().length >= 4 &&
@@ -204,7 +243,7 @@ export default function PublicRegistrationPage() {
     <div className="min-h-screen bg-[#06110d] px-4 pb-8 pt-2 text-slate-100 md:px-6 md:pb-8 md:pt-3">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.08),transparent_24%),radial-gradient(circle_at_top_right,rgba(74,222,128,0.08),transparent_22%),linear-gradient(180deg,rgba(8,20,16,0.95),rgba(6,17,13,1))]" />
 
-      <div className="relative mx-auto max-w-6xl">
+      <div className="relative mx-auto max-w-7xl">
         <div className="mb-4 flex justify-center">
           <div className="flex h-36 w-36 items-center justify-center rounded-[32px] border border-amber-200/30 bg-[#f4ead7] p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] md:h-40 md:w-40">
             <img
@@ -215,16 +254,18 @@ export default function PublicRegistrationPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid items-start gap-6 xl:grid-cols-[minmax(340px,0.92fr)_minmax(0,1.08fr)]">
         <section className="rounded-[28px] border border-emerald-100/10 bg-[#0b1713]/90 p-6 md:p-8">
-          <h1 className="mt-4 font-title text-3xl leading-tight text-white md:text-4xl">Inscrição do Retiro da II IPR de Camacan</h1>
+          <h1 className="mt-4 font-title text-3xl leading-tight text-white md:text-4xl">
+            Inscrição do Retiro da II IPR de Camacan
+          </h1>
           <p className="mt-4 max-w-xl text-sm leading-7 text-slate-400">
             Preencha seus dados, escolha a forma de pagamento e confirme o termo de
             compromisso. A inscrição entra no banco online e aguarda validação da
             diretoria.
           </p>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <div className="mt-8 grid gap-4 lg:grid-cols-2">
             <div className="rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
               <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
                 Valor integral
@@ -253,6 +294,23 @@ export default function PublicRegistrationPage() {
                 </p>
               )}
             </div>
+
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
+              <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
+                Parcelamento do boleto
+              </p>
+              <div className="mt-3 space-y-2 text-sm leading-6 text-slate-400">
+                <p>
+                  Primeira parcela: mesmo dia da inscrição, no mês seguinte.
+                </p>
+                <p>
+                  Última parcela: <span className="text-slate-200">{formatIsoDatePtBr(PAYMENT_DEADLINE_ISO)}</span>.
+                </p>
+                <p>
+                  Limite atual de parcelamento: <span className="text-white">{monthsAvailableForBoleto}x</span>.
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
@@ -272,8 +330,8 @@ export default function PublicRegistrationPage() {
           onSubmit={handleSubmit}
           className="rounded-[28px] border border-emerald-100/10 bg-[#0d1814]/90 p-6 md:p-8"
         >
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="space-y-2 md:col-span-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+            <label className="space-y-2 md:col-span-2 xl:col-span-6">
               <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                 Nome completo
               </span>
@@ -285,7 +343,7 @@ export default function PublicRegistrationPage() {
               />
             </label>
 
-            <label className="space-y-2">
+            <label className="space-y-2 xl:col-span-2">
               <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                 Data de nascimento
               </span>
@@ -304,7 +362,7 @@ export default function PublicRegistrationPage() {
               </span>
             </label>
 
-            <label className="space-y-2">
+            <label className="space-y-2 xl:col-span-2">
               <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                 Telefone
               </span>
@@ -316,7 +374,7 @@ export default function PublicRegistrationPage() {
               />
             </label>
 
-            <label className="space-y-2">
+            <label className="space-y-2 xl:col-span-2">
               <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                 E-mail
               </span>
@@ -329,7 +387,7 @@ export default function PublicRegistrationPage() {
               />
             </label>
 
-            <label className="space-y-2">
+            <label className="space-y-2 xl:col-span-3">
               <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                 Qual a sua igreja
               </span>
@@ -341,7 +399,7 @@ export default function PublicRegistrationPage() {
               />
             </label>
 
-            <label className="space-y-2">
+            <label className="space-y-2 xl:col-span-3">
               <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                 Cidade onde mora
               </span>
@@ -353,7 +411,7 @@ export default function PublicRegistrationPage() {
               />
             </label>
 
-            <label className="space-y-2">
+            <label className="space-y-2 xl:col-span-3">
               <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                 Restrições alimentares
               </span>
@@ -368,7 +426,7 @@ export default function PublicRegistrationPage() {
               />
             </label>
 
-            <label className="space-y-2">
+            <label className="space-y-2 xl:col-span-3">
               <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                 Restrições médicas
               </span>
@@ -385,7 +443,7 @@ export default function PublicRegistrationPage() {
           </div>
 
           <section className="mt-6 rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-5">
-            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
                   Escolha do pagamento
@@ -400,13 +458,13 @@ export default function PublicRegistrationPage() {
               </p>
             </div>
 
-            <div className="mt-4 grid gap-3">
+            <div className="mt-4 grid gap-3 lg:grid-cols-2">
               {paymentOptions.map(({ value, label, description, icon: Icon }) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => setPaymentMethod(value)}
-                  className={`flex items-start gap-3 rounded-[22px] border px-4 py-4 text-left transition ${
+                  className={`flex min-h-[6.75rem] items-start gap-3 rounded-[22px] border px-4 py-4 text-left transition lg:min-h-[7.25rem] ${
                     form.paymentMethod === value
                       ? 'border-cyan-400/24 bg-cyan-400/8 text-cyan-100'
                       : 'border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/16 hover:bg-white/[0.04]'
@@ -426,56 +484,19 @@ export default function PublicRegistrationPage() {
                 <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
                   Em quantas vezes deseja parcelar?
                 </span>
-                <select
-                  value={form.installmentCount}
-                  onChange={(event) =>
-                    updateField('installmentCount', Number(event.target.value))
-                  }
-                  className="field-surface w-full"
-                  disabled={!form.birthDate}
-                >
-                  {Array.from(
-                    {
-                      length:
-                        form.paymentMethod === 'Boleto'
-                          ? Math.min(
-                              getMaxInstallmentsForMethod(form.paymentMethod),
-                              monthsAvailableForBoleto,
-                            )
-                          : getMaxInstallmentsForMethod(form.paymentMethod),
-                    },
-                    (_, index) => index + 1,
-                  ).map((count) => {
-                    const label = (() => {
-                      if (!form.birthDate) {
-                        return `${count}x`
-                      }
-
-                      try {
-                        const optionPricing = computeRegistrationPricing({
-                          birthDateIso: form.birthDate,
-                          paymentMethod: form.paymentMethod,
-                          installmentCount: count,
-                          baseFee: retreatFee,
-                        })
-
-                        if (form.paymentMethod === 'CartaoCredito') {
-                          return `${count}x de ${formatCurrency(optionPricing.installmentAmounts[0])} (total ${formatCurrency(optionPricing.totalAmount)})`
-                        }
-
-                        return `${count}x de ${formatCurrency(optionPricing.installmentAmounts[0])}`
-                      } catch {
-                        return `${count}x`
-                      }
-                    })()
-
-                    return (
-                      <option key={count} value={count}>
-                        {label}
-                      </option>
-                    )
-                  })}
-                </select>
+                <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.72fr)]">
+                  <PrettySelect
+                    value={form.installmentCount}
+                    onChange={(value) => updateField('installmentCount', value)}
+                    options={installmentOptions}
+                    disabled={!form.birthDate}
+                  />
+                  <div className="rounded-[20px] border border-white/10 bg-white/[0.02] px-4 py-3 text-sm leading-6 text-slate-400">
+                    {form.paymentMethod === 'CartaoCredito'
+                      ? 'No cartão, a tela de sucesso mostra apenas as parcelas com taxas inclusas.'
+                      : `No boleto, a última parcela sempre vence em ${formatIsoDatePtBr(PAYMENT_DEADLINE_ISO)}.`}
+                  </div>
+                </div>
               </label>
             ) : null}
           </section>

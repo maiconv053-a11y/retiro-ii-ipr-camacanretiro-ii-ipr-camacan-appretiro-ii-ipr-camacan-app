@@ -2,6 +2,8 @@ import type { PaymentMethod } from '../types/retreat'
 
 export const EVENT_DATE_ISO = '2027-02-05'
 export const EVENT_DATE = new Date(`${EVENT_DATE_ISO}T00:00:00Z`)
+export const PAYMENT_DEADLINE_ISO = '2027-02-04'
+export const PAYMENT_DEADLINE = new Date(`${PAYMENT_DEADLINE_ISO}T00:00:00Z`)
 export const BASE_REGISTRATION_FEE = 750
 
 export type AgePricingTier = 'Free' | 'Half' | 'Full'
@@ -92,27 +94,71 @@ export function splitAmountIntoInstallments(totalAmount: number, installmentCoun
 
 export function getMonthsAvailableUntilEvent(now: Date) {
   const startMonth = now.getUTCFullYear() * 12 + now.getUTCMonth()
-  const lastAllowedMonth =
-    EVENT_DATE.getUTCFullYear() * 12 + (EVENT_DATE.getUTCMonth() - 1)
+  const deadlineMonth = PAYMENT_DEADLINE.getUTCFullYear() * 12 + PAYMENT_DEADLINE.getUTCMonth()
+  return Math.max(1, deadlineMonth - startMonth)
+}
 
-  return Math.max(1, lastAllowedMonth - startMonth + 1)
+function getDaysInUtcMonth(year: number, month: number) {
+  return new Date(Date.UTC(year, month + 1, 0)).getUTCDate()
 }
 
 export function addUtcMonths(date: Date, months: number) {
-  const next = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
-  next.setUTCMonth(next.getUTCMonth() + months)
-  return next
+  const totalMonths = date.getUTCFullYear() * 12 + date.getUTCMonth() + months
+  const nextYear = Math.floor(totalMonths / 12)
+  const nextMonth = ((totalMonths % 12) + 12) % 12
+  const nextDay = Math.min(date.getUTCDate(), getDaysInUtcMonth(nextYear, nextMonth))
+
+  return new Date(Date.UTC(nextYear, nextMonth, nextDay))
 }
 
 export function toDateIso(date: Date) {
   return date.toISOString().slice(0, 10)
 }
 
-export function computeDueDates(now: Date, installmentCount: number) {
-  const monthsAvailable = getMonthsAvailableUntilEvent(now)
-  const safeCount = Math.max(1, Math.min(installmentCount, monthsAvailable))
+function buildDueDateSlots(now: Date) {
+  const totalSlots = getMonthsAvailableUntilEvent(now)
 
-  return Array.from({ length: safeCount }, (_, index) => toDateIso(addUtcMonths(now, index)))
+  if (totalSlots <= 1) {
+    return [PAYMENT_DEADLINE_ISO]
+  }
+
+  const firstDueDate = addUtcMonths(now, 1)
+
+  return Array.from({ length: totalSlots }, (_, index) => {
+    if (index === totalSlots - 1) {
+      return PAYMENT_DEADLINE_ISO
+    }
+
+    return toDateIso(addUtcMonths(firstDueDate, index))
+  })
+}
+
+function distributeInstallmentIndexes(totalSlots: number, installmentCount: number) {
+  if (installmentCount <= 1 || totalSlots <= 1) {
+    return [totalSlots - 1]
+  }
+
+  const lastIndex = totalSlots - 1
+  const indexes: number[] = []
+
+  for (let index = 0; index < installmentCount; index += 1) {
+    const rawIndex = Math.round((index * lastIndex) / (installmentCount - 1))
+    const minAllowed = index === 0 ? 0 : indexes[index - 1] + 1
+    const maxAllowed = lastIndex - (installmentCount - 1 - index)
+    indexes.push(Math.min(maxAllowed, Math.max(minAllowed, rawIndex)))
+  }
+
+  return indexes
+}
+
+export function computeDueDates(now: Date, installmentCount: number) {
+  const totalSlots = getMonthsAvailableUntilEvent(now)
+  const safeCount = Math.max(1, Math.min(installmentCount, totalSlots))
+  const dueDateSlots = buildDueDateSlots(now)
+
+  return distributeInstallmentIndexes(dueDateSlots.length, safeCount).map(
+    (index) => dueDateSlots[index],
+  )
 }
 
 export type RegistrationPricingResult = {
@@ -132,13 +178,14 @@ export function computeRegistrationPricing(params: {
   birthDateIso: string
   paymentMethod: PaymentMethod
   installmentCount: number
+  baseFee?: number
   now?: Date
 }) {
   const now = params.now ?? new Date()
   const ageAtEvent = calculateAgeOnDate(params.birthDateIso, EVENT_DATE)
   const discountMultiplier = getAgeDiscountMultiplier(ageAtEvent)
   const discountTier = getAgePricingTier(ageAtEvent)
-  const baseFee = BASE_REGISTRATION_FEE
+  const baseFee = params.baseFee ?? BASE_REGISTRATION_FEE
 
   const paymentMethod = params.paymentMethod
 
@@ -152,7 +199,7 @@ export function computeRegistrationPricing(params: {
       installmentCount: 1,
       totalAmount: 0,
       installmentAmounts: [0],
-      dueDates: paymentMethod === 'CartaoCredito' ? null : [toDateIso(now)],
+      dueDates: paymentMethod === 'CartaoCredito' ? null : [PAYMENT_DEADLINE_ISO],
       cardInstallmentLabel: paymentMethod === 'CartaoCredito' ? '1x de R$ 0,00' : null,
     } satisfies RegistrationPricingResult
   }

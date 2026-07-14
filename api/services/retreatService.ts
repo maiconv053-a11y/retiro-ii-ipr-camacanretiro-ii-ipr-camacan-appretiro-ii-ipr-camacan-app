@@ -646,10 +646,12 @@ export async function createParticipantRecord(input: ParticipantInput) {
 
 export async function createPublicRegistrationRecord(input: PublicRegistrationInput) {
   const supabase = assertSupabase()
+  const retreatFee = await loadRetreatFee()
   const pricing = computeRegistrationPricing({
     birthDateIso: input.birthDate,
     paymentMethod: input.paymentMethod,
     installmentCount: input.installmentCount,
+    baseFee: retreatFee,
   })
   const { data, error } = await supabase
     .from('participantes')
@@ -847,6 +849,26 @@ export async function createLogisticsTaskRecord(task: LogisticsTaskInput) {
     status: fromTaskStatus(task.status),
     observacoes: task.notes,
   })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function updateLogisticsTaskRecord(taskId: string, task: LogisticsTaskInput) {
+  const supabase = assertSupabase()
+  const { error } = await supabase
+    .from('checklist_organizacao')
+    .update({
+      categoria: task.category === 'Compras' ? 'compras' : 'contratos',
+      tarefa: task.title,
+      responsavel: task.owner,
+      valor_estimado: task.estimatedCost,
+      valor_gasto: task.actualCost,
+      status: fromTaskStatus(task.status),
+      observacoes: task.notes,
+    })
+    .eq('id', taskId)
 
   if (error) {
     throw error

@@ -15,6 +15,7 @@ vi.mock('@/services/retreatApi', () => ({
   updateRetreatFee: vi.fn(),
   validateParticipantPayment: vi.fn(),
   createLogisticsTask: vi.fn(),
+  updateLogisticsTask: vi.fn(),
   updateLogisticsStatus: vi.fn(),
 }))
 
@@ -136,6 +137,13 @@ describe('retreatStore', () => {
     })
     mockedApi.validateParticipantPayment.mockResolvedValue(participantsFixture)
     mockedApi.createLogisticsTask.mockResolvedValue(logisticsFixture)
+    mockedApi.updateLogisticsTask.mockResolvedValue([
+      {
+        ...logisticsFixture[0],
+        title: 'Mercado Atualizado',
+        owner: 'Equipe Azul',
+      },
+    ])
     mockedApi.updateLogisticsStatus.mockResolvedValue(logisticsFixture)
   })
 
@@ -215,5 +223,26 @@ describe('retreatStore', () => {
     expect(mockedApi.updateRetreatFee).toHaveBeenCalledWith(450)
     expect(useRetreatStore.getState().settings.retreatFee).toBe(450)
     expect(useRetreatStore.getState().participants[1].financial.totalAmount).toBe(450)
+  })
+
+  it('edita uma tarefa de logística e sincroniza o checklist', async () => {
+    await useRetreatStore.getState().updateLogisticsTask('task-1', {
+      category: 'Compras',
+      title: 'Mercado Atualizado',
+      owner: 'Equipe Azul',
+      estimatedCost: 130,
+      actualCost: 95,
+      status: 'EmAndamento',
+      notes: 'Revisado',
+    })
+
+    expect(mockedApi.updateLogisticsTask).toHaveBeenCalledWith(
+      'task-1',
+      expect.objectContaining({
+        title: 'Mercado Atualizado',
+        owner: 'Equipe Azul',
+      }),
+    )
+    expect(useRetreatStore.getState().logisticsTasks[0].title).toBe('Mercado Atualizado')
   })
 })

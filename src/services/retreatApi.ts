@@ -121,6 +121,13 @@ export function createLogisticsTask(task: LogisticsTaskInput) {
   })
 }
 
+export function updateLogisticsTask(taskId: string, task: LogisticsTaskInput) {
+  return request<LogisticsTask[]>(`/api/logistics/${taskId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(task),
+  })
+}
+
 export function updateLogisticsStatus(taskId: string, status: TaskStatus) {
   return request<LogisticsTask[]>(`/api/logistics/${taskId}/status`, {
     method: 'PATCH',

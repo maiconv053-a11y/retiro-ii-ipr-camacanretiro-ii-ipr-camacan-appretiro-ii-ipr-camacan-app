@@ -1,5 +1,5 @@
-import { useMemo, useState, type FormEvent } from 'react'
-import { ClipboardPlus, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { ClipboardPlus, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import type { LogisticsTask, LogisticsTaskInput, TaskStatus } from '@shared/types/retreat'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { formatCurrency } from '@/utils/format'
@@ -7,8 +7,11 @@ import { formatCurrency } from '@/utils/format'
 interface LogisticsBoardProps {
   tasks: LogisticsTask[]
   onAddTask: (task: LogisticsTaskInput) => Promise<void> | void
+  onEditTask: (task: LogisticsTask) => void
   onStatusChange: (taskId: string, status: TaskStatus) => Promise<void> | void
   onDeleteTask: (taskId: string, taskTitle: string) => Promise<void> | void
+  editingTask?: LogisticsTaskInput | null
+  onCancelEdit?: () => void
   isSubmitting?: boolean
 }
 
@@ -44,11 +47,16 @@ function formatTaskStatusLabel(status: TaskStatus) {
 export function LogisticsBoard({
   tasks,
   onAddTask,
+  onEditTask,
   onStatusChange,
   onDeleteTask,
+  editingTask = null,
+  onCancelEdit,
   isSubmitting = false,
 }: LogisticsBoardProps) {
   const [form, setForm] = useState<LogisticsTaskInput>(initialTask)
+
+  const mode = editingTask ? 'edit' : 'create'
 
   const groupedTasks = useMemo(
     () => ({
@@ -57,6 +65,10 @@ export function LogisticsBoard({
     }),
     [tasks],
   )
+
+  useEffect(() => {
+    setForm(editingTask ?? initialTask)
+  }, [editingTask])
 
   function updateField<Key extends keyof LogisticsTaskInput>(
     field: Key,
@@ -86,7 +98,9 @@ export function LogisticsBoard({
       return
     }
 
-    setForm(initialTask)
+    if (!editingTask) {
+      setForm(initialTask)
+    }
   }
 
   return (
@@ -100,17 +114,37 @@ export function LogisticsBoard({
             <p className="font-title text-[10px] uppercase tracking-[0.24em] text-emerald-200/60">
               Controle operacional
             </p>
-            <h2 className="mt-2 font-title text-xl text-white">Nova tarefa</h2>
+            <h2 className="mt-2 font-title text-xl text-white">
+              {mode === 'edit' ? 'Editar tarefa' : 'Nova tarefa'}
+            </h2>
           </div>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            aria-label="Adicionar tarefa"
-            title="Adicionar tarefa"
-            className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-3 text-emerald-100 transition hover:border-emerald-300/30 hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <ClipboardPlus className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            {mode === 'edit' && onCancelEdit ? (
+              <button
+                type="button"
+                onClick={onCancelEdit}
+                disabled={isSubmitting}
+                aria-label="Cancelar edição"
+                title="Cancelar edição"
+                className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 text-slate-300 transition hover:border-white/16 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            ) : null}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              aria-label={mode === 'edit' ? 'Salvar tarefa' : 'Adicionar tarefa'}
+              title={mode === 'edit' ? 'Salvar tarefa' : 'Adicionar tarefa'}
+              className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-3 text-emerald-100 transition hover:border-emerald-300/30 hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {mode === 'edit' ? (
+                <Pencil className="h-4 w-4" />
+              ) : (
+                <ClipboardPlus className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="grid gap-4">
@@ -186,7 +220,11 @@ export function LogisticsBoard({
             disabled={isSubmitting}
             className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-5 py-3 text-sm font-medium text-emerald-100 transition hover:border-emerald-300/30 hover:bg-emerald-300/15"
           >
-            {isSubmitting ? 'Salvando...' : 'Adicionar ao checklist'}
+            {isSubmitting
+              ? 'Salvando...'
+              : mode === 'edit'
+                ? 'Salvar alterações'
+                : 'Adicionar ao checklist'}
           </button>
         </div>
       </form>
@@ -230,7 +268,7 @@ export function LogisticsBoard({
               {groupedTasks[category].map((task) => (
                 <article
                   key={task.id}
-                className="rounded-[20px] border border-emerald-100/10 bg-[#0b1713]/82 p-4"
+                  className="rounded-[20px] border border-emerald-100/10 bg-[#0b1713]/82 p-4"
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
@@ -246,6 +284,15 @@ export function LogisticsBoard({
                         label={formatTaskStatusLabel(task.status)}
                         tone={statusTone[task.status]}
                       />
+                      <button
+                        type="button"
+                        onClick={() => onEditTask(task)}
+                        disabled={isSubmitting}
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-slate-200 transition hover:border-emerald-300/25 hover:bg-emerald-300/10 hover:text-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        Editar
+                      </button>
                       <select
                         value={task.status}
                         onChange={(event) =>
