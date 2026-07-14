@@ -14,6 +14,19 @@ interface BoletoPdfInput {
 
 const PIX_KEY = '(73) 982313389'
 
+const PAGE_COLORS = {
+  background: [248, 247, 244] as const,
+  cardBorder: [120, 131, 126] as const,
+  softBorder: [207, 212, 209] as const,
+  title: [5, 40, 31] as const,
+  text: [32, 37, 35] as const,
+  muted: [83, 90, 87] as const,
+  accent: [7, 56, 42] as const,
+  accentSoft: [230, 239, 235] as const,
+  gold: [212, 181, 96] as const,
+  white: [245, 247, 242] as const,
+}
+
 function drawRoundedLabel(
   pdf: jsPDF,
   text: string,
@@ -22,32 +35,101 @@ function drawRoundedLabel(
   width: number,
   height: number,
 ) {
-  pdf.setFillColor(7, 56, 42)
+  pdf.setFillColor(...PAGE_COLORS.accent)
   pdf.roundedRect(x, y, width, height, 2.5, 2.5, 'F')
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(9)
-  pdf.setTextColor(245, 247, 242)
+  pdf.setTextColor(...PAGE_COLORS.white)
   pdf.text(text, x + width / 2, y + height / 2 + 1.2, { align: 'center' })
 }
 
-function drawLineField(
+function drawCard(
+  pdf: jsPDF,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  pdf.setDrawColor(...PAGE_COLORS.cardBorder)
+  pdf.setFillColor(255, 255, 255)
+  pdf.setLineWidth(0.35)
+  pdf.roundedRect(x, y, width, height, 3.5, 3.5, 'FD')
+}
+
+function drawParticipantRow(
   pdf: jsPDF,
   label: string,
   value: string,
   x: number,
   y: number,
   width: number,
+  height: number,
+  labelWidth = 25,
 ) {
+  const safeValue = value?.trim() || '-'
+  const valueLines = pdf
+    .splitTextToSize(safeValue, Math.max(width - labelWidth - 10, 12))
+    .slice(0, 2)
+
+  pdf.setDrawColor(...PAGE_COLORS.softBorder)
+  pdf.setFillColor(255, 255, 255)
+  pdf.roundedRect(x, y, width, height, 2.5, 2.5, 'FD')
+
+  pdf.setFillColor(...PAGE_COLORS.accentSoft)
+  pdf.roundedRect(x + 2, y + 2, labelWidth, height - 4, 1.8, 1.8, 'F')
+  pdf.setDrawColor(...PAGE_COLORS.softBorder)
+  pdf.line(x + labelWidth + 4, y + 2.5, x + labelWidth + 4, y + height - 2.5)
+
   pdf.setFont('helvetica', 'bold')
-  pdf.setFontSize(8.5)
-  pdf.setTextColor(48, 55, 52)
-  pdf.text(label, x, y)
-  pdf.setDrawColor(151, 156, 153)
-  pdf.line(x + 26, y + 0.5, x + width, y + 0.5)
+  pdf.setFontSize(7.2)
+  pdf.setTextColor(...PAGE_COLORS.muted)
+  pdf.text(label, x + 2 + labelWidth / 2, y + height / 2 + 0.7, {
+    align: 'center',
+  })
+
   pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(9.5)
-  pdf.setTextColor(32, 37, 35)
-  pdf.text(value || '-', x + 28, y - 1.2)
+  pdf.setFontSize(valueLines.length > 1 ? 8 : 9)
+  pdf.setTextColor(...PAGE_COLORS.text)
+  pdf.text(valueLines, x + labelWidth + 7, y + (valueLines.length > 1 ? 5.4 : height / 2 + 0.7))
+}
+
+function drawMetricCard(
+  pdf: jsPDF,
+  label: string,
+  value: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  drawCard(pdf, x, y, width, height)
+
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(7.4)
+  pdf.setTextColor(...PAGE_COLORS.muted)
+  pdf.text(label, x + width / 2, y + 7, { align: 'center' })
+
+  const lines = pdf.splitTextToSize(value, Math.max(width - 10, 10)).slice(0, 2)
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(lines.length > 1 ? 9 : 10.5)
+  pdf.setTextColor(...PAGE_COLORS.text)
+  pdf.text(lines, x + width / 2, y + 15, { align: 'center' })
+}
+
+function drawCenteredTextBlock(
+  pdf: jsPDF,
+  text: string,
+  x: number,
+  y: number,
+  width: number,
+  fontSize: number,
+  color: readonly [number, number, number],
+) {
+  const lines = pdf.splitTextToSize(text, width)
+  pdf.setFont('helvetica', 'normal')
+  pdf.setFontSize(fontSize)
+  pdf.setTextColor(...color)
+  pdf.text(lines, x + width / 2, y, { align: 'center' })
 }
 
 function formatDueDate(date?: string) {
@@ -123,134 +205,228 @@ export async function downloadBoletoBookletPdf({
       pdf.addPage()
     }
 
-    pdf.setFillColor(248, 247, 244)
+    pdf.setFillColor(...PAGE_COLORS.background)
     pdf.rect(0, 0, pageWidth, pageHeight, 'F')
 
-    const leftX = margin
-    const leftY = 10
-    const leftW = 82
-    const logoBoxH = 110
-    const rightX = leftX + leftW + 6
-    const rightW = pageWidth - rightX - margin
+    const contentX = margin
+    const contentY = 12
+    const contentW = pageWidth - margin * 2
+    const topRowH = 82
+    const gap = 6
+    const logoW = 60
+    const rightW = contentW - logoW - gap
+    const logoX = contentX
+    const headerX = logoX + logoW + gap
+    const participantCardY = contentY + 18
+    const participantCardH = topRowH - 18
+    const participantInnerX = headerX + 5
+    const participantInnerW = rightW - 10
+    const halfGap = 4
+    const halfW = (participantInnerW - halfGap) / 2
+    const nameRowH = 15
+    const infoRowH = 11
+    const summaryY = contentY + topRowH + 6
+    const summaryH = 23
+    const summaryGap = 4
+    const summaryW = (contentW - summaryGap * 2) / 3
+    const pixY = summaryY + summaryH + 8
+    const pixH = 66
+    const instructionsX = contentX + 7
+    const instructionsW = 52
+    const qrBoxX = instructionsX + instructionsW + 4
+    const qrBoxY = pixY + 13
+    const qrBoxSize = 36
+    const separatorX = qrBoxX + qrBoxSize + 7
+    const keyAreaX = separatorX + 7
+    const keyAreaW = contentX + contentW - keyAreaX - 7
+    const footerY = pixY + pixH + 8
+    const footerH = 18
+
+    drawCard(pdf, logoX, contentY, logoW, topRowH)
 
     if (logoDataUrl) {
-      pdf.addImage(logoDataUrl, 'PNG', leftX - 1, leftY, leftW + 6, logoBoxH)
+      const logoRenderWidth = logoW - 14
+      const logoRenderHeight = 50
+      const logoRenderX = logoX + (logoW - logoRenderWidth) / 2
+      const logoRenderY = contentY + (topRowH - logoRenderHeight) / 2
+
+      pdf.addImage(logoDataUrl, 'PNG', logoRenderX, logoRenderY, logoRenderWidth, logoRenderHeight)
     }
 
-    pdf.setDrawColor(212, 181, 96)
+    pdf.setDrawColor(...PAGE_COLORS.gold)
     pdf.setLineWidth(0.4)
-    pdf.line(rightX + 2, 18, rightX + 22, 18)
-    pdf.line(pageWidth - margin - 22, 18, pageWidth - margin - 2, 18)
-    pdf.setFillColor(212, 181, 96)
-    pdf.circle(rightX + 25, 18, 0.8, 'F')
-    pdf.circle(pageWidth - margin - 25, 18, 0.8, 'F')
+    pdf.line(headerX + 2, contentY + 7, headerX + 24, contentY + 7)
+    pdf.line(headerX + rightW - 24, contentY + 7, headerX + rightW - 2, contentY + 7)
+    pdf.setFillColor(...PAGE_COLORS.gold)
+    pdf.circle(headerX + 27, contentY + 7, 0.8, 'F')
+    pdf.circle(headerX + rightW - 27, contentY + 7, 0.8, 'F')
 
     pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(27)
-    pdf.setTextColor(5, 40, 31)
-    pdf.text('BOLETO', rightX + rightW / 2, 22, { align: 'center' })
+    pdf.setFontSize(26)
+    pdf.setTextColor(...PAGE_COLORS.title)
+    pdf.text('BOLETO', headerX + rightW / 2, contentY + 11, { align: 'center' })
 
-    pdf.setDrawColor(120, 131, 126)
-    pdf.setLineWidth(0.35)
-    pdf.roundedRect(rightX, 26, rightW, 68, 3.5, 3.5)
-    drawRoundedLabel(pdf, 'DADOS DO PARTICIPANTE', rightX + 28, 26, 52, 10)
+    drawCard(pdf, headerX, participantCardY, rightW, participantCardH)
+    drawRoundedLabel(pdf, 'DADOS DO PARTICIPANTE', headerX + 22, participantCardY, 62, 9)
 
-    drawLineField(pdf, 'NOME COMPLETO:', participantName, rightX + 4, 43, rightW - 8)
-    drawLineField(pdf, 'TELEFONE:', participantPhone || '-', rightX + 4, 57, rightW - 8)
-    drawLineField(pdf, 'E-MAIL:', participantEmail || '-', rightX + 4, 71, rightW - 8)
-    drawLineField(
+    drawParticipantRow(
       pdf,
-      'IGREJA / CIDADE:',
-      [participantChurch, participantCity].filter(Boolean).join(' - ') || '-',
-      rightX + 4,
-      85,
-      rightW - 8,
+      'NOME',
+      participantName,
+      participantInnerX,
+      participantCardY + 12,
+      participantInnerW,
+      nameRowH,
+      22,
+    )
+    drawParticipantRow(
+      pdf,
+      'TELEFONE',
+      participantPhone || '-',
+      participantInnerX,
+      participantCardY + 31,
+      halfW,
+      infoRowH,
+      24,
+    )
+    drawParticipantRow(
+      pdf,
+      'E-MAIL',
+      participantEmail || '-',
+      participantInnerX + halfW + halfGap,
+      participantCardY + 31,
+      halfW,
+      infoRowH,
+      20,
+    )
+    drawParticipantRow(
+      pdf,
+      'IGREJA',
+      participantChurch || '-',
+      participantInnerX,
+      participantCardY + 46,
+      halfW,
+      infoRowH,
+      20,
+    )
+    drawParticipantRow(
+      pdf,
+      'CIDADE',
+      participantCity || '-',
+      participantInnerX + halfW + halfGap,
+      participantCardY + 46,
+      halfW,
+      infoRowH,
+      20,
     )
 
-    pdf.setDrawColor(151, 156, 153)
-    pdf.setLineWidth(0.25)
-    pdf.line(rightX + 4, 100, rightX + rightW - 4, 100)
-    pdf.line(rightX + rightW / 3, 104, rightX + rightW / 3, 126)
-    pdf.line(rightX + (rightW / 3) * 2, 104, rightX + (rightW / 3) * 2, 126)
+    drawMetricCard(
+      pdf,
+      'DATA DE VENCIMENTO',
+      formatDueDate(installment.dueDate),
+      contentX,
+      summaryY,
+      summaryW,
+      summaryH,
+    )
+    drawMetricCard(
+      pdf,
+      'NUMERO DE PARCELAS',
+      `${index + 1} de ${installments.length}`,
+      contentX + summaryW + summaryGap,
+      summaryY,
+      summaryW,
+      summaryH,
+    )
+    drawMetricCard(
+      pdf,
+      'FORMA DE PAGAMENTO',
+      'BOLETO VIA PIX',
+      contentX + (summaryW + summaryGap) * 2,
+      summaryY,
+      summaryW,
+      summaryH,
+    )
+
+    drawCard(pdf, contentX, pixY, contentW, pixH)
+    drawRoundedLabel(pdf, 'PAGAMENTO VIA PIX', contentX + 6, pixY, 47, 9)
+
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(11)
+    pdf.setTextColor(...PAGE_COLORS.title)
+    pdf.text(`Valor: ${formatCurrency(installment.amount)}`, instructionsX, pixY + 18)
+
+    drawCenteredTextBlock(
+      pdf,
+      'Escaneie o QR Code ao lado ou utilize a chave PIX informada.',
+      instructionsX,
+      pixY + 28,
+      instructionsW,
+      9,
+      PAGE_COLORS.text,
+    )
 
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(8)
-    pdf.setTextColor(48, 55, 52)
-    pdf.text('DATA DE VENCIMENTO', rightX + 10, 110)
-    pdf.text('NUMERO DE PARCELAS', rightX + rightW / 3 + 10, 110)
-    pdf.text('FORMA DE PAGAMENTO', rightX + (rightW / 3) * 2 + 10, 110)
-
-    pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(11)
-    pdf.setTextColor(19, 28, 24)
-    pdf.text(formatDueDate(installment.dueDate), rightX + 10, 121)
-    pdf.text(`${index + 1} de ${installments.length}`, rightX + rightW / 3 + 10, 121)
-    pdf.text('BOLETO (VIA PIX)', rightX + (rightW / 3) * 2 + 10, 121)
-
-    const pixBoxY = 108
-    const pixBoxH = 48
-    pdf.setDrawColor(120, 131, 126)
-    pdf.setLineWidth(0.35)
-    pdf.roundedRect(margin, pixBoxY, pageWidth - margin * 2, pixBoxH, 3.5, 3.5)
-    drawRoundedLabel(pdf, 'PAGAMENTO VIA PIX', margin + 4, pixBoxY, 45, 9)
-
+    pdf.setTextColor(...PAGE_COLORS.muted)
+    pdf.text('COMPROVANTE', instructionsX + instructionsW / 2, pixY + 48, { align: 'center' })
     pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(10)
-    pdf.setTextColor(38, 46, 43)
-    pdf.text('Escaneie o QR Code ao lado para realizar', margin + 8, pixBoxY + 23)
-    pdf.text('o pagamento desta parcela.', margin + 8, pixBoxY + 29)
-    pdf.text(`Valor: ${formatCurrency(installment.amount)}`, margin + 8, pixBoxY + 37)
+    pdf.setFontSize(8.6)
+    pdf.text('Envie apos o pagamento.', instructionsX + instructionsW / 2, pixY + 54, {
+      align: 'center',
+    })
 
-    const qrX = margin + 56
-    const qrY = pixBoxY + 6
-    pdf.setDrawColor(120, 131, 126)
+    pdf.setDrawColor(...PAGE_COLORS.cardBorder)
     pdf.setLineDashPattern([1.4, 1.4], 0)
-    pdf.roundedRect(qrX, qrY, 30, 30, 2.5, 2.5)
+    pdf.roundedRect(qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 2.5, 2.5)
     pdf.setLineDashPattern([], 0)
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(10)
-    pdf.setTextColor(38, 46, 43)
-    pdf.text('QR CODE', qrX + 15, qrY + 16, { align: 'center' })
-    pdf.text('AQUI', qrX + 15, qrY + 22, { align: 'center' })
+    pdf.setTextColor(...PAGE_COLORS.muted)
+    pdf.text('QR CODE', qrBoxX + qrBoxSize / 2, qrBoxY + 17, { align: 'center' })
+    pdf.text('AQUI', qrBoxX + qrBoxSize / 2, qrBoxY + 23, { align: 'center' })
 
-    const dividerX = margin + 98
-    pdf.setDrawColor(120, 131, 126)
-    pdf.line(dividerX, pixBoxY + 6, dividerX, pixBoxY + pixBoxH - 6)
-    pdf.setFillColor(7, 56, 42)
-    pdf.circle(dividerX, pixBoxY + pixBoxH / 2, 4.5, 'F')
+    pdf.setDrawColor(...PAGE_COLORS.softBorder)
+    pdf.line(separatorX, pixY + 11, separatorX, pixY + pixH - 11)
+    pdf.setFillColor(...PAGE_COLORS.accent)
+    pdf.circle(separatorX, pixY + pixH / 2, 4.8, 'F')
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(10)
-    pdf.setTextColor(245, 247, 242)
-    pdf.text('OU', dividerX, pixBoxY + pixBoxH / 2 + 1.2, { align: 'center' })
+    pdf.setTextColor(...PAGE_COLORS.white)
+    pdf.text('OU', separatorX, pixY + pixH / 2 + 1.2, { align: 'center' })
 
-    const keyX = dividerX + 10
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(12)
-    pdf.setTextColor(26, 35, 31)
-    pdf.text('CHAVE PIX', keyX + 18, pixBoxY + 13)
+    pdf.setTextColor(...PAGE_COLORS.title)
+    pdf.text('CHAVE PIX', keyAreaX, pixY + 18)
     pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(9.5)
-    pdf.setTextColor(48, 55, 52)
-    pdf.text('Utilize a chave abaixo para realizar o pagamento.', keyX + 18, pixBoxY + 20)
+    pdf.setFontSize(9)
+    pdf.setTextColor(...PAGE_COLORS.text)
+    pdf.text(
+      pdf.splitTextToSize('Utilize a chave abaixo para realizar o pagamento desta parcela.', keyAreaW),
+      keyAreaX,
+      pixY + 27,
+    )
 
-    pdf.setDrawColor(120, 131, 126)
-    pdf.roundedRect(keyX + 4, pixBoxY + 26, pageWidth - keyX - margin - 4, 14, 2.5, 2.5)
+    pdf.setDrawColor(...PAGE_COLORS.cardBorder)
+    pdf.setFillColor(...PAGE_COLORS.accentSoft)
+    pdf.roundedRect(keyAreaX, pixY + 35, keyAreaW, 16, 2.5, 2.5, 'FD')
     pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(11)
-    pdf.setTextColor(19, 28, 24)
-    pdf.text(PIX_KEY, keyX + 8, pixBoxY + 35)
+    pdf.setFontSize(12)
+    pdf.setTextColor(...PAGE_COLORS.text)
+    pdf.text(PIX_KEY, keyAreaX + keyAreaW / 2, pixY + 45.5, { align: 'center' })
 
     pdf.setFillColor(4, 44, 34)
-    pdf.roundedRect(margin, 160, pageWidth - margin * 2, 15, 2.5, 2.5, 'F')
+    pdf.roundedRect(margin, footerY, pageWidth - margin * 2, footerH, 2.5, 2.5, 'F')
     pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(10.5)
+    pdf.setFontSize(9.4)
     pdf.setTextColor(244, 250, 247)
     pdf.text(
       'Apos o pagamento, envie o comprovante para o mesmo numero que fez o PIX.',
       margin + 4,
-      169.5,
+      footerY + 10.8,
     )
-    pdf.text('Vivendo uma vida renovada!', pageWidth - margin - 4, 169.5, {
+    pdf.text('Vivendo uma vida renovada!', pageWidth - margin - 4, footerY + 10.8, {
       align: 'right',
     })
 
@@ -260,7 +436,7 @@ export async function downloadBoletoBookletPdf({
     pdf.text(
       `Parcela ${index + 1} • ${installment.label} • Status: ${installment.status}`,
       margin,
-      184,
+      footerY + footerH + 7,
     )
   })
 

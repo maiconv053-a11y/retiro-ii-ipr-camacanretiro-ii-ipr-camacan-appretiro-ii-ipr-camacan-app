@@ -3,6 +3,7 @@ import {
   normalizeInstallmentCount,
   requiresInstallments,
 } from '@shared/types/retreat'
+import { computeDueDates } from '@/utils/registrationPricing'
 import type {
   FinancialRecord,
   FinancialUpdate,
@@ -14,9 +15,11 @@ import type {
 export function createInstallments(
   totalAmount: number,
   installmentCount: number,
+  referenceDate: Date = new Date(),
 ): Installment[] {
   const safeCount = Math.max(1, installmentCount)
   const baseAmount = Number((totalAmount / safeCount).toFixed(2))
+  const dueDates = computeDueDates(referenceDate, safeCount)
 
   return Array.from({ length: safeCount }, (_, index) => ({
     id: `installment-${safeCount}-${index + 1}`,
@@ -26,7 +29,7 @@ export function createInstallments(
         ? Number((totalAmount - baseAmount * (safeCount - 1)).toFixed(2))
         : baseAmount,
     status: index === 0 ? ('Paga' as const) : ('Pendente' as const),
-    dueDate: new Date(Date.UTC(2026, 7 + index, 10)).toISOString().slice(0, 10),
+    dueDate: dueDates[index],
   }))
 }
 

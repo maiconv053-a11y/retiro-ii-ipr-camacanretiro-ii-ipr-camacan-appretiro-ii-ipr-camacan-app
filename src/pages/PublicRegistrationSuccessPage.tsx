@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import type { PublicRegistrationSuccessSummary } from '@shared/types/retreat'
+import { Download } from 'lucide-react'
+import type { Installment, PublicRegistrationSuccessSummary } from '@shared/types/retreat'
 import logoRetiro from '@/assets/logo-retiro.png'
+import { downloadBoletoBookletPdf } from '@/utils/boletoPdf'
 import { formatCurrency, formatIsoDatePtBr, formatPaymentMethodLabel } from '@/utils/format'
 
 type SuccessPayload = PublicRegistrationSuccessSummary & {
   fullName: string
+  participantPhone: string
+  participantEmail: string
+  participantChurch: string
+  participantCity: string
 }
 
 function readSummaryFromSessionStorage() {
@@ -51,12 +57,32 @@ export default function PublicRegistrationSuccessPage() {
       return []
     }
 
-    return payload.installmentAmounts.map((amount, index) => ({
-      index: index + 1,
-      amount,
-      dueDate: payload.dueDates ? payload.dueDates[index] ?? null : null,
-    }))
+    return payload.installmentAmounts.map(
+      (amount, index): Installment & { index: number } => ({
+        id: `public-success-installment-${index + 1}`,
+        index: index + 1,
+        label: `${index + 1}x`,
+        amount,
+        status: 'Pendente',
+        dueDate: payload.dueDates ? payload.dueDates[index] ?? undefined : undefined,
+      }),
+    )
   }, [payload])
+
+  async function handleDownloadBoleto() {
+    if (!payload || payload.paymentMethod !== 'Boleto') {
+      return
+    }
+
+    await downloadBoletoBookletPdf({
+      participantName: payload.fullName,
+      participantPhone: payload.participantPhone,
+      participantEmail: payload.participantEmail,
+      participantChurch: payload.participantChurch,
+      participantCity: payload.participantCity,
+      installments,
+    })
+  }
 
   if (!payload) {
     return null
@@ -149,7 +175,17 @@ export default function PublicRegistrationSuccessPage() {
             </div>
           )}
 
-          <div className="mt-8 flex justify-end">
+          <div className="mt-8 flex flex-col gap-3 md:flex-row md:justify-end">
+            {payload.paymentMethod === 'Boleto' ? (
+              <button
+                type="button"
+                onClick={() => void handleDownloadBoleto()}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200/25 bg-amber-200/10 px-5 py-3 text-sm font-medium text-amber-100 transition hover:border-amber-200/35 hover:bg-amber-200/15"
+              >
+                <Download className="h-4 w-4" />
+                Baixar boleto
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => navigate('/', { replace: true })}

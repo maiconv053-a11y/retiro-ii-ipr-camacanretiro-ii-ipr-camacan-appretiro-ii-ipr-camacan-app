@@ -222,6 +222,10 @@ export default function PublicRegistrationPage() {
       const payload = {
         ...response.summary,
         fullName: form.fullName.trim(),
+        participantPhone: form.phone.trim(),
+        participantEmail: form.email.trim(),
+        participantChurch: form.church.trim(),
+        participantCity: form.city.trim(),
       }
 
       sessionStorage.setItem('publicRegistrationSummary', JSON.stringify(payload))

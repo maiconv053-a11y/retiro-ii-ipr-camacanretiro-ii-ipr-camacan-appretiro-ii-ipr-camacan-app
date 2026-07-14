@@ -18,6 +18,7 @@ import {
 } from '../../shared/types/retreat.js'
 import {
   calculateAgeOnDate,
+  computeDueDates,
   computeRegistrationPricing,
   EVENT_DATE,
 } from '../../shared/utils/registrationPricing.js'
@@ -85,9 +86,14 @@ type RetreatSettingsRow = {
 const DEFAULT_RETREAT_FEE = 750
 const SETTINGS_ROW_ID = 'principal'
 
-function createInstallments(totalAmount: number, installmentCount: number): Installment[] {
+function createInstallments(
+  totalAmount: number,
+  installmentCount: number,
+  referenceDate: Date = new Date(),
+): Installment[] {
   const safeCount = Math.max(1, installmentCount)
   const baseAmount = Number((totalAmount / safeCount).toFixed(2))
+  const dueDates = computeDueDates(referenceDate, safeCount)
 
   return Array.from({ length: safeCount }, (_, index) => ({
     id: `installment-${safeCount}-${index + 1}`,
@@ -97,7 +103,7 @@ function createInstallments(totalAmount: number, installmentCount: number): Inst
         ? Number((totalAmount - baseAmount * (safeCount - 1)).toFixed(2))
         : baseAmount,
     status: 'Pendente',
-    dueDate: new Date(Date.UTC(2026, 7 + index, 10)).toISOString().slice(0, 10),
+    dueDate: dueDates[index],
   }))
 }
 
@@ -398,10 +404,12 @@ async function persistFinancialRecord(
     .select('status_validacao')
     .eq('participante_id', participantId)
     .maybeSingle()
-  const installments = syncInstallmentsAmountPaid(
-    createInstallments(update.totalAmount, installmentCount),
-    amountPaid,
-  )
+  const generatedInstallments = createInstallments(update.totalAmount, installmentCount)
+  const installmentsWithDueDates = generatedInstallments.map((installment, index) => ({
+    ...installment,
+    dueDate: update.installments[index]?.dueDate ?? installment.dueDate,
+  }))
+  const installments = syncInstallmentsAmountPaid(installmentsWithDueDates, amountPaid)
 
   const { data: financial, error: financialError } = await supabase
     .from('financeiro')
