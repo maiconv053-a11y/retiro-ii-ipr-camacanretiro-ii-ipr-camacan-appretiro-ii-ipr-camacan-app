@@ -5,6 +5,7 @@ import {
   createParticipantRecord,
   deleteParticipantRecord,
   listParticipants,
+  sendParticipantChargeEmailRecord,
   validateParticipantPaymentRecord,
   updateParticipantFinancialRecord,
   updateParticipantRecord,
@@ -99,6 +100,25 @@ router.patch('/:id/validate-payment', async (req: Request, res: Response) => {
       success: false,
       error:
         error instanceof Error ? error.message : 'Erro ao validar pagamento do participante',
+    })
+  }
+})
+
+router.post('/:id/send-charge-email', async (req: Request, res: Response) => {
+  try {
+    const installmentId =
+      typeof req.body?.installmentId === 'string' ? req.body.installmentId : undefined
+
+    const result = await sendParticipantChargeEmailRecord(req.params.id, installmentId)
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro ao enviar e-mail de cobrança',
     })
   }
 })

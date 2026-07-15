@@ -20,9 +20,14 @@ export default function ParticipantsPage() {
   const addParticipant = useRetreatStore((state) => state.addParticipant)
   const updateParticipant = useRetreatStore((state) => state.updateParticipant)
   const deleteParticipant = useRetreatStore((state) => state.deleteParticipant)
+  const sendParticipantChargeEmail = useRetreatStore((state) => state.sendParticipantChargeEmail)
   const syncing = useRetreatStore((state) => state.syncing)
   const [query, setQuery] = useState('')
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null)
+  const [chargeEmailFeedback, setChargeEmailFeedback] = useState<{
+    tone: 'success' | 'error'
+    message: string
+  } | null>(null)
   const [statusFilter, setStatusFilter] = useState<'Todos' | RegistrationStatus>(
     'Todos',
   )
@@ -48,10 +53,32 @@ export default function ParticipantsPage() {
     if (editingParticipant) {
       await updateParticipant(editingParticipant.id, values)
       setEditingParticipant(null)
+      setChargeEmailFeedback(null)
       return
     }
 
     await addParticipant(values)
+  }
+
+  async function handleSendChargeEmail(participantId: string, installmentId?: string) {
+    const participant = participants.find((item) => item.id === participantId)
+
+    try {
+      const result = await sendParticipantChargeEmail(participantId, installmentId)
+      setChargeEmailFeedback({
+        tone: 'success',
+        message: `Cobrança da parcela ${result.installmentNumber} enviada para ${participant?.email || result.email}.`,
+      })
+    } catch (error) {
+      setChargeEmailFeedback({
+        tone: 'error',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível enviar o e-mail de cobrança.',
+      })
+      throw error
+    }
   }
 
   async function handleDeleteParticipant(participant: Participant) {
@@ -68,6 +95,16 @@ export default function ParticipantsPage() {
     if (editingParticipant?.id === participant.id) {
       setEditingParticipant(null)
     }
+  }
+
+  function handleEditParticipant(participant: Participant) {
+    setEditingParticipant(participant)
+    setChargeEmailFeedback(null)
+  }
+
+  function handleCancelEdit() {
+    setEditingParticipant(null)
+    setChargeEmailFeedback(null)
   }
 
   return (
@@ -87,10 +124,13 @@ export default function ParticipantsPage() {
           onSubmit={handleSubmit}
           defaultTotalAmount={retreatFee}
           mode={editingParticipant ? 'edit' : 'create'}
+          participantDetails={editingParticipant}
           initialValues={
             editingParticipant ? mapParticipantToInput(editingParticipant) : undefined
           }
-          onCancelEdit={() => setEditingParticipant(null)}
+          onCancelEdit={handleCancelEdit}
+          onSendChargeEmail={handleSendChargeEmail}
+          chargeEmailFeedback={chargeEmailFeedback}
           isSubmitting={syncing}
         />
         <ParticipantsTable
@@ -99,7 +139,7 @@ export default function ParticipantsPage() {
           statusFilter={statusFilter}
           onQueryChange={setQuery}
           onStatusFilterChange={setStatusFilter}
-          onEditParticipant={setEditingParticipant}
+          onEditParticipant={handleEditParticipant}
           onDeleteParticipant={handleDeleteParticipant}
           isSubmitting={syncing}
         />

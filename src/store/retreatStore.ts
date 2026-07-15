@@ -28,6 +28,15 @@ interface RetreatState {
     update: FinancialUpdate,
   ) => Promise<void>
   validateParticipantPayment: (participantId: string) => Promise<void>
+  sendParticipantChargeEmail: (
+    participantId: string,
+    installmentId?: string,
+  ) => Promise<{
+    sent: boolean
+    email: string
+    installmentId: string
+    installmentNumber: number
+  }>
   updateRetreatFee: (retreatFee: number) => Promise<void>
   addLogisticsTask: (task: LogisticsTaskInput) => Promise<void>
   updateLogisticsTask: (taskId: string, task: LogisticsTaskInput) => Promise<void>
@@ -159,6 +168,18 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
       const participants = await retreatApi.validateParticipantPayment(participantId)
 
       set({ participants, syncing: false })
+    } catch (error) {
+      set({ syncing: false, error: getErrorMessage(error) })
+      throw error
+    }
+  },
+  sendParticipantChargeEmail: async (participantId, installmentId) => {
+    set({ syncing: true, error: null })
+
+    try {
+      const result = await retreatApi.sendParticipantChargeEmail(participantId, installmentId)
+      set({ syncing: false })
+      return result
     } catch (error) {
       set({ syncing: false, error: getErrorMessage(error) })
       throw error

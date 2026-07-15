@@ -24,6 +24,7 @@ import {
 } from '../../shared/utils/registrationPricing.js'
 import { assertSupabase } from '../lib/supabase.js'
 import { sendPublicRegistrationConfirmationEmail } from '../../server/lib/registrationConfirmationEmail.js'
+import { sendParticipantManualChargeEmail } from '../../server/lib/manualChargeEmail.js'
 
 type ParticipantRow = {
   id: string
@@ -648,6 +649,7 @@ export async function getInstallmentBoletoData(installmentId: string) {
     installmentAmount: Number(row.valor_parcela),
     installmentStatus: row.status === 'paga' ? 'Paga' : 'Pendente',
     dueDate: row.vencimento,
+    dueDateIso: row.vencimento,
     paymentMethod: financial.forma_pagamento,
     totalInstallments: Math.max(1, Number(financial.num_parcelas || 1)),
     participantId: participant.id,
@@ -657,6 +659,87 @@ export async function getInstallmentBoletoData(installmentId: string) {
     participantChurch: participant.igreja,
     participantCity: participant.cidade,
   }
+}
+
+export async function sendParticipantChargeEmailRecord(
+  participantId: string,
+  installmentId?: string,
+) {
+  const supabase = assertSupabase()
+  const { data: financialData, error: financialError } = await supabase
+    .from('financeiro')
+    .select(
+      `
+        id,
+        forma_pagamento,
+        num_parcelas,
+        participante:participante_id (
+          id,
+          nome,
+          telefone,
+          email,
+          igreja,
+          cidade
+        )
+      `,
+    )
+    .eq('participante_id', participantId)
+    .maybeSingle()
+
+  if (financialError) {
+    throw financialError
+  }
+
+  if (!financialData) {
+    throw new Error('Registro financeiro do participante não encontrado.')
+  }
+
+  const financial = Array.isArray(financialData) ? financialData[0] ?? null : financialData
+  const participant = Array.isArray(financial?.participante)
+    ? financial.participante[0] ?? null
+    : financial?.participante ?? null
+
+  if (!financial || !participant) {
+    throw new Error('Dados do participante não encontrados.')
+  }
+
+  const { data: installmentsData, error: installmentsError } = await supabase
+    .from('financeiro_parcelas')
+    .select('id, numero_parcela, valor_parcela, status, vencimento')
+    .eq('financeiro_id', financial.id)
+    .order('numero_parcela', { ascending: true })
+
+  if (installmentsError) {
+    throw installmentsError
+  }
+
+  const installments = (installmentsData as FinancialInstallmentRow[] | null) ?? []
+  const selectedInstallment = installmentId
+    ? installments.find((item) => item.id === installmentId)
+    : installments.find((item) => item.status !== 'paga')
+
+  if (!selectedInstallment) {
+    throw new Error('Nenhuma parcela pendente encontrada para envio.')
+  }
+
+  if (selectedInstallment.status === 'paga') {
+    throw new Error('A parcela selecionada já está paga.')
+  }
+
+  return sendParticipantManualChargeEmail({
+    installmentId: selectedInstallment.id,
+    installmentNumber: selectedInstallment.numero_parcela,
+    installmentAmount: Number(selectedInstallment.valor_parcela),
+    installmentStatus: selectedInstallment.status === 'paga' ? 'Paga' : 'Pendente',
+    dueDateIso: selectedInstallment.vencimento,
+    paymentMethod: financial.forma_pagamento,
+    totalInstallments: Math.max(1, Number(financial.num_parcelas || 1)),
+    participantName: participant.nome,
+    participantEmail: participant.email ?? '',
+    participantPhone: participant.telefone,
+    participantChurch: participant.igreja,
+    participantCity: participant.cidade,
+  })
 }
 
 export async function updateRetreatFee(newRetreatFee: number) {

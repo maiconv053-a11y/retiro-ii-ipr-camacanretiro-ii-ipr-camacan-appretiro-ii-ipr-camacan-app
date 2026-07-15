@@ -104,6 +104,21 @@ export function validateParticipantPayment(participantId: string) {
   })
 }
 
+export function sendParticipantChargeEmail(
+  participantId: string,
+  installmentId?: string,
+) {
+  return request<{
+    sent: boolean
+    email: string
+    installmentId: string
+    installmentNumber: number
+  }>(`/api/participants/${participantId}/send-charge-email`, {
+    method: 'POST',
+    body: JSON.stringify({ installmentId }),
+  })
+}
+
 export function deleteParticipant(participantId: string) {
   return request<Participant[]>(`/api/participants/${participantId}`, {
     method: 'DELETE',

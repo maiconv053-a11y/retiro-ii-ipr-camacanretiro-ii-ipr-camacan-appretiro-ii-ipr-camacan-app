@@ -3,19 +3,26 @@ import { Pencil, Plus, RotateCcw } from 'lucide-react'
 import {
   getMaxInstallmentsForMethod,
   normalizeInstallmentCount,
+  Participant,
   requiresInstallments,
   ParticipantInput,
   PaymentMethod,
   RegistrationStatus,
 } from '@shared/types/retreat'
-import { formatPhone } from '@/utils/format'
+import { formatCurrency, formatIsoDatePtBr, formatPhone } from '@/utils/format'
 
 interface ParticipantFormProps {
   onSubmit: (participant: ParticipantInput) => Promise<void> | void
   initialValues?: ParticipantInput
+  participantDetails?: Participant | null
   defaultTotalAmount?: number
   mode?: 'create' | 'edit'
   onCancelEdit?: () => void
+  onSendChargeEmail?: (participantId: string, installmentId?: string) => Promise<void> | void
+  chargeEmailFeedback?: {
+    tone: 'success' | 'error'
+    message: string
+  } | null
   isSubmitting?: boolean
 }
 
@@ -58,16 +65,32 @@ const paymentOptions: Array<{ value: PaymentMethod; label: string }> = [
 export function ParticipantForm({
   onSubmit,
   initialValues,
+  participantDetails,
   defaultTotalAmount = 750,
   mode = 'create',
   onCancelEdit,
+  onSendChargeEmail,
+  chargeEmailFeedback,
   isSubmitting = false,
 }: ParticipantFormProps) {
   const [form, setForm] = useState<ParticipantInput>(() => createInitialState(defaultTotalAmount))
+  const [selectedChargeInstallmentId, setSelectedChargeInstallmentId] = useState('')
 
   useEffect(() => {
     setForm(initialValues ?? createInitialState(defaultTotalAmount))
   }, [defaultTotalAmount, initialValues])
+
+  const pendingInstallments = useMemo(
+    () =>
+      participantDetails?.financial.installments.filter(
+        (installment) => installment.status === 'Pendente',
+      ) ?? [],
+    [participantDetails],
+  )
+
+  useEffect(() => {
+    setSelectedChargeInstallmentId(pendingInstallments[0]?.id ?? '')
+  }, [participantDetails?.id, pendingInstallments])
 
   const isValid = useMemo(
     () =>
@@ -125,6 +148,18 @@ export function ParticipantForm({
         ? normalizeInstallmentCount(paymentMethod, form.installmentCount)
         : 1,
     )
+  }
+
+  async function handleSendChargeEmail() {
+    if (!participantDetails || !onSendChargeEmail) {
+      return
+    }
+
+    try {
+      await onSendChargeEmail(participantDetails.id, selectedChargeInstallmentId || undefined)
+    } catch {
+      return
+    }
   }
 
   const heading = mode === 'edit' ? 'Editar participante' : 'Cadastro de participante'
@@ -372,6 +407,87 @@ export function ParticipantForm({
           ) : null}
         </div>
       </div>
+
+      {mode === 'edit' && participantDetails ? (
+        <div className="mt-6 rounded-[22px] border border-[#b7d0bf]/40 bg-white/76 p-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
+                Cobrança manual
+              </span>
+              <p className="mt-1 text-sm text-[#4c6457]">
+                Dispare manualmente o e-mail de cobrança para a parcela pendente do participante.
+              </p>
+              <p className="mt-2 text-sm text-[#20352a]">
+                Destino: {participantDetails.email || 'Sem e-mail cadastrado'}
+              </p>
+            </div>
+            <div className="grid gap-3 md:min-w-[21rem]">
+              <label className="space-y-2">
+                <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
+                  Parcela pendente
+                </span>
+                <select
+                  value={selectedChargeInstallmentId}
+                  onChange={(event) => setSelectedChargeInstallmentId(event.target.value)}
+                  disabled={pendingInstallments.length === 0 || isSubmitting}
+                  className="field-surface w-full"
+                >
+                  {pendingInstallments.length === 0 ? (
+                    <option value="">Nenhuma parcela pendente</option>
+                  ) : (
+                    pendingInstallments.map((installment) => (
+                      <option key={installment.id} value={installment.id}>
+                        {installment.label} · {formatCurrency(installment.amount)} · vence{' '}
+                        {installment.dueDate
+                          ? formatIsoDatePtBr(installment.dueDate)
+                          : 'a definir'}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={() => void handleSendChargeEmail()}
+                disabled={
+                  isSubmitting ||
+                  !onSendChargeEmail ||
+                  !participantDetails.email?.trim() ||
+                  pendingInstallments.length === 0
+                }
+                className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-5 py-3 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {isSubmitting ? 'Enviando...' : 'Enviar e-mail de cobrança'}
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-2 text-sm">
+            {!participantDetails.email?.trim() ? (
+              <p className="rounded-2xl border border-rose-300/45 bg-rose-50 px-4 py-3 text-rose-700">
+                Cadastre um e-mail no participante para liberar o envio manual da cobrança.
+              </p>
+            ) : null}
+            {pendingInstallments.length === 0 ? (
+              <p className="rounded-2xl border border-[#b7d0bf]/45 bg-[#eef5ef] px-4 py-3 text-[#4c6457]">
+                Esse participante não possui parcela pendente no momento.
+              </p>
+            ) : null}
+            {chargeEmailFeedback ? (
+              <p
+                className={`rounded-2xl px-4 py-3 ${
+                  chargeEmailFeedback.tone === 'success'
+                    ? 'border border-[#89b39a]/45 bg-[#eef5ef] text-[#29513e]'
+                    : 'border border-rose-300/45 bg-rose-50 text-rose-700'
+                }`}
+              >
+                {chargeEmailFeedback.message}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-6 flex items-center justify-between gap-4 border-t border-[#c7dacf] pt-4">
         <p className="text-sm text-[#4c6457]">
