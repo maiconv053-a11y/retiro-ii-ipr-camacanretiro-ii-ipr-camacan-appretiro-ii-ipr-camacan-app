@@ -1,5 +1,4 @@
 import 'dotenv/config'
-import { readFile } from 'node:fs/promises'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
@@ -36,16 +35,9 @@ if (!participantName) {
 const PUBLIC_SITE_URL =
   process.env.PUBLIC_SITE_URL ||
   'https://retiro-ii-ipr-camacanretiro-ii-ipr.vercel.app'
-
-async function loadEmailLogoSrc() {
-  try {
-    const fileUrl = new URL('../src/assets/logo-retiro.png', import.meta.url)
-    const buffer = await readFile(fileUrl)
-    return `data:image/png;base64,${buffer.toString('base64')}`
-  } catch {
-    return null
-  }
-}
+const EMAIL_LOGO_URL =
+  process.env.EMAIL_LOGO_URL ||
+  'https://raw.githubusercontent.com/maiconv053-a11y/retiro-ii-ipr-camacanretiro-ii-ipr-camacan-appretiro-ii-ipr-camacan-app/main/public/logo-retiro.png'
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: {
@@ -103,61 +95,32 @@ function buildEmailText(context) {
   ].join('\n')
 }
 
-function buildEmailHtml(context, logoSrc) {
+function buildEmailHtml(context) {
   return `
-    <div style="margin:0; padding:32px 16px; background:#07110d;">
-      <div style="max-width:680px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; color:#e8f5ef;">
-        <div style="margin-bottom:16px; text-align:center;">
-          <span style="display:inline-block; padding:8px 14px; border:1px solid #1e3b31; border-radius:999px; background:#0d1b15; color:#8fd3b5; font-size:11px; letter-spacing:0.24em; text-transform:uppercase;">
-            Cobranca de parcela
-          </span>
+    <div style="margin:0;padding:24px 12px;background:#07110d;font-family:Arial,Helvetica,sans-serif;color:#e8f5ef;">
+      <div style="max-width:620px;margin:0 auto;background:#0d1713;border:1px solid #1f3b31;border-radius:20px;overflow:hidden;">
+        <div style="padding:24px 24px 12px;text-align:center;background:#10211a;">
+          <img src="${EMAIL_LOGO_URL}" alt="Logo do Retiro da II IPR de Camacan" width="88" style="display:block;width:88px;height:auto;margin:0 auto 14px;" />
+          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8fd3b5;">Cobranca de parcela</div>
+          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#ffffff;">Sua parcela esta em aberto</h1>
         </div>
-        <div style="background:linear-gradient(180deg,#11241c 0%,#0a1511 100%); border:1px solid #1f3b31; border-radius:28px; overflow:hidden; box-shadow:0 18px 60px rgba(0,0,0,0.35);">
-          <div style="padding:32px 28px 18px; background:radial-gradient(circle at top, rgba(71,166,122,0.18), transparent 55%); text-align:center;">
-            ${logoSrc ? `<img src="${logoSrc}" alt="Logo do Retiro da II IPR de Camacan" style="display:block; width:120px; max-width:100%; margin:0 auto 18px;" />` : ''}
-            <h1 style="margin:0; font-size:30px; line-height:1.2; color:#ffffff;">
-              Sua parcela esta em aberto
-            </h1>
-            <p style="margin:12px 0 0; font-size:15px; line-height:1.8; color:#cde6da;">
-              Olá, <strong>${context.participantName}</strong>! Este e-mail foi enviado para lembrar da sua cobrança no
-              <strong>Retiro da II IPR de Camacan</strong>.
-            </p>
+        <div style="padding:24px;">
+          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#d7e9e0;">
+            Olá, <strong>${context.participantName}</strong>! A sua parcela <strong>nº ${context.installmentNumber}</strong> vence em <strong>${context.dueDateLabel}</strong>.
+          </p>
+          <div style="margin:0 0 16px;padding:16px;border:1px solid #24483b;border-radius:16px;background:#0b1410;">
+            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#d7e9e0;"><strong>Valor:</strong> ${formatCurrency(context.installmentAmount)}</p>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#d7e9e0;"><strong>Forma de acerto:</strong> ${context.paymentMethodLabel}</p>
           </div>
-          <div style="padding:0 28px 28px;">
-            <div style="border:1px solid #24483b; border-radius:22px; background:#0c1713; padding:18px; margin-bottom:18px;">
-              <div style="font-size:13px; line-height:1.8; color:#d7e9e0;">
-                A sua parcela <strong>nº ${context.installmentNumber}</strong> vence em
-                <strong>${context.dueDateLabel}</strong>.
-              </div>
-            </div>
-            <div style="margin-bottom:18px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:separate; border-spacing:0 12px;">
-                <tr>
-                  <td style="width:50%; padding:16px 18px; border:1px solid #1f3b31; border-radius:18px; background:#0d1a15;">
-                    <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#7fbf9d; margin-bottom:8px;">Valor</div>
-                    <div style="font-size:24px; font-weight:700; color:#ffffff;">${formatCurrency(context.installmentAmount)}</div>
-                  </td>
-                  <td style="width:50%; padding:16px 18px; border:1px solid #1f3b31; border-radius:18px; background:#0d1a15;">
-                    <div style="font-size:11px; letter-spacing:0.18em; text-transform:uppercase; color:#7fbf9d; margin-bottom:8px;">Forma de acerto</div>
-                    <div style="font-size:24px; font-weight:700; color:#ffffff;">${context.paymentMethodLabel}</div>
-                  </td>
-                </tr>
-              </table>
-            </div>
-            <div style="padding:18px; border-left:3px solid #4db57d; border-radius:0 16px 16px 0; background:#0f1d17; color:#d5e8de; font-size:14px; line-height:1.8;">
-              Para garantir sua vaga e nos ajudar na organização do retiro, realize o pagamento com a diretoria
-              ou envie o comprovante em resposta a esta mensagem.
-            </div>
-            <div style="margin-top:20px; text-align:center;">
-              <a href="${PUBLIC_SITE_URL}" style="display:inline-block; padding:14px 24px; border-radius:999px; background:#39a86c; color:#07110d; font-size:14px; font-weight:700; text-decoration:none;">
-                Abrir sistema do retiro
-              </a>
-            </div>
+          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#d7e9e0;">
+            Para garantir sua vaga e nos ajudar na organização do retiro, realize o pagamento com a diretoria ou envie o comprovante em resposta a esta mensagem.
+          </p>
+          <div style="text-align:center;">
+            <a href="${PUBLIC_SITE_URL}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#39a86c;color:#07110d;font-size:14px;font-weight:700;text-decoration:none;">Abrir sistema do retiro</a>
           </div>
-          <div style="padding:18px 28px 28px; text-align:center; color:#8faf9f; font-size:12px; line-height:1.7;">
-            Retiro da II IPR de Camacan<br />
-            Deus abençoe!
-          </div>
+        </div>
+        <div style="padding:0 24px 22px;text-align:center;font-size:12px;line-height:1.6;color:#8faf9f;">
+          Retiro da II IPR de Camacan<br />Deus abençoe!
         </div>
       </div>
     </div>
@@ -224,13 +187,12 @@ async function loadInstallmentContext() {
 
 async function main() {
   const context = await loadInstallmentContext()
-  const logoSrc = await loadEmailLogoSrc()
   const response = await resend.emails.send({
     from: RESEND_FROM_EMAIL,
     to: [context.participantEmail],
     subject: buildEmailSubject(context),
     text: buildEmailText(context),
-    html: buildEmailHtml(context, logoSrc),
+    html: buildEmailHtml(context),
   })
 
   if (response.error) {
