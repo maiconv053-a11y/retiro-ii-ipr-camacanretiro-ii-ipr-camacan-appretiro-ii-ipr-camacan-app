@@ -22,8 +22,8 @@ import {
   computeRegistrationPricing,
   EVENT_DATE,
 } from '../../shared/utils/registrationPricing.js'
-import { sendPublicRegistrationConfirmationEmail } from '../lib/registrationConfirmationEmail.js'
 import { assertSupabase } from '../lib/supabase.js'
+import { sendPublicRegistrationConfirmationEmail } from '../../server/lib/registrationConfirmationEmail.js'
 
 type ParticipantRow = {
   id: string
