@@ -1,0 +1,38 @@
+name: Teste de E-mail (Resend)
+
+on:
+  workflow_dispatch:
+    inputs:
+      to:
+        description: Email de destino
+        required: true
+        type: string
+      name:
+        description: Nome do participante
+        required: true
+        type: string
+
+jobs:
+  send-test-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Send test email
+        run: node scripts/send-test-email-to-participant.mjs --to "${{ inputs.to }}" --name "${{ inputs.name }}"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
