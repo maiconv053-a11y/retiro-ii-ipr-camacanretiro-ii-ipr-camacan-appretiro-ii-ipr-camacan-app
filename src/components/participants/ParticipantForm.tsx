@@ -170,11 +170,11 @@ export function ParticipantForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-[24px] border border-[#aac4b3]/40 bg-[#eef5ef]/92 p-6"
+      className="rounded-[24px] border border-[#98c5aa]/50 bg-[#e3f2e7]/96 p-6"
     >
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="font-title text-[10px] uppercase tracking-[0.24em] text-[#6a957d]">
+          <p className="font-title text-[10px] uppercase tracking-[0.24em] text-[#4f8e6c]">
             {subheading}
           </p>
           <h2 className="mt-2 font-title text-xl text-[#20352a]">
@@ -189,7 +189,7 @@ export function ParticipantForm({
             disabled={isSubmitting}
               aria-label="Cancelar edição"
               title="Cancelar edição"
-            className="rounded-2xl border border-[#b7d0bf]/45 bg-white/78 p-3 text-slate-700 transition hover:border-[#89b39a]/55 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-2xl border border-[#a2c9b1]/55 bg-white/84 p-3 text-slate-700 transition hover:border-[#73a985]/60 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               <RotateCcw className="h-4 w-4" />
             </button>
@@ -199,7 +199,7 @@ export function ParticipantForm({
             disabled={!isValid || isSubmitting}
             aria-label={actionLabel}
             title={actionLabel}
-            className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] p-3 text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-[#73a985]/60 bg-[#cfe6d7] p-3 text-[#214a34] transition hover:border-[#5f9874]/70 hover:bg-[#c4dfcd] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {mode === 'edit' ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
           </button>
@@ -323,8 +323,8 @@ export function ParticipantForm({
                 onClick={() => updateField('registrationStatus', status)}
                 className={`rounded-2xl border px-4 py-3 text-xs uppercase tracking-[0.16em] transition ${
                   form.registrationStatus === status
-                    ? 'border-[#7ea790]/60 bg-[#d9e9de] text-[#1f382c]'
-                    : 'border-[#b7d0bf]/40 bg-white/72 text-[#42594d] hover:border-[#89b39a]/55 hover:text-[#20352a]'
+                    ? 'border-[#6fa883]/60 bg-[#cfe6d7] text-[#214a34]'
+                    : 'border-[#a8ccb6]/45 bg-white/78 text-[#42594d] hover:border-[#79b08f]/60 hover:text-[#20352a]'
                 }`}
               >
                 {registrationLabels[status]}
@@ -409,7 +409,7 @@ export function ParticipantForm({
       </div>
 
       {mode === 'edit' && participantDetails ? (
-        <div className="mt-6 rounded-[22px] border border-[#b7d0bf]/40 bg-white/76 p-4">
+        <div className="mt-6 rounded-[22px] border border-[#a8ccb6]/45 bg-white/82 p-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
@@ -456,7 +456,7 @@ export function ParticipantForm({
                   !participantDetails.email?.trim() ||
                   pendingInstallments.length === 0
                 }
-                className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-5 py-3 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-2xl border border-[#73a985]/60 bg-[#cfe6d7] px-5 py-3 text-sm font-medium text-[#214a34] transition hover:border-[#5f9874]/70 hover:bg-[#c4dfcd] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {isSubmitting ? 'Enviando...' : 'Enviar e-mail de cobrança'}
               </button>
@@ -478,7 +478,7 @@ export function ParticipantForm({
               <p
                 className={`rounded-2xl px-4 py-3 ${
                   chargeEmailFeedback.tone === 'success'
-                    ? 'border border-[#89b39a]/45 bg-[#eef5ef] text-[#29513e]'
+                    ? 'border border-[#79b08f]/55 bg-[#d9ede0] text-[#214a34]'
                     : 'border border-rose-300/45 bg-rose-50 text-rose-700'
                 }`}
               >
@@ -501,7 +501,7 @@ export function ParticipantForm({
               type="button"
               onClick={onCancelEdit}
               disabled={isSubmitting}
-              className="rounded-2xl border border-[#b7d0bf]/45 bg-white/78 px-5 py-3 text-sm font-medium text-[#42594d] transition hover:border-[#89b39a]/55 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-2xl border border-[#a2c9b1]/55 bg-white/84 px-5 py-3 text-sm font-medium text-[#42594d] transition hover:border-[#73a985]/60 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancelar
             </button>
@@ -509,7 +509,7 @@ export function ParticipantForm({
           <button
             type="submit"
             disabled={!isValid || isSubmitting}
-            className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-5 py-3 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-[#73a985]/60 bg-[#cfe6d7] px-5 py-3 text-sm font-medium text-[#214a34] transition hover:border-[#5f9874]/70 hover:bg-[#c4dfcd] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isSubmitting ? 'Salvando...' : submitLabel}
           </button>

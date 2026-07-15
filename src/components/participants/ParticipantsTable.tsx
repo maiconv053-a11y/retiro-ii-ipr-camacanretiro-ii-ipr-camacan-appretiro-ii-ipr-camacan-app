@@ -54,18 +54,18 @@ export function ParticipantsTable({
   const filteredParticipants = filterParticipants(participants, query, statusFilter)
 
   return (
-    <section className="rounded-[28px] border border-[#aac4b3]/40 bg-[#eef5ef]/92 p-6">
+    <section className="rounded-[28px] border border-[#98c5aa]/50 bg-[#e3f2e7]/96 p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="font-title text-[11px] uppercase tracking-[0.32em] text-[#6a957d]">BUSCA RÁPIDA</p>
+          <p className="font-title text-[11px] uppercase tracking-[0.32em] text-[#4f8e6c]">BUSCA RÁPIDA</p>
           <h2 className="mt-2 font-title text-xl text-[#20352a]">
             Participantes cadastrados
           </h2>
         </div>
 
         <div className="flex flex-col gap-3 md:flex-row">
-          <label className="flex items-center gap-3 rounded-2xl border border-[#b7d0bf]/45 bg-white/80 px-4 py-3 text-slate-700">
-            <Search className="h-4 w-4 text-[#6a957d]" />
+          <label className="flex items-center gap-3 rounded-2xl border border-[#9fcab0]/55 bg-white/86 px-4 py-3 text-slate-700">
+            <Search className="h-4 w-4 text-[#4f8e6c]" />
             <input
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
@@ -82,8 +82,8 @@ export function ParticipantsTable({
                 onClick={() => onStatusFilterChange(filter)}
                 className={`rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.22em] transition ${
                   statusFilter === filter
-                    ? 'border-[#89b39a]/55 bg-[#dcebe2] text-[#29513e]'
-                    : 'border-[#b7d0bf]/40 bg-white/74 text-[#42594d] hover:border-[#89b39a]/55 hover:text-[#20352a]'
+                    ? 'border-[#69a884]/60 bg-[#cfe6d7] text-[#214a34]'
+                    : 'border-[#a8ccb6]/45 bg-white/80 text-[#42594d] hover:border-[#79b08f]/60 hover:text-[#20352a]'
                 }`}
               >
                 {filterLabels[filter]}
@@ -93,9 +93,9 @@ export function ParticipantsTable({
         </div>
       </div>
 
-      <div className="mt-6 hidden overflow-hidden rounded-[24px] border border-[#b7d0bf]/40 lg:block">
-        <table className="min-w-full divide-y divide-[#c9ddd0] text-left text-sm">
-          <thead className="bg-[#dcebe1] text-xs uppercase tracking-[0.24em] text-[#4f6a5b]">
+      <div className="mt-6 hidden overflow-hidden rounded-[24px] border border-[#a8ccb6]/45 lg:block">
+        <table className="min-w-full divide-y divide-[#bfd9c9] text-left text-sm">
+          <thead className="bg-[#d2e8d8] text-xs uppercase tracking-[0.24em] text-[#456653]">
             <tr>
               <th className="px-4 py-3 font-medium">Participante</th>
               <th className="px-4 py-3 font-medium">Contato</th>
@@ -148,7 +148,7 @@ export function ParticipantsTable({
                       type="button"
                       onClick={() => onEditParticipant(participant)}
                       disabled={isSubmitting}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-[#b7d0bf]/45 bg-white/78 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-700 transition hover:border-[#89b39a]/55 hover:bg-[#dcebe2] hover:text-[#29513e] disabled:cursor-not-allowed disabled:opacity-40"
+                      className="inline-flex items-center gap-2 rounded-2xl border border-[#a2c9b1]/55 bg-white/84 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-700 transition hover:border-[#73a985]/60 hover:bg-[#d1e7d8] hover:text-[#214a34] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                       Editar
@@ -174,7 +174,7 @@ export function ParticipantsTable({
         {filteredParticipants.map((participant) => (
           <article
             key={participant.id}
-            className="rounded-[24px] border border-[#b7d0bf]/40 bg-white/78 p-4"
+            className="rounded-[24px] border border-[#a8ccb6]/45 bg-white/84 p-4"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -213,7 +213,7 @@ export function ParticipantsTable({
                   type="button"
                   onClick={() => onEditParticipant(participant)}
                   disabled={isSubmitting}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#b7d0bf]/45 bg-white/78 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-700 transition hover:border-[#89b39a]/55 hover:bg-[#dcebe2] hover:text-[#29513e] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#a2c9b1]/55 bg-white/84 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-700 transition hover:border-[#73a985]/60 hover:bg-[#d1e7d8] hover:text-[#214a34] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   Editar participante

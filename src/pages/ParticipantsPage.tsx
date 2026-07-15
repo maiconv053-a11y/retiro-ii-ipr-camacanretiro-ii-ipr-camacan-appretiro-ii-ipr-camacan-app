@@ -119,7 +119,7 @@ export default function ParticipantsPage() {
         }
       />
 
-      <div className="grid gap-6 2xl:grid-cols-[0.78fr_1.22fr]">
+      <div className="grid gap-6">
         <ParticipantForm
           onSubmit={handleSubmit}
           defaultTotalAmount={retreatFee}
