@@ -40,14 +40,14 @@ export function StatCard({
         <div className="rounded-2xl border border-[#b7d0bf]/45 bg-white/78 p-3 text-[#274233]">
           {icon}
         </div>
-        <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-slate-500">
+        <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-[#567262]">
           {to ? ctaLabel : 'Resumo'}
           <ArrowUpRight className={`h-3.5 w-3.5 ${iconAccentClasses[accent]}`} />
         </span>
       </div>
-      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="text-[11px] uppercase tracking-[0.16em] text-[#567262]">{label}</p>
       <p className="mt-3 font-title text-[2rem] leading-none text-[#20352a]">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-600">{hint}</p>
+      <p className="mt-2 text-sm leading-6 text-[#42594d]">{hint}</p>
     </>
   )
 

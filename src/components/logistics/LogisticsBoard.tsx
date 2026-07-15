@@ -157,7 +157,7 @@ export function LogisticsBoard({
                 className={`rounded-2xl border px-4 py-3 text-xs uppercase tracking-[0.2em] transition ${
                   form.category === category
                     ? 'border-[#89b39a]/55 bg-[#dcebe2] text-[#29513e]'
-                    : 'border-[#b7d0bf]/40 bg-white/74 text-slate-600 hover:border-[#89b39a]/55 hover:text-[#20352a]'
+                    : 'border-[#b7d0bf]/40 bg-white/74 text-[#42594d] hover:border-[#89b39a]/55 hover:text-[#20352a]'
                 }`}
               >
                 {category}
@@ -189,7 +189,7 @@ export function LogisticsBoard({
                 className="field-surface"
                 placeholder="Valor estimado"
               />
-              <span className="px-1 text-xs text-slate-400">
+              <span className="px-1 text-xs text-[#587264]">
                 Valor previsto antes da compra ou da assinatura do contrato.
               </span>
             </label>
@@ -201,7 +201,7 @@ export function LogisticsBoard({
                 className="field-surface"
                 placeholder="Valor gasto"
               />
-              <span className="px-1 text-xs text-slate-400">
+              <span className="px-1 text-xs text-[#587264]">
                 Valor realmente pago depois que a compra ou contrato acontecer.
               </span>
             </label>
@@ -242,7 +242,7 @@ export function LogisticsBoard({
                 </p>
                 <h3 className="mt-2 font-title text-xl text-[#20352a]">{category}</h3>
               </div>
-              <div className="text-right text-sm text-slate-600">
+              <div className="text-right text-sm text-[#42594d]">
                 <p>
                   Estimado:{' '}
                   {formatCurrency(
@@ -273,10 +273,10 @@ export function LogisticsBoard({
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
                       <h4 className="text-base font-medium text-[#20352a]">{task.title}</h4>
-                      <p className="mt-1 text-sm text-slate-600">
+                      <p className="mt-1 text-sm text-[#42594d]">
                         Responsável: {task.owner}
                       </p>
-                      <p className="mt-3 text-sm text-slate-600">{task.notes}</p>
+                      <p className="mt-3 text-sm text-[#42594d]">{task.notes}</p>
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -317,7 +317,7 @@ export function LogisticsBoard({
                           )
                         }
                         disabled={isSubmitting}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-3 py-2 text-sm text-rose-100 transition hover:border-rose-400/30 hover:bg-rose-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-300/45 bg-rose-50 px-3 py-2 text-sm text-rose-700 transition hover:border-rose-400/40 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <Trash2 className="h-4 w-4" />
                         Excluir
@@ -325,7 +325,7 @@ export function LogisticsBoard({
                     </div>
                   </div>
 
-                  <div className="mt-4 grid gap-2 text-sm text-slate-300 md:grid-cols-2">
+                  <div className="mt-4 grid gap-2 text-sm text-[#42594d] md:grid-cols-2">
                     <p>Estimado: {formatCurrency(task.estimatedCost)}</p>
                     <p>Gasto: {formatCurrency(task.actualCost)}</p>
                   </div>

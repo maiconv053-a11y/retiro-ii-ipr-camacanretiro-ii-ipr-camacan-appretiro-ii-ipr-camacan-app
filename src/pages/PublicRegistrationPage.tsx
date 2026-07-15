@@ -263,7 +263,7 @@ export default function PublicRegistrationPage() {
           <h1 className="mt-4 font-title text-3xl leading-tight text-[#20352a] md:text-4xl">
             Inscrição do Retiro da II IPR de Camacan
           </h1>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">
+          <p className="mt-4 max-w-xl text-sm leading-7 text-[#42594d]">
             Preencha seus dados, escolha a forma de pagamento e confirme o termo de
             compromisso. A inscrição entra no banco online e aguarda validação da
             diretoria.
@@ -277,14 +277,14 @@ export default function PublicRegistrationPage() {
               <p className="mt-3 font-title text-3xl text-[#20352a]">
                 {formatCurrency(retreatFee)}
               </p>
-              <div className="mt-3 space-y-1 text-sm text-slate-400">
+              <div className="mt-3 space-y-1 text-sm text-[#4c6457]">
                 <p className="text-[#2b4337]">O valor do retiro inclui:</p>
                 <p>Hospedagem.</p>
                 <p>Alimentação: café da manhã, almoço e janta.</p>
                 <p>Transporte.</p>
               </div>
               {pricing ? (
-                <div className="mt-3 space-y-1 text-sm text-slate-400">
+                <div className="mt-3 space-y-1 text-sm text-[#4c6457]">
                   <p>
                     Data do evento:{' '}
                     <span className="text-[#2b4337]">{formatIsoDatePtBr(EVENT_DATE_ISO)}</span>
@@ -299,35 +299,35 @@ export default function PublicRegistrationPage() {
                   </p>
                 </div>
               ) : (
-                <p className="mt-2 text-sm text-slate-400">
+                <p className="mt-2 text-sm text-[#4c6457]">
                   Preencha a data de nascimento para calcular o valor final.
                 </p>
               )}
             </div>
 
             <div className="rounded-[24px] border border-[#b7d0bf]/40 bg-white/72 p-5">
-              <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
+              <p className="text-xs uppercase tracking-[0.22em] text-[#567262]">
                 Parcelamento do boleto
               </p>
-              <div className="mt-3 space-y-2 text-sm leading-6 text-slate-400">
+              <div className="mt-3 space-y-2 text-sm leading-6 text-[#4c6457]">
                 <p>
                   Primeira parcela: mesmo dia da inscrição, no mês seguinte.
                 </p>
                 <p>
-                  Última parcela: <span className="text-slate-200">{formatIsoDatePtBr(PAYMENT_DEADLINE_ISO)}</span>.
+                  Última parcela: <span className="text-[#20352a]">{formatIsoDatePtBr(PAYMENT_DEADLINE_ISO)}</span>.
                 </p>
                 <p>
-                  Limite atual de parcelamento: <span className="text-white">{monthsAvailableForBoleto}x</span>.
+                  Limite atual de parcelamento: <span className="text-[#20352a]">{monthsAvailableForBoleto}x</span>.
                 </p>
               </div>
             </div>
           </div>
 
           <div className="mt-8 rounded-[24px] border border-[#b7d0bf]/40 bg-white/72 p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
+            <p className="text-xs uppercase tracking-[0.22em] text-[#567262]">
               Como funciona
             </p>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
+            <div className="mt-4 space-y-3 text-sm leading-6 text-[#42594d]">
               <p>1. Você preenche seus dados pessoais e possíveis restrições.</p>
               <p>2. Escolhe a forma de pagamento e as parcelas, quando aplicável.</p>
               <p>3. Aceita o termo de compromisso e envia a solicitação.</p>
@@ -342,7 +342,7 @@ export default function PublicRegistrationPage() {
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
             <label className="space-y-2 md:col-span-2 xl:col-span-6">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Nome completo
               </span>
               <input
@@ -354,7 +354,7 @@ export default function PublicRegistrationPage() {
             </label>
 
             <label className="space-y-2 xl:col-span-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Data de nascimento
               </span>
               <input
@@ -367,13 +367,13 @@ export default function PublicRegistrationPage() {
                 className="field-surface w-full"
                 placeholder="dd/mm/aaaa"
               />
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-[#50675a]">
                 Digite a data no formato brasileiro: dd/mm/aaaa.
               </span>
             </label>
 
             <label className="space-y-2 xl:col-span-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Telefone
               </span>
               <input
@@ -385,7 +385,7 @@ export default function PublicRegistrationPage() {
             </label>
 
             <label className="space-y-2 xl:col-span-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 E-mail
               </span>
               <input
@@ -398,7 +398,7 @@ export default function PublicRegistrationPage() {
             </label>
 
             <label className="space-y-2 xl:col-span-3">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Qual a sua igreja
               </span>
               <input
@@ -410,7 +410,7 @@ export default function PublicRegistrationPage() {
             </label>
 
             <label className="space-y-2 xl:col-span-3">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Cidade onde mora
               </span>
               <input
@@ -422,7 +422,7 @@ export default function PublicRegistrationPage() {
             </label>
 
             <label className="space-y-2 xl:col-span-3">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Restrições alimentares
               </span>
               <textarea
@@ -437,7 +437,7 @@ export default function PublicRegistrationPage() {
             </label>
 
             <label className="space-y-2 xl:col-span-3">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Restrições médicas
               </span>
               <textarea
@@ -455,15 +455,15 @@ export default function PublicRegistrationPage() {
           <section className="mt-6 rounded-[24px] border border-[#aac4b3]/40 bg-[#dcebe1]/85 p-5">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
+                <p className="text-xs uppercase tracking-[0.22em] text-[#567262]">
                   Escolha do pagamento
                 </p>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-[#4c6457]">
                   Valor total previsto:{' '}
                   {pricing ? formatCurrency(pricing.totalAmount) : '—'}
                 </p>
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[#50675a]">
                 Boleto até 7x e cartão de crédito até 12x.
               </p>
             </div>
@@ -476,14 +476,14 @@ export default function PublicRegistrationPage() {
                   onClick={() => setPaymentMethod(value)}
                   className={`flex min-h-[6.75rem] items-start gap-3 rounded-[22px] border px-4 py-4 text-left transition lg:min-h-[7.25rem] ${
                     form.paymentMethod === value
-                      ? 'border-cyan-400/24 bg-cyan-400/8 text-cyan-100'
-                      : 'border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/16 hover:bg-white/[0.04]'
+                      ? 'border-[#7ea790]/60 bg-[#d9e9de] text-[#1f382c]'
+                      : 'border-[#b7d0bf]/40 bg-white/72 text-[#42594d] hover:border-[#89b39a]/55 hover:bg-white'
                   }`}
                 >
                   <Icon className="mt-0.5 h-4 w-4 shrink-0" />
                   <div>
                     <p className="text-sm font-medium">{label}</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-400">{description}</p>
+                    <p className="mt-1 text-sm leading-6 text-[#4c6457]">{description}</p>
                   </div>
                 </button>
               ))}
@@ -491,7 +491,7 @@ export default function PublicRegistrationPage() {
 
             {requiresInstallments(form.paymentMethod) ? (
               <label className="mt-4 block space-y-2">
-                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                   Em quantas vezes deseja parcelar?
                 </span>
                 <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.72fr)]">
@@ -501,7 +501,7 @@ export default function PublicRegistrationPage() {
                     options={installmentOptions}
                     disabled={!form.birthDate}
                   />
-                  <div className="rounded-[20px] border border-white/10 bg-white/[0.02] px-4 py-3 text-sm leading-6 text-slate-400">
+                  <div className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 px-4 py-3 text-sm leading-6 text-[#4c6457]">
                     {form.paymentMethod === 'CartaoCredito'
                       ? 'No cartão, a tela de sucesso mostra apenas as parcelas com taxas inclusas.'
                       : `No boleto, a última parcela sempre vence em ${formatIsoDatePtBr(PAYMENT_DEADLINE_ISO)}.`}
@@ -512,7 +512,7 @@ export default function PublicRegistrationPage() {
           </section>
 
           <section className="mt-6 rounded-[24px] border border-[#b7d0bf]/40 bg-white/72 p-5">
-            <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
+            <p className="text-xs uppercase tracking-[0.22em] text-[#567262]">
               Termo de compromisso
             </p>
             <div className="mt-4 h-56 overflow-y-auto rounded-[20px] border border-[#b7d0bf]/40 bg-[#f4faf6] p-4 text-sm leading-7 text-slate-700">
@@ -575,13 +575,13 @@ export default function PublicRegistrationPage() {
           </section>
 
           {error ? (
-            <div className="mt-6 rounded-[20px] border border-rose-400/20 bg-rose-400/[0.06] px-4 py-3 text-sm text-rose-100">
-              {error}
+            <div className="mt-6 rounded-[20px] border border-rose-300/45 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              <span className="text-rose-800">{error}</span>
             </div>
           ) : null}
 
-          <div className="mt-6 flex flex-col gap-4 border-t border-white/10 pt-5 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm leading-6 text-slate-400">
+          <div className="mt-6 flex flex-col gap-4 border-t border-[#c7dacf] pt-5 md:flex-row md:items-center md:justify-between">
+            <p className="text-sm leading-6 text-[#4c6457]">
               Ao enviar, sua inscrição será gravada com status financeiro
               <span className="text-[#20352a]"> pendente de validação</span>.
             </p>

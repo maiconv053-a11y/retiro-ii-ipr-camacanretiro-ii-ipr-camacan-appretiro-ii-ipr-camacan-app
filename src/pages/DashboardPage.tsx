@@ -105,7 +105,7 @@ export default function DashboardPage() {
             <h2 className="mt-2 font-title text-xl text-[#20352a]">
               Valor fixo do retiro
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-[#42594d]">
               Ao atualizar este valor, a inscrição pública passa a exibir o novo total e
               as parcelas futuras dos participantes com saldo pendente são recalculadas
               automaticamente.
@@ -114,7 +114,7 @@ export default function DashboardPage() {
 
           <div className="flex w-full flex-col gap-3 lg:max-w-xl lg:flex-row lg:items-end">
             <label className="flex-1 space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#567262]">
                 Novo valor do retiro
               </span>
               <input
@@ -153,7 +153,7 @@ export default function DashboardPage() {
               <h2 className="mt-2 font-title text-xl text-[#20352a]">
                 Participantes com saldo pendente
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-[#42594d]">
                 Foco rápido nas inscrições que ainda precisam de acompanhamento.
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function DashboardPage() {
 
           <div className="mt-5 space-y-3">
             {pendingParticipants.length === 0 ? (
-              <article className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 p-4 text-sm leading-6 text-slate-600">
+              <article className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 p-4 text-sm leading-6 text-[#42594d]">
                 Nenhum participante com saldo pendente no momento.
               </article>
             ) : (
@@ -178,7 +178,7 @@ export default function DashboardPage() {
                     <h3 className="text-sm font-medium text-[#20352a]">
                       {participant.fullName}
                     </h3>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                    <p className="mt-1 text-sm leading-6 text-[#42594d]">
                       Pago {formatCurrency(participant.financial.amountPaid)} de{' '}
                       {formatCurrency(participant.financial.totalAmount)}
                     </p>
@@ -200,13 +200,13 @@ export default function DashboardPage() {
           <h2 className="mt-2 font-title text-xl text-[#20352a]">
             Próximos pontos de atenção
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-[#42594d]">
             Itens operacionais mais importantes para a equipe organizadora.
           </p>
 
           <div className="mt-5 space-y-3">
             {logisticsTasks.length === 0 ? (
-              <article className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 p-4 text-sm leading-6 text-slate-600">
+              <article className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 p-4 text-sm leading-6 text-[#42594d]">
                 Ainda não existem tarefas cadastradas para a operação.
               </article>
             ) : (
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-sm font-medium text-[#20352a]">{task.title}</h3>
-                      <p className="mt-1 text-sm text-slate-600">{task.owner}</p>
+                      <p className="mt-1 text-sm text-[#42594d]">{task.owner}</p>
                     </div>
                     <StatusBadge
                       label={
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                       }
                     />
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-slate-600">{task.notes}</p>
+                  <p className="mt-4 text-sm leading-6 text-[#42594d]">{task.notes}</p>
                 </article>
               ))
             )}

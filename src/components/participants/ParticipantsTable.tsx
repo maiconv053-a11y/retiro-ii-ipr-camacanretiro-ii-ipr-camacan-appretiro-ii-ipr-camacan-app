@@ -69,7 +69,7 @@ export function ParticipantsTable({
             <input
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
-              className="w-full bg-transparent text-sm outline-none placeholder:text-slate-500 md:min-w-64"
+              className="w-full bg-transparent text-sm outline-none placeholder:text-[#667d71] md:min-w-64"
               placeholder="Buscar por nome, telefone, e-mail, igreja ou cidade"
             />
           </label>
@@ -83,7 +83,7 @@ export function ParticipantsTable({
                 className={`rounded-full border px-4 py-2 text-[11px] uppercase tracking-[0.22em] transition ${
                   statusFilter === filter
                     ? 'border-[#89b39a]/55 bg-[#dcebe2] text-[#29513e]'
-                    : 'border-[#b7d0bf]/40 bg-white/74 text-slate-600 hover:border-[#89b39a]/55 hover:text-[#20352a]'
+                    : 'border-[#b7d0bf]/40 bg-white/74 text-[#42594d] hover:border-[#89b39a]/55 hover:text-[#20352a]'
                 }`}
               >
                 {filterLabels[filter]}
@@ -95,7 +95,7 @@ export function ParticipantsTable({
 
       <div className="mt-6 hidden overflow-hidden rounded-[24px] border border-[#b7d0bf]/40 lg:block">
         <table className="min-w-full divide-y divide-[#c9ddd0] text-left text-sm">
-          <thead className="bg-[#dcebe1] text-xs uppercase tracking-[0.24em] text-[#628a74]">
+          <thead className="bg-[#dcebe1] text-xs uppercase tracking-[0.24em] text-[#4f6a5b]">
             <tr>
               <th className="px-4 py-3 font-medium">Participante</th>
               <th className="px-4 py-3 font-medium">Contato</th>
@@ -111,21 +111,21 @@ export function ParticipantsTable({
               <tr key={participant.id} className="bg-white/60 text-slate-700">
                 <td className="px-4 py-4">
                   <p className="font-medium text-[#20352a]">{participant.fullName}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">
+                  <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[#587264]">
                     {participant.ageAtEvent} anos
                   </p>
                 </td>
                 <td className="px-4 py-4 text-slate-700">
                   <p>{participant.phone}</p>
-                  <p className="mt-1 text-xs text-slate-500">{participant.email || 'Sem e-mail'}</p>
+                  <p className="mt-1 text-xs text-[#587264]">{participant.email || 'Sem e-mail'}</p>
                 </td>
                 <td className="px-4 py-4 text-slate-700">
                   <p>{participant.church || 'Igreja não informada'}</p>
-                  <p className="mt-1 text-xs text-slate-500">{participant.city || 'Cidade não informada'}</p>
+                  <p className="mt-1 text-xs text-[#587264]">{participant.city || 'Cidade não informada'}</p>
                 </td>
-                <td className="px-4 py-4 text-slate-300">
+                <td className="px-4 py-4 text-[#42594d]">
                   <p>{participant.dietaryRestrictions || 'Nenhuma'}</p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-[#587264]">
                     {participant.medicalRestrictions || 'Nenhuma'}
                   </p>
                 </td>
@@ -135,9 +135,9 @@ export function ParticipantsTable({
                     tone={statusToneMap[participant.registrationStatus]}
                   />
                 </td>
-                <td className="px-4 py-4 text-slate-300">
+                <td className="px-4 py-4 text-[#42594d]">
                   <p>{formatCurrency(participant.financial.amountPaid)}</p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-[#587264]">
                     de {formatCurrency(participant.financial.totalAmount)} ·{' '}
                     {formatPaymentMethodLabel(participant.financial.paymentMethod)}
                   </p>
@@ -157,7 +157,7 @@ export function ParticipantsTable({
                       type="button"
                       onClick={() => onDeleteParticipant(participant)}
                       disabled={isSubmitting}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-4 py-2 text-xs uppercase tracking-[0.2em] text-rose-100 transition hover:border-rose-400/30 hover:bg-rose-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="inline-flex items-center gap-2 rounded-2xl border border-rose-300/45 bg-rose-50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-rose-700 transition hover:border-rose-400/40 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       Excluir
@@ -179,10 +179,10 @@ export function ParticipantsTable({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="font-medium text-[#20352a]">{participant.fullName}</h3>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-[#42594d]">
                   {participant.ageAtEvent} anos · {participant.phone}
                 </p>
-                <p className="mt-1 text-sm text-slate-500">{participant.email || 'Sem e-mail'}</p>
+                <p className="mt-1 text-sm text-[#587264]">{participant.email || 'Sem e-mail'}</p>
               </div>
               <StatusBadge
                 label={registrationStatusLabels[participant.registrationStatus]}
@@ -222,7 +222,7 @@ export function ParticipantsTable({
                   type="button"
                   onClick={() => onDeleteParticipant(participant)}
                   disabled={isSubmitting}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-4 py-3 text-xs uppercase tracking-[0.2em] text-rose-100 transition hover:border-rose-400/30 hover:bg-rose-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-300/45 bg-rose-50 px-4 py-3 text-xs uppercase tracking-[0.2em] text-rose-700 transition hover:border-rose-400/40 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Excluir participante

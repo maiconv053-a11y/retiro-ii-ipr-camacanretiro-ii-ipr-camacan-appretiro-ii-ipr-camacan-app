@@ -173,7 +173,7 @@ export function ParticipantForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 md:col-span-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
             Nome completo
           </span>
           <input
@@ -185,7 +185,7 @@ export function ParticipantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
             Data de nascimento
           </span>
           <input
@@ -198,7 +198,7 @@ export function ParticipantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
             Telefone
           </span>
           <input
@@ -210,7 +210,7 @@ export function ParticipantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
             E-mail
           </span>
           <input
@@ -223,7 +223,7 @@ export function ParticipantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
             Qual a sua igreja
           </span>
           <input
@@ -235,7 +235,7 @@ export function ParticipantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
             Cidade onde mora
           </span>
           <input
@@ -247,7 +247,7 @@ export function ParticipantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
             Restrições alimentares
           </span>
           <textarea
@@ -262,7 +262,7 @@ export function ParticipantForm({
         </label>
 
         <label className="space-y-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
             Restrições médicas
           </span>
           <textarea
@@ -277,7 +277,7 @@ export function ParticipantForm({
         </label>
 
         <label className="space-y-2 md:col-span-2">
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
             Status da inscrição
           </span>
           <div className="grid grid-cols-3 gap-2">
@@ -288,8 +288,8 @@ export function ParticipantForm({
                 onClick={() => updateField('registrationStatus', status)}
                 className={`rounded-2xl border px-4 py-3 text-xs uppercase tracking-[0.16em] transition ${
                   form.registrationStatus === status
-                    ? 'border-cyan-400/24 bg-cyan-400/8 text-cyan-100'
-                    : 'border-white/10 bg-white/[0.02] text-slate-400 hover:border-white/16 hover:text-slate-200'
+                    ? 'border-[#7ea790]/60 bg-[#d9e9de] text-[#1f382c]'
+                    : 'border-[#b7d0bf]/40 bg-white/72 text-[#42594d] hover:border-[#89b39a]/55 hover:text-[#20352a]'
                 }`}
               >
                 {registrationLabels[status]}
@@ -298,12 +298,12 @@ export function ParticipantForm({
           </div>
         </label>
 
-        <div className="space-y-3 rounded-[22px] border border-white/10 bg-white/[0.02] p-4 md:col-span-2">
+        <div className="space-y-3 rounded-[22px] border border-[#b7d0bf]/40 bg-white/72 p-4 md:col-span-2">
           <div>
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+            <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
               Configuração financeira inicial
             </span>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-[#4c6457]">
               Defina o valor total do débito e a forma de pagamento escolhida já na inscrição.
               Boleto vai até 7x e cartão vai até 12x.
             </p>
@@ -311,7 +311,7 @@ export function ParticipantForm({
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Valor total do débito
               </span>
               <input
@@ -328,7 +328,7 @@ export function ParticipantForm({
             </label>
 
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Forma de pagamento
               </span>
               <select
@@ -349,7 +349,7 @@ export function ParticipantForm({
 
           {requiresInstallments(form.paymentMethod) ? (
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Parcelamento
               </span>
               <select
@@ -373,8 +373,8 @@ export function ParticipantForm({
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-4 border-t border-white/10 pt-4">
-        <p className="text-sm text-slate-400">
+      <div className="mt-6 flex items-center justify-between gap-4 border-t border-[#c7dacf] pt-4">
+        <p className="text-sm text-[#4c6457]">
           {isValid
             ? 'Pronto para salvar. O perfil financeiro inicial será criado ou atualizado automaticamente.'
             : 'Preencha nome, telefone, e-mail, igreja, cidade, valor total e forma de pagamento para liberar o cadastro.'}
@@ -385,7 +385,7 @@ export function ParticipantForm({
               type="button"
               onClick={onCancelEdit}
               disabled={isSubmitting}
-              className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-white/16 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-2xl border border-[#b7d0bf]/45 bg-white/78 px-5 py-3 text-sm font-medium text-[#42594d] transition hover:border-[#89b39a]/55 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancelar
             </button>
@@ -393,7 +393,7 @@ export function ParticipantForm({
           <button
             type="submit"
             disabled={!isValid || isSubmitting}
-            className="rounded-2xl border border-cyan-400/20 bg-cyan-400/8 px-5 py-3 text-sm font-medium text-cyan-100 transition hover:border-cyan-400/30 hover:bg-cyan-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-5 py-3 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isSubmitting ? 'Salvando...' : submitLabel}
           </button>

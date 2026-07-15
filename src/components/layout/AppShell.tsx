@@ -34,16 +34,16 @@ export function AppShell() {
             <h1 className="mt-3 font-title text-[1.7rem] leading-tight text-[#21372c]">
               Retiro da II IPR de Camacan
             </h1>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-[#42594d]">
               Controle unificado de inscrições, finanças e logística em um painel
               limpo e responsivo.
             </p>
             <div className="mt-4 rounded-[18px] border border-[#a8c5b3]/35 bg-[#dcebe1] px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-[#567262]">
                 Área interna
               </p>
               <p className="mt-2 text-sm text-[#244032]">Painel da organização</p>
-              <p className="mt-1 text-xs text-slate-600">
+              <p className="mt-1 text-xs text-[#4c6457]">
                 Gestão interna sem etapa de autenticação.
               </p>
             </div>
@@ -60,7 +60,7 @@ export function AppShell() {
                     'group flex items-center gap-3 rounded-[18px] border px-4 py-3 text-sm transition',
                     isActive
                       ? 'border-[#8eb39d]/55 bg-white/85 text-[#1f352b]'
-                      : 'border-transparent bg-transparent text-slate-600 hover:border-[#a8c5b3]/45 hover:bg-white/70 hover:text-[#21372c]',
+                      : 'border-transparent bg-transparent text-[#42594d] hover:border-[#a8c5b3]/45 hover:bg-white/70 hover:text-[#21372c]',
                   )
                 }
               >
@@ -71,7 +71,7 @@ export function AppShell() {
           </nav>
 
           <div className="rounded-[22px] border border-[#a8c5b3]/35 bg-white/72 p-4">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-[#567262]">
               Estado do sistema
             </p>
             <div className="mt-3 flex items-center gap-3">
@@ -118,7 +118,7 @@ export function AppShell() {
                   'flex flex-col items-center gap-1 rounded-[18px] px-3 py-2 text-[11px] uppercase tracking-[0.14em] transition',
                   isActive
                     ? 'bg-white/82 text-[#1f352b]'
-                    : 'text-slate-500 hover:bg-white/70 hover:text-[#20372c]',
+                    : 'text-[#42594d] hover:bg-white/70 hover:text-[#20372c]',
                 )
               }
             >

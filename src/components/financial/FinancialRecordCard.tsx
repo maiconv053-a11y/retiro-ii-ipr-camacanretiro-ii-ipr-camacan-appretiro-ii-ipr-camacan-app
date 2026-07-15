@@ -195,7 +195,7 @@ export function FinancialRecordCard({
               </button>
             ) : null}
           </div>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-[#42594d]">
             Pago {formatCurrency(participant.financial.amountPaid)} de{' '}
             {formatCurrency(participant.financial.totalAmount)}
           </p>
@@ -213,7 +213,7 @@ export function FinancialRecordCard({
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Valor total
               </span>
               <input
@@ -242,7 +242,7 @@ export function FinancialRecordCard({
             </label>
 
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Valor pago
               </span>
               <input
@@ -275,8 +275,8 @@ export function FinancialRecordCard({
                 onClick={() => setMethod(value)}
                 className={`flex items-center gap-3 rounded-[22px] border px-4 py-3 text-left transition ${
                   draft.paymentMethod === value
-                    ? 'border-emerald-300/24 bg-emerald-300/10 text-emerald-100'
-                    : 'border-emerald-100/10 bg-[#0b1713]/80 text-slate-400 hover:border-emerald-200/20 hover:text-slate-100'
+                    ? 'border-[#7ea790]/60 bg-[#d9e9de] text-[#1f382c]'
+                    : 'border-[#b7d0bf]/40 bg-white/72 text-[#42594d] hover:border-[#89b39a]/55 hover:text-[#20352a]'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -286,13 +286,13 @@ export function FinancialRecordCard({
           </div>
         </div>
 
-        <div className="rounded-[22px] border border-emerald-100/10 bg-[#0b1713]/82 p-4">
+        <div className="rounded-[22px] border border-[#b7d0bf]/40 bg-white/76 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-emerald-200/45">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#587264]">
                 Parcelamento
               </p>
-              <p className="mt-1 text-sm text-slate-300">
+              <p className="mt-1 text-sm text-[#42594d]">
                 Boleto até 7x e cartão de crédito até 12x.
               </p>
             </div>
@@ -300,7 +300,7 @@ export function FinancialRecordCard({
               value={draft.installmentCount}
               disabled={!requiresInstallments(draft.paymentMethod)}
               onChange={(event) => setInstallmentCount(Number(event.target.value))}
-              className="rounded-2xl border border-emerald-100/10 bg-[#102019] px-3 py-2 text-sm text-white outline-none disabled:opacity-40"
+              className="rounded-2xl border border-[#b7d0bf]/45 bg-[#f8fbf9] px-3 py-2 text-sm text-[#20352a] outline-none disabled:opacity-40"
             >
               {Array.from(
                 { length: getMaxInstallmentsForMethod(draft.paymentMethod) },
@@ -319,13 +319,13 @@ export function FinancialRecordCard({
                 key={`${participant.id}-${installment.id}`}
                 type="button"
                 onClick={() => toggleInstallment(index)}
-                className="flex w-full items-center justify-between rounded-2xl border border-emerald-100/10 bg-[#102019]/78 px-4 py-3 text-left"
+                className="flex w-full items-center justify-between rounded-2xl border border-[#b7d0bf]/40 bg-[#eef5ef] px-4 py-3 text-left"
               >
                 <div>
-                  <p className="text-sm text-white">
+                  <p className="text-sm text-[#20352a]">
                     {installment.label} · {formatCurrency(installment.amount)}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-[#587264]">
                     Vencimento{' '}
                     {installment.dueDate ? formatIsoDatePtBr(installment.dueDate) : 'a definir'}
                   </p>
@@ -340,14 +340,14 @@ export function FinancialRecordCard({
         </div>
       </div>
 
-      <div className="mt-5 flex flex-col gap-4 border-t border-emerald-100/10 pt-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1 text-sm text-slate-400">
+      <div className="mt-5 flex flex-col gap-4 border-t border-[#c7dacf] pt-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1 text-sm text-[#4c6457]">
           <p>
-            Saldo aberto: <span className="text-white">{formatCurrency(pendingAmount)}</span>
+            Saldo aberto: <span className="text-[#20352a]">{formatCurrency(pendingAmount)}</span>
           </p>
           <p>
             Origem da inscrição:{' '}
-            <span className="text-white">
+            <span className="text-[#20352a]">
               {participant.registrationSource === 'Publica' ? 'Área pública' : 'Diretoria'}
             </span>
           </p>
@@ -358,7 +358,7 @@ export function FinancialRecordCard({
               type="button"
               onClick={validatePayment}
               disabled={isSaving || !onValidatePayment}
-              className="rounded-2xl border border-emerald-400/20 bg-emerald-400/8 px-5 py-3 text-sm font-medium text-emerald-100 transition hover:border-emerald-400/30 hover:bg-emerald-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-5 py-3 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isSaving ? 'Validando...' : 'Validar pagamento'}
             </button>
@@ -367,7 +367,7 @@ export function FinancialRecordCard({
             type="button"
             onClick={saveChanges}
             disabled={isSaving}
-            className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-5 py-3 text-sm font-medium text-emerald-100 transition hover:border-emerald-300/30 hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-5 py-3 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {isSaving ? 'Salvando...' : 'Atualizar financeiro'}
           </button>

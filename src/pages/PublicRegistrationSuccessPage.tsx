@@ -115,22 +115,22 @@ export default function PublicRegistrationSuccessPage() {
           <h1 className="mt-3 font-title text-3xl leading-tight text-[#20352a] md:text-4xl">
             Sua inscrição foi registrada
           </h1>
-          <p className="mt-4 text-sm leading-7 text-slate-600">
+          <p className="mt-4 text-sm leading-7 text-[#42594d]">
             {payload.fullName} · pagamento {formatPaymentMethodLabel(payload.paymentMethod)} ·{' '}
             idade no evento: {payload.ageAtEvent} anos
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             <div className="rounded-[24px] border border-[#b7d0bf]/40 bg-white/72 p-5">
-              <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Valor total</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-[#567262]">Valor total</p>
               <p className="mt-3 font-title text-3xl text-[#20352a]">
                 {formatCurrency(payload.totalAmount)}
               </p>
-              <p className="mt-2 text-sm text-slate-600">{installmentLabel}</p>
+              <p className="mt-2 text-sm text-[#4c6457]">{installmentLabel}</p>
             </div>
 
             <div className="rounded-[24px] border border-[#b7d0bf]/40 bg-white/72 p-5">
-              <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Próximos passos</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-[#567262]">Próximos passos</p>
               <p className="mt-3 text-sm leading-7 text-slate-700">
                 O pagamento ficará como pendente de validação até a diretoria confirmar a
                 baixa.
@@ -140,7 +140,7 @@ export default function PublicRegistrationSuccessPage() {
 
           {payload.paymentMethod === 'CartaoCredito' ? (
             <div className="mt-8 rounded-[24px] border border-[#aac4b3]/40 bg-[#dcebe1]/85 p-5">
-              <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
+              <p className="text-xs uppercase tracking-[0.22em] text-[#567262]">
                 Parcelamento no cartão
               </p>
               <p className="mt-3 text-sm leading-7 text-slate-700">
@@ -150,7 +150,7 @@ export default function PublicRegistrationSuccessPage() {
             </div>
           ) : (
             <div className="mt-8 rounded-[24px] border border-[#aac4b3]/40 bg-[#dcebe1]/85 p-5">
-              <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
+              <p className="text-xs uppercase tracking-[0.22em] text-[#567262]">
                 Parcelas e vencimentos estimados
               </p>
               <div className="mt-4 space-y-3">
@@ -163,11 +163,11 @@ export default function PublicRegistrationSuccessPage() {
                       Parcela {installment.index} · {formatCurrency(installment.amount)}
                     </p>
                     {installment.dueDate ? (
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-[#42594d]">
                         Vencimento: {formatIsoDatePtBr(installment.dueDate)}
                       </p>
                     ) : (
-                      <p className="text-sm text-slate-500">Vencimento a combinar</p>
+                      <p className="text-sm text-[#587264]">Vencimento a combinar</p>
                     )}
                   </div>
                 ))}
