@@ -107,14 +107,14 @@ export function LogisticsBoard({
     <div className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
       <form
         onSubmit={handleSubmit}
-        className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/82 p-6"
+        className="rounded-[24px] border border-[#aac4b3]/40 bg-[#eef5ef]/92 p-6"
       >
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="font-title text-[10px] uppercase tracking-[0.24em] text-emerald-200/60">
+            <p className="font-title text-[10px] uppercase tracking-[0.24em] text-[#6a957d]">
               Controle operacional
             </p>
-            <h2 className="mt-2 font-title text-xl text-white">
+            <h2 className="mt-2 font-title text-xl text-[#20352a]">
               {mode === 'edit' ? 'Editar tarefa' : 'Nova tarefa'}
             </h2>
           </div>
@@ -126,7 +126,7 @@ export function LogisticsBoard({
                 disabled={isSubmitting}
                 aria-label="Cancelar edição"
                 title="Cancelar edição"
-                className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 text-slate-300 transition hover:border-white/16 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-2xl border border-[#b7d0bf]/45 bg-white/78 p-3 text-slate-700 transition hover:border-[#89b39a]/55 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <RotateCcw className="h-4 w-4" />
               </button>
@@ -136,7 +136,7 @@ export function LogisticsBoard({
               disabled={isSubmitting}
               aria-label={mode === 'edit' ? 'Salvar tarefa' : 'Adicionar tarefa'}
               title={mode === 'edit' ? 'Salvar tarefa' : 'Adicionar tarefa'}
-              className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 p-3 text-emerald-100 transition hover:border-emerald-300/30 hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] p-3 text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {mode === 'edit' ? (
                 <Pencil className="h-4 w-4" />
@@ -156,8 +156,8 @@ export function LogisticsBoard({
                 onClick={() => updateField('category', category)}
                 className={`rounded-2xl border px-4 py-3 text-xs uppercase tracking-[0.2em] transition ${
                   form.category === category
-                    ? 'border-emerald-300/25 bg-emerald-300/10 text-emerald-100'
-                    : 'border-emerald-100/10 bg-[#0b1713]/80 text-slate-500 hover:border-emerald-200/20 hover:text-slate-200'
+                    ? 'border-[#89b39a]/55 bg-[#dcebe2] text-[#29513e]'
+                    : 'border-[#b7d0bf]/40 bg-white/74 text-slate-600 hover:border-[#89b39a]/55 hover:text-[#20352a]'
                 }`}
               >
                 {category}
@@ -218,7 +218,7 @@ export function LogisticsBoard({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-5 py-3 text-sm font-medium text-emerald-100 transition hover:border-emerald-300/30 hover:bg-emerald-300/15"
+            className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-5 py-3 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8]"
           >
             {isSubmitting
               ? 'Salvando...'
@@ -233,16 +233,16 @@ export function LogisticsBoard({
         {(['Compras', 'Contratos'] as const).map((category) => (
           <section
             key={category}
-            className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-6"
+            className="rounded-[24px] border border-[#aac4b3]/40 bg-[#e5f0e8]/88 p-6"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-title text-[11px] uppercase tracking-[0.3em] text-emerald-200/45">
+                <p className="font-title text-[11px] uppercase tracking-[0.3em] text-[#6a957d]">
                   {category === 'Compras' ? 'Mercado e materiais' : 'Fornecedores e acordos'}
                 </p>
-                <h3 className="mt-2 font-title text-xl text-white">{category}</h3>
+                <h3 className="mt-2 font-title text-xl text-[#20352a]">{category}</h3>
               </div>
-              <div className="text-right text-sm text-slate-400">
+              <div className="text-right text-sm text-slate-600">
                 <p>
                   Estimado:{' '}
                   {formatCurrency(
@@ -268,15 +268,15 @@ export function LogisticsBoard({
               {groupedTasks[category].map((task) => (
                 <article
                   key={task.id}
-                  className="rounded-[20px] border border-emerald-100/10 bg-[#0b1713]/82 p-4"
+                  className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/78 p-4"
                 >
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
-                      <h4 className="text-base font-medium text-white">{task.title}</h4>
-                      <p className="mt-1 text-sm text-slate-400">
+                      <h4 className="text-base font-medium text-[#20352a]">{task.title}</h4>
+                      <p className="mt-1 text-sm text-slate-600">
                         Responsável: {task.owner}
                       </p>
-                      <p className="mt-3 text-sm text-slate-400">{task.notes}</p>
+                      <p className="mt-3 text-sm text-slate-600">{task.notes}</p>
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -288,7 +288,7 @@ export function LogisticsBoard({
                         type="button"
                         onClick={() => onEditTask(task)}
                         disabled={isSubmitting}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-slate-200 transition hover:border-emerald-300/25 hover:bg-emerald-300/10 hover:text-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#b7d0bf]/45 bg-white/78 px-3 py-2 text-sm text-slate-700 transition hover:border-[#89b39a]/55 hover:bg-[#dcebe2] hover:text-[#29513e] disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <Pencil className="h-4 w-4" />
                         Editar
@@ -301,7 +301,7 @@ export function LogisticsBoard({
                           ).catch(() => undefined)
                         }
                         disabled={isSubmitting}
-                        className="rounded-2xl border border-emerald-100/10 bg-[#102019] px-3 py-2 text-sm text-white outline-none"
+                        className="rounded-2xl border border-[#b7d0bf]/45 bg-white/88 px-3 py-2 text-sm text-[#20352a] outline-none"
                       >
                         {statusOptions.map((status) => (
                           <option key={status} value={status}>

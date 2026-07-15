@@ -13,15 +13,15 @@ interface StatCardProps {
 }
 
 const accentClasses = {
-  cyan: 'from-cyan-400/12 to-transparent text-cyan-100',
-  violet: 'from-violet-400/12 to-transparent text-violet-100',
-  green: 'from-emerald-400/12 to-transparent text-emerald-100',
+  cyan: 'from-[#7fb290]/30 to-transparent text-[#315644]',
+  violet: 'from-[#a3c7b0]/32 to-transparent text-[#385e4a]',
+  green: 'from-[#6f9f80]/28 to-transparent text-[#294c3a]',
 }
 
 const iconAccentClasses = {
-  cyan: 'text-cyan-100',
-  violet: 'text-violet-100',
-  green: 'text-emerald-100',
+  cyan: 'text-[#315644]',
+  violet: 'text-[#385e4a]',
+  green: 'text-[#294c3a]',
 }
 
 export function StatCard({
@@ -37,7 +37,7 @@ export function StatCard({
     <>
       <div className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${accentClasses[accent]}`} />
       <div className="mb-8 flex items-center justify-between">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.025] p-3 text-slate-100">
+        <div className="rounded-2xl border border-[#b7d0bf]/45 bg-white/78 p-3 text-[#274233]">
           {icon}
         </div>
         <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-slate-500">
@@ -46,8 +46,8 @@ export function StatCard({
         </span>
       </div>
       <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">{label}</p>
-      <p className="mt-3 font-title text-[2rem] leading-none text-white">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-400">{hint}</p>
+      <p className="mt-3 font-title text-[2rem] leading-none text-[#20352a]">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{hint}</p>
     </>
   )
 
@@ -55,7 +55,7 @@ export function StatCard({
     return (
       <Link
         to={to}
-        className="group relative block overflow-hidden rounded-[24px] border border-white/10 bg-[#08111f]/88 p-5 transition hover:-translate-y-0.5 hover:border-white/16 hover:bg-[#0a1424] focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
+        className="group relative block overflow-hidden rounded-[24px] border border-[#aac4b3]/40 bg-[#f2f8f3]/92 p-5 transition hover:-translate-y-0.5 hover:border-[#8eb39d]/55 hover:bg-white/92 focus:outline-none focus:ring-2 focus:ring-[#7da98d]/35"
       >
         {content}
       </Link>
@@ -63,7 +63,7 @@ export function StatCard({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[#08111f]/88 p-5">
+    <div className="relative overflow-hidden rounded-[24px] border border-[#aac4b3]/40 bg-[#f2f8f3]/92 p-5">
       {content}
     </div>
   )

@@ -83,25 +83,25 @@ async function main() {
     'Deus abençoe!',
   ].join('\n')
   const html = `
-    <div style="margin:0;padding:24px 12px;background:#07110d;font-family:Arial,Helvetica,sans-serif;color:#e8f5ef;">
-      <div style="max-width:620px;margin:0 auto;background:#0d1713;border:1px solid #1f3b31;border-radius:20px;overflow:hidden;">
-        <div style="padding:24px 24px 12px;text-align:center;background:#10211a;">
+    <div style="margin:0;padding:24px 12px;background:#edf4ee;font-family:Arial,Helvetica,sans-serif;color:#274035;">
+      <div style="max-width:620px;margin:0 auto;background:#eef5ef;border:1px solid #b7d0bf;border-radius:20px;overflow:hidden;">
+        <div style="padding:24px 24px 12px;text-align:center;background:#d6e8dc;">
           <img src="${EMAIL_LOGO_URL}" alt="Logo do Retiro da II IPR de Camacan" width="88" style="display:block;width:88px;height:auto;margin:0 auto 14px;" />
-          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8fd3b5;">Teste de entrega</div>
-          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#ffffff;">E-mail funcionando com sucesso</h1>
+          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#5f8a73;">Teste de entrega</div>
+          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#20352a;">E-mail funcionando com sucesso</h1>
         </div>
         <div style="padding:24px;">
-          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#d7e9e0;">
+          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#425d51;">
             Olá, <strong>${recipient.name}</strong>! Este é um teste real do sistema de notificações por e-mail do <strong>Retiro II IPR de Camacan</strong>.
           </p>
-          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#d7e9e0;">
+          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#425d51;">
             Se esta mensagem chegou corretamente, o domínio está validado, o Resend está operacional e o sistema está pronto para disparar e-mails reais.
           </p>
           <div style="text-align:center;">
-            <a href="${PUBLIC_SITE_URL}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#39a86c;color:#07110d;font-size:14px;font-weight:700;text-decoration:none;">Abrir sistema do retiro</a>
+            <a href="${PUBLIC_SITE_URL}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#4a8b63;color:#f7fbf8;font-size:14px;font-weight:700;text-decoration:none;">Abrir sistema do retiro</a>
           </div>
         </div>
-        <div style="padding:0 24px 22px;text-align:center;font-size:12px;line-height:1.6;color:#8faf9f;">
+        <div style="padding:0 24px 22px;text-align:center;font-size:12px;line-height:1.6;color:#6d8277;">
           Retiro da II IPR de Camacan<br />Deus abençoe!
         </div>
       </div>

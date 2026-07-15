@@ -4,12 +4,11 @@ import { cn } from '@/lib/utils'
 type Tone = 'cyan' | 'violet' | 'green' | 'amber' | 'rose'
 
 const toneClasses: Record<Tone, string> = {
-  cyan: 'border-cyan-400/20 bg-cyan-400/8 text-cyan-100',
-  violet:
-    'border-violet-400/20 bg-violet-400/8 text-violet-100',
-  green: 'border-emerald-400/20 bg-emerald-400/8 text-emerald-100',
-  amber: 'border-amber-400/20 bg-amber-400/8 text-amber-100',
-  rose: 'border-rose-400/20 bg-rose-400/8 text-rose-100',
+  cyan: 'border-[#9dc4ad]/55 bg-[#e8f3eb] text-[#345745]',
+  violet: 'border-[#b4cfbf]/55 bg-[#edf5ef] text-[#406350]',
+  green: 'border-[#89b39a]/55 bg-[#dcece2] text-[#27513d]',
+  amber: 'border-amber-300/45 bg-amber-50 text-amber-700',
+  rose: 'border-rose-300/45 bg-rose-50 text-rose-700',
 }
 
 interface StatusBadgeProps {

@@ -1,6 +1,10 @@
 import 'dotenv/config'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import {
+  buildInstallmentBoletoUrl,
+  createInstallmentBoletoAttachment,
+} from './lib/boletoChargeEmail.mjs'
 
 function getArgValue(flag) {
   const index = process.argv.indexOf(flag)
@@ -82,12 +86,18 @@ function buildEmailSubject(context) {
 }
 
 function buildEmailText(context) {
+  const boletoLine =
+    context.boletoUrl && context.paymentMethod === 'boleto'
+      ? ['', `Abrir boleto: ${context.boletoUrl}`]
+      : []
+
   return [
     `Olá, ${context.participantName}!`,
     '',
     `Passando para lembrar que a parcela nº ${context.installmentNumber} do Retiro da II IPR de Camacan vence em ${context.dueDateLabel}.`,
     `Valor: ${formatCurrency(context.installmentAmount)}`,
     `Forma de acerto: ${context.paymentMethodLabel}`,
+    ...boletoLine,
     '',
     'Para garantir sua vaga e nos ajudar na organização do retiro, realize o pagamento com a diretoria ou envie o comprovante em resposta a esta mensagem.',
     '',
@@ -96,30 +106,48 @@ function buildEmailText(context) {
 }
 
 function buildEmailHtml(context) {
+  const buttonLabel =
+    context.boletoUrl && context.paymentMethod === 'boleto'
+      ? 'Abrir boleto'
+      : 'Abrir sistema do retiro'
+  const buttonHref =
+    context.boletoUrl && context.paymentMethod === 'boleto'
+      ? context.boletoUrl
+      : PUBLIC_SITE_URL
+  const boletoHint =
+    context.boletoUrl && context.paymentMethod === 'boleto'
+      ? `
+          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#d7e9e0;">
+            O boleto desta parcela segue anexado neste e-mail. Se preferir, use o botão abaixo para abrir o arquivo diretamente.
+          </p>
+        `
+      : ''
+
   return `
-    <div style="margin:0;padding:24px 12px;background:#07110d;font-family:Arial,Helvetica,sans-serif;color:#e8f5ef;">
-      <div style="max-width:620px;margin:0 auto;background:#0d1713;border:1px solid #1f3b31;border-radius:20px;overflow:hidden;">
-        <div style="padding:24px 24px 12px;text-align:center;background:#10211a;">
+    <div style="margin:0;padding:24px 12px;background:#edf4ee;font-family:Arial,Helvetica,sans-serif;color:#274035;">
+      <div style="max-width:620px;margin:0 auto;background:#eef5ef;border:1px solid #b7d0bf;border-radius:20px;overflow:hidden;">
+        <div style="padding:24px 24px 12px;text-align:center;background:#d6e8dc;">
           <img src="${EMAIL_LOGO_URL}" alt="Logo do Retiro da II IPR de Camacan" width="88" style="display:block;width:88px;height:auto;margin:0 auto 14px;" />
-          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8fd3b5;">Cobranca de parcela</div>
-          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#ffffff;">Sua parcela esta em aberto</h1>
+          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#5f8a73;">Cobranca de parcela</div>
+          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#20352a;">Sua parcela esta em aberto</h1>
         </div>
         <div style="padding:24px;">
-          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#d7e9e0;">
+          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#425d51;">
             Olá, <strong>${context.participantName}</strong>! A sua parcela <strong>nº ${context.installmentNumber}</strong> vence em <strong>${context.dueDateLabel}</strong>.
           </p>
-          <div style="margin:0 0 16px;padding:16px;border:1px solid #24483b;border-radius:16px;background:#0b1410;">
-            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#d7e9e0;"><strong>Valor:</strong> ${formatCurrency(context.installmentAmount)}</p>
-            <p style="margin:0;font-size:14px;line-height:1.6;color:#d7e9e0;"><strong>Forma de acerto:</strong> ${context.paymentMethodLabel}</p>
+          <div style="margin:0 0 16px;padding:16px;border:1px solid #a8c5b3;border-radius:16px;background:#f7fbf8;">
+            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#425d51;"><strong>Valor:</strong> ${formatCurrency(context.installmentAmount)}</p>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#425d51;"><strong>Forma de acerto:</strong> ${context.paymentMethodLabel}</p>
           </div>
-          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#d7e9e0;">
+          ${boletoHint}
+          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#425d51;">
             Para garantir sua vaga e nos ajudar na organização do retiro, realize o pagamento com a diretoria ou envie o comprovante em resposta a esta mensagem.
           </p>
           <div style="text-align:center;">
-            <a href="${PUBLIC_SITE_URL}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#39a86c;color:#07110d;font-size:14px;font-weight:700;text-decoration:none;">Abrir sistema do retiro</a>
+            <a href="${buttonHref}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#4a8b63;color:#f7fbf8;font-size:14px;font-weight:700;text-decoration:none;">${buttonLabel}</a>
           </div>
         </div>
-        <div style="padding:0 24px 22px;text-align:center;font-size:12px;line-height:1.6;color:#8faf9f;">
+        <div style="padding:0 24px 22px;text-align:center;font-size:12px;line-height:1.6;color:#6d8277;">
           Retiro da II IPR de Camacan<br />Deus abençoe!
         </div>
       </div>
@@ -138,11 +166,15 @@ async function loadInstallmentContext() {
       vencimento,
       financeiro:financeiro_id (
         id,
-        forma_pagamento,
+          forma_pagamento,
+          num_parcelas,
         participante:participante_id (
           id,
           nome,
-          email
+            email,
+            telefone,
+            igreja,
+            cidade
         )
       )
     `)
@@ -164,12 +196,18 @@ async function loadInstallmentContext() {
         installmentId: row.id,
         installmentNumber: row.numero_parcela,
         installmentAmount: Number(row.valor_parcela),
+        installmentStatus: row.status === 'paga' ? 'Paga' : 'Pendente',
         dueDateIso: row.vencimento,
         dueDateLabel: formatDatePtBr(row.vencimento),
+        paymentMethod: financeiro?.forma_pagamento ?? null,
         paymentMethodLabel: formatPaymentMethod(financeiro?.forma_pagamento),
+        totalInstallments: Math.max(1, Number(financeiro?.num_parcelas || 1)),
         participantId: participante?.id ?? null,
         participantName: participante?.nome ?? null,
         participantEmail: participante?.email ?? null,
+        participantPhone: participante?.telefone ?? null,
+        participantChurch: participante?.igreja ?? null,
+        participantCity: participante?.cidade ?? null,
       }
     })
     .filter((row) => String(row.participantName || '').toLowerCase().includes(participantName.toLowerCase()))
@@ -187,12 +225,24 @@ async function loadInstallmentContext() {
 
 async function main() {
   const context = await loadInstallmentContext()
+  const boletoUrl =
+    context.paymentMethod === 'boleto'
+      ? buildInstallmentBoletoUrl(context.installmentId)
+      : null
+  const attachment =
+    context.paymentMethod === 'boleto'
+      ? await createInstallmentBoletoAttachment({
+          ...context,
+          boletoUrl,
+        })
+      : null
   const response = await resend.emails.send({
     from: RESEND_FROM_EMAIL,
     to: [context.participantEmail],
-    subject: buildEmailSubject(context),
-    text: buildEmailText(context),
-    html: buildEmailHtml(context),
+    subject: buildEmailSubject({ ...context, boletoUrl }),
+    text: buildEmailText({ ...context, boletoUrl }),
+    html: buildEmailHtml({ ...context, boletoUrl }),
+    attachments: attachment ? [attachment] : undefined,
   })
 
   if (response.error) {

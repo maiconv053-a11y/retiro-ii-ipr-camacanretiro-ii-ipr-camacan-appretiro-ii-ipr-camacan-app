@@ -43,27 +43,27 @@ export default function FinancialPage() {
       />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <div className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-5">
+        <div className="rounded-[24px] border border-[#aac4b3]/40 bg-[#dcebe1]/85 p-5">
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
             Total previsto
           </p>
-          <p className="mt-3 font-title text-3xl text-white">
+          <p className="mt-3 font-title text-3xl text-[#20352a]">
             {formatCurrency(totalExpected)}
           </p>
         </div>
-        <div className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-5">
+        <div className="rounded-[24px] border border-[#aac4b3]/40 bg-[#dcebe1]/85 p-5">
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
             Total pago
           </p>
-          <p className="mt-3 font-title text-3xl text-white">
+          <p className="mt-3 font-title text-3xl text-[#20352a]">
             {formatCurrency(totalPaid)}
           </p>
         </div>
-        <div className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-5">
+        <div className="rounded-[24px] border border-[#aac4b3]/40 bg-[#dcebe1]/85 p-5">
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">
             Saldo em aberto
           </p>
-          <p className="mt-3 font-title text-3xl text-white">
+          <p className="mt-3 font-title text-3xl text-[#20352a]">
             {formatCurrency(totalExpected - totalPaid)}
           </p>
         </div>

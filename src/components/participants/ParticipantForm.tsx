@@ -135,14 +135,14 @@ export function ParticipantForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6"
+      className="rounded-[24px] border border-[#aac4b3]/40 bg-[#eef5ef]/92 p-6"
     >
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="font-title text-[10px] uppercase tracking-[0.24em] text-cyan-300/58">
+          <p className="font-title text-[10px] uppercase tracking-[0.24em] text-[#6a957d]">
             {subheading}
           </p>
-          <h2 className="mt-2 font-title text-xl text-white">
+          <h2 className="mt-2 font-title text-xl text-[#20352a]">
             {heading}
           </h2>
         </div>
@@ -154,7 +154,7 @@ export function ParticipantForm({
             disabled={isSubmitting}
               aria-label="Cancelar edição"
               title="Cancelar edição"
-            className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 text-slate-300 transition hover:border-white/16 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-2xl border border-[#b7d0bf]/45 bg-white/78 p-3 text-slate-700 transition hover:border-[#89b39a]/55 hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               <RotateCcw className="h-4 w-4" />
             </button>
@@ -164,7 +164,7 @@ export function ParticipantForm({
             disabled={!isValid || isSubmitting}
             aria-label={actionLabel}
             title={actionLabel}
-            className="rounded-2xl border border-cyan-400/20 bg-cyan-400/8 p-3 text-cyan-100 transition hover:border-cyan-400/30 hover:bg-cyan-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] p-3 text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {mode === 'edit' ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
           </button>

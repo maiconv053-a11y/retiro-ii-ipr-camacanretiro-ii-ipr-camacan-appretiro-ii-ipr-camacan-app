@@ -15,7 +15,7 @@ import {
   syncInstallmentsAmountPaid,
 } from '@/utils/finance'
 import { downloadBoletoBookletPdf } from '@/utils/boletoPdf'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatIsoDatePtBr } from '@/utils/format'
 
 interface FinancialRecordCardProps {
   participant: Participant
@@ -179,23 +179,23 @@ export function FinancialRecordCard({
   }
 
   return (
-    <article className="rounded-[24px] border border-emerald-100/10 bg-[#102019]/78 p-5">
-      <div className="flex flex-col gap-4 border-b border-emerald-100/10 pb-4 md:flex-row md:items-center md:justify-between">
+    <article className="rounded-[24px] border border-[#aac4b3]/40 bg-[#eef5ef]/92 p-5">
+      <div className="flex flex-col gap-4 border-b border-[#b7d0bf]/40 pb-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-3">
-            <h3 className="font-title text-xl text-white">{participant.fullName}</h3>
+            <h3 className="font-title text-xl text-[#20352a]">{participant.fullName}</h3>
             {draft.paymentMethod === 'Boleto' ? (
               <button
                 type="button"
                 onClick={() => void handleDownloadBoletoPdf()}
-                className="inline-flex items-center gap-2 rounded-2xl border border-amber-200/25 bg-amber-200/10 px-4 py-2 text-sm font-medium text-amber-100 transition hover:border-amber-200/35 hover:bg-amber-200/15"
+                className="inline-flex items-center gap-2 rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-4 py-2 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8]"
               >
                 <Download className="h-4 w-4" />
                 Baixar PDF
               </button>
             ) : null}
           </div>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-slate-600">
             Pago {formatCurrency(participant.financial.amountPaid)} de{' '}
             {formatCurrency(participant.financial.totalAmount)}
           </p>
@@ -213,7 +213,7 @@ export function FinancialRecordCard({
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 Valor total
               </span>
               <input
@@ -242,7 +242,7 @@ export function FinancialRecordCard({
             </label>
 
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 Valor pago
               </span>
               <input
@@ -326,7 +326,8 @@ export function FinancialRecordCard({
                     {installment.label} · {formatCurrency(installment.amount)}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
-                    Vencimento {installment.dueDate ?? 'a definir'}
+                    Vencimento{' '}
+                    {installment.dueDate ? formatIsoDatePtBr(installment.dueDate) : 'a definir'}
                   </p>
                 </div>
                 <StatusBadge

@@ -96,16 +96,16 @@ export default function DashboardPage() {
         />
       </div>
 
-      <section className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6">
+      <section className="rounded-[24px] border border-[#aac4b3]/40 bg-[#f2f8f3]/92 p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <p className="font-title text-[10px] uppercase tracking-[0.24em] text-cyan-300/58">
+            <p className="font-title text-[10px] uppercase tracking-[0.24em] text-[#6a957d]">
               Configuração central
             </p>
-            <h2 className="mt-2 font-title text-xl text-white">
+            <h2 className="mt-2 font-title text-xl text-[#20352a]">
               Valor fixo do retiro
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               Ao atualizar este valor, a inscrição pública passa a exibir o novo total e
               as parcelas futuras dos participantes com saldo pendente são recalculadas
               automaticamente.
@@ -114,7 +114,7 @@ export default function DashboardPage() {
 
           <div className="flex w-full flex-col gap-3 lg:max-w-xl lg:flex-row lg:items-end">
             <label className="flex-1 space-y-2">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 Novo valor do retiro
               </span>
               <input
@@ -130,7 +130,7 @@ export default function DashboardPage() {
               type="button"
               onClick={() => void handleRetreatFeeUpdate()}
               disabled={syncing || !Number.isFinite(feeDraft) || feeDraft <= 0}
-              className="flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/8 px-5 py-3 text-sm font-medium text-cyan-100 transition hover:border-cyan-400/30 hover:bg-cyan-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-5 py-3 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <PencilLine className="h-4 w-4" />
               {syncing ? 'Atualizando valor...' : 'Salvar novo valor'}
@@ -138,22 +138,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-[20px] border border-white/8 bg-white/[0.02] px-4 py-4 text-sm text-slate-300">
-          Valor atual publicado: <span className="text-white">{formatCurrency(retreatFee)}</span>
+        <div className="mt-4 rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 px-4 py-4 text-sm text-slate-700">
+          Valor atual publicado: <span className="text-[#20352a]">{formatCurrency(retreatFee)}</span>
         </div>
       </section>
 
       <div className="grid gap-5 2xl:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6">
+        <section className="rounded-[24px] border border-[#aac4b3]/40 bg-[#f2f8f3]/92 p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="font-title text-[10px] uppercase tracking-[0.24em] text-cyan-300/58">
+              <p className="font-title text-[10px] uppercase tracking-[0.24em] text-[#6a957d]">
                 Radar financeiro
               </p>
-              <h2 className="mt-2 font-title text-xl text-white">
+              <h2 className="mt-2 font-title text-xl text-[#20352a]">
                 Participantes com saldo pendente
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-400">
+              <p className="mt-2 text-sm leading-6 text-slate-600">
                 Foco rápido nas inscrições que ainda precisam de acompanhamento.
               </p>
             </div>
@@ -165,20 +165,20 @@ export default function DashboardPage() {
 
           <div className="mt-5 space-y-3">
             {pendingParticipants.length === 0 ? (
-              <article className="rounded-[20px] border border-white/8 bg-white/[0.02] p-4 text-sm leading-6 text-slate-400">
+              <article className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 p-4 text-sm leading-6 text-slate-600">
                 Nenhum participante com saldo pendente no momento.
               </article>
             ) : (
               pendingParticipants.map((participant) => (
                 <article
                   key={participant.id}
-                  className="flex flex-col gap-3 rounded-[20px] border border-white/8 bg-white/[0.02] p-4 md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-3 rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 p-4 md:flex-row md:items-center md:justify-between"
                 >
                   <div>
-                    <h3 className="text-sm font-medium text-white">
+                    <h3 className="text-sm font-medium text-[#20352a]">
                       {participant.fullName}
                     </h3>
-                    <p className="mt-1 text-sm leading-6 text-slate-400">
+                    <p className="mt-1 text-sm leading-6 text-slate-600">
                       Pago {formatCurrency(participant.financial.amountPaid)} de{' '}
                       {formatCurrency(participant.financial.totalAmount)}
                     </p>
@@ -193,32 +193,32 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="rounded-[24px] border border-white/10 bg-[#08111f]/88 p-6">
-          <p className="font-title text-[10px] uppercase tracking-[0.24em] text-violet-300/58">
+        <section className="rounded-[24px] border border-[#aac4b3]/40 bg-[#f2f8f3]/92 p-6">
+          <p className="font-title text-[10px] uppercase tracking-[0.24em] text-[#7a9c87]">
             Operação logística
           </p>
-          <h2 className="mt-2 font-title text-xl text-white">
+          <h2 className="mt-2 font-title text-xl text-[#20352a]">
             Próximos pontos de atenção
           </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-400">
+          <p className="mt-2 text-sm leading-6 text-slate-600">
             Itens operacionais mais importantes para a equipe organizadora.
           </p>
 
           <div className="mt-5 space-y-3">
             {logisticsTasks.length === 0 ? (
-              <article className="rounded-[20px] border border-white/8 bg-white/[0.02] p-4 text-sm leading-6 text-slate-400">
+              <article className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 p-4 text-sm leading-6 text-slate-600">
                 Ainda não existem tarefas cadastradas para a operação.
               </article>
             ) : (
               logisticsTasks.map((task) => (
                 <article
                   key={task.id}
-                  className="rounded-[20px] border border-white/8 bg-white/[0.02] p-4"
+                  className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="text-sm font-medium text-white">{task.title}</h3>
-                      <p className="mt-1 text-sm text-slate-400">{task.owner}</p>
+                      <h3 className="text-sm font-medium text-[#20352a]">{task.title}</h3>
+                      <p className="mt-1 text-sm text-slate-600">{task.owner}</p>
                     </div>
                     <StatusBadge
                       label={
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                       }
                     />
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-slate-400">{task.notes}</p>
+                  <p className="mt-4 text-sm leading-6 text-slate-600">{task.notes}</p>
                 </article>
               ))
             )}

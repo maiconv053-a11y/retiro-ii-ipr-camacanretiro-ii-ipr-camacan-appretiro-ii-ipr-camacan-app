@@ -15,16 +15,16 @@ interface BoletoPdfInput {
 const PIX_KEY = '(73) 982313389'
 
 const PAGE_COLORS = {
-  background: [248, 247, 244] as const,
-  cardBorder: [120, 131, 126] as const,
-  softBorder: [207, 212, 209] as const,
-  title: [5, 40, 31] as const,
-  text: [32, 37, 35] as const,
-  muted: [83, 90, 87] as const,
-  accent: [7, 56, 42] as const,
-  accentSoft: [230, 239, 235] as const,
-  gold: [212, 181, 96] as const,
-  white: [245, 247, 242] as const,
+  background: [238, 245, 239] as const,
+  cardBorder: [167, 197, 179] as const,
+  softBorder: [199, 220, 206] as const,
+  title: [32, 53, 42] as const,
+  text: [67, 93, 81] as const,
+  muted: [95, 122, 109] as const,
+  accent: [74, 139, 99] as const,
+  accentSoft: [220, 235, 226] as const,
+  gold: [195, 178, 118] as const,
+  white: [247, 251, 248] as const,
 }
 
 function drawRoundedLabel(

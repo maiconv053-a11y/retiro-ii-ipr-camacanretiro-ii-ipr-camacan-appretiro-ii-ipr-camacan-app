@@ -67,6 +67,62 @@ type FinancialInstallmentRow = {
   vencimento: string | null
 }
 
+type InstallmentBoletoRow = {
+  id: string
+  numero_parcela: number
+  valor_parcela: number
+  status: string
+  vencimento: string | null
+  financeiro:
+    | {
+        id: string
+        forma_pagamento: string
+        num_parcelas: number
+        participante:
+          | {
+              id: string
+              nome: string
+              telefone: string | null
+              email: string | null
+              igreja: string | null
+              cidade: string | null
+            }
+          | {
+              id: string
+              nome: string
+              telefone: string | null
+              email: string | null
+              igreja: string | null
+              cidade: string | null
+            }[]
+          | null
+      }
+    | {
+        id: string
+        forma_pagamento: string
+        num_parcelas: number
+        participante:
+          | {
+              id: string
+              nome: string
+              telefone: string | null
+              email: string | null
+              igreja: string | null
+              cidade: string | null
+            }
+          | {
+              id: string
+              nome: string
+              telefone: string | null
+              email: string | null
+              igreja: string | null
+              cidade: string | null
+            }[]
+          | null
+      }[]
+    | null
+}
+
 type LogisticsRow = {
   id: string
   categoria: string
@@ -536,6 +592,70 @@ async function recalculateFutureInvoices(newRetreatFee: number) {
 export async function getRetreatSettings() {
   const settings = await ensureRetreatSettingsRecord()
   return mapRetreatSettings(settings)
+}
+
+export async function getInstallmentBoletoData(installmentId: string) {
+  const supabase = assertSupabase()
+  const { data, error } = await supabase
+    .from('financeiro_parcelas')
+    .select(
+      `
+        id,
+        numero_parcela,
+        valor_parcela,
+        status,
+        vencimento,
+        financeiro:financeiro_id (
+          id,
+          forma_pagamento,
+          num_parcelas,
+          participante:participante_id (
+            id,
+            nome,
+            telefone,
+            email,
+            igreja,
+            cidade
+          )
+        )
+      `,
+    )
+    .eq('id', installmentId)
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  if (!data) {
+    throw new Error('Parcela não encontrada.')
+  }
+
+  const row = data as InstallmentBoletoRow
+  const financial = Array.isArray(row.financeiro) ? row.financeiro[0] ?? null : row.financeiro
+  const participant = Array.isArray(financial?.participante)
+    ? financial?.participante[0] ?? null
+    : financial?.participante ?? null
+
+  if (!financial || !participant) {
+    throw new Error('Dados financeiros da parcela não encontrados.')
+  }
+
+  return {
+    installmentId: row.id,
+    installmentNumber: row.numero_parcela,
+    installmentAmount: Number(row.valor_parcela),
+    installmentStatus: row.status === 'paga' ? 'Paga' : 'Pendente',
+    dueDate: row.vencimento,
+    paymentMethod: financial.forma_pagamento,
+    totalInstallments: Math.max(1, Number(financial.num_parcelas || 1)),
+    participantId: participant.id,
+    participantName: participant.nome,
+    participantPhone: participant.telefone,
+    participantEmail: participant.email,
+    participantChurch: participant.igreja,
+    participantCity: participant.cidade,
+  }
 }
 
 export async function updateRetreatFee(newRetreatFee: number) {

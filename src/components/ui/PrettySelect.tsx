@@ -61,22 +61,22 @@ export function PrettySelect({
         onClick={() => setOpen((current) => !current)}
         className={`flex min-h-[3.5rem] w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left text-sm transition ${
           disabled
-            ? 'cursor-not-allowed border-white/10 bg-[#102019]/55 text-slate-500 opacity-70'
+            ? 'cursor-not-allowed border-[#b7d0bf]/35 bg-[#e7f1ea]/80 text-slate-500 opacity-70'
             : open
-              ? 'border-emerald-300/25 bg-[#163126] text-white shadow-[0_0_0_4px_rgba(16,185,129,0.08)]'
-              : 'border-emerald-100/10 bg-[#102019]/90 text-slate-100 hover:border-emerald-200/20 hover:bg-[#163126]'
+              ? 'border-[#86ae96]/65 bg-white text-[#20352a] shadow-[0_0_0_4px_rgba(120,169,137,0.14)]'
+              : 'border-[#b7d0bf]/45 bg-white/88 text-[#24372d] hover:border-[#86ae96]/55 hover:bg-white'
         }`}
       >
         <span className="truncate pr-2">
           {selectedOption?.label ?? 'Selecione uma opção'}
         </span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-emerald-100/80 transition ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 text-[#476b58] transition ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       {open && !disabled ? (
-        <div className="absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-[22px] border border-emerald-100/10 bg-[#0f1f19]/98 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+        <div className="absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-[22px] border border-[#b7d0bf]/45 bg-[#f5faf6]/98 shadow-[0_24px_60px_rgba(96,130,111,0.18)] backdrop-blur-xl">
           <div className="max-h-80 overflow-y-auto p-2">
             {options.map((option) => {
               const active = option.value === value
@@ -91,12 +91,12 @@ export function PrettySelect({
                   }}
                   className={`flex w-full items-start justify-between gap-3 rounded-[18px] px-4 py-3 text-left text-sm transition ${
                     active
-                      ? 'bg-emerald-300/10 text-white'
-                      : 'text-slate-200 hover:bg-white/[0.04]'
+                      ? 'bg-[#dcebe1] text-[#20352a]'
+                      : 'text-slate-700 hover:bg-[#edf5ef]'
                   }`}
                 >
                   <span className="leading-6">{option.label}</span>
-                  {active ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-200" /> : null}
+                  {active ? <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#406350]" /> : null}
                 </button>
               )
             })}

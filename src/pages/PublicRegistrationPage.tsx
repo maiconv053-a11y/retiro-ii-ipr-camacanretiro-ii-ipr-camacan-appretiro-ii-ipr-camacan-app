@@ -244,12 +244,12 @@ export default function PublicRegistrationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#06110d] px-4 pb-8 pt-2 text-slate-100 md:px-6 md:pb-8 md:pt-3">
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.08),transparent_24%),radial-gradient(circle_at_top_right,rgba(74,222,128,0.08),transparent_22%),linear-gradient(180deg,rgba(8,20,16,0.95),rgba(6,17,13,1))]" />
+    <div className="min-h-screen bg-[#edf4ee] px-4 pb-8 pt-2 text-slate-800 md:px-6 md:pb-8 md:pt-3">
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_left,rgba(160,202,178,0.32),transparent_24%),radial-gradient(circle_at_top_right,rgba(206,226,214,0.5),transparent_24%),linear-gradient(180deg,rgba(248,252,249,0.96),rgba(232,242,235,1))]" />
 
       <div className="relative mx-auto max-w-7xl">
         <div className="mb-4 flex justify-center">
-          <div className="flex h-36 w-36 items-center justify-center rounded-[32px] border border-amber-200/30 bg-[#f4ead7] p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] md:h-40 md:w-40">
+          <div className="flex h-36 w-36 items-center justify-center rounded-[32px] border border-[#b8d1c0]/70 bg-[#f6faf7] p-3 shadow-[0_12px_28px_rgba(101,136,116,0.12)] md:h-40 md:w-40">
             <img
               src={logoRetiro}
               alt="Logo Retiro 2027"
@@ -259,26 +259,26 @@ export default function PublicRegistrationPage() {
         </div>
 
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(340px,0.92fr)_minmax(0,1.08fr)]">
-        <section className="rounded-[28px] border border-emerald-100/10 bg-[#0b1713]/90 p-6 md:p-8">
-          <h1 className="mt-4 font-title text-3xl leading-tight text-white md:text-4xl">
+        <section className="rounded-[28px] border border-[#aac4b3]/40 bg-[#eef5ef]/92 p-6 md:p-8">
+          <h1 className="mt-4 font-title text-3xl leading-tight text-[#20352a] md:text-4xl">
             Inscrição do Retiro da II IPR de Camacan
           </h1>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-slate-400">
+          <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600">
             Preencha seus dados, escolha a forma de pagamento e confirme o termo de
             compromisso. A inscrição entra no banco online e aguarda validação da
             diretoria.
           </p>
 
           <div className="mt-8 grid gap-4 lg:grid-cols-2">
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
+            <div className="rounded-[24px] border border-[#b7d0bf]/40 bg-white/72 p-5">
               <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
                 Valor integral
               </p>
-              <p className="mt-3 font-title text-3xl text-white">
+              <p className="mt-3 font-title text-3xl text-[#20352a]">
                 {formatCurrency(retreatFee)}
               </p>
               <div className="mt-3 space-y-1 text-sm text-slate-400">
-                <p className="text-slate-200">O valor do retiro inclui:</p>
+                <p className="text-[#2b4337]">O valor do retiro inclui:</p>
                 <p>Hospedagem.</p>
                 <p>Alimentação: café da manhã, almoço e janta.</p>
                 <p>Transporte.</p>
@@ -287,15 +287,15 @@ export default function PublicRegistrationPage() {
                 <div className="mt-3 space-y-1 text-sm text-slate-400">
                   <p>
                     Data do evento:{' '}
-                    <span className="text-slate-200">{formatIsoDatePtBr(EVENT_DATE_ISO)}</span>
+                    <span className="text-[#2b4337]">{formatIsoDatePtBr(EVENT_DATE_ISO)}</span>
                   </p>
                   <p>
                     Idade no evento:{' '}
-                    <span className="text-slate-200">{pricing.ageAtEvent} anos</span>
+                    <span className="text-[#2b4337]">{pricing.ageAtEvent} anos</span>
                   </p>
                   <p>
                     Valor final:{' '}
-                    <span className="text-white">{formatCurrency(pricing.totalAmount)}</span>
+                    <span className="text-[#20352a]">{formatCurrency(pricing.totalAmount)}</span>
                   </p>
                 </div>
               ) : (
@@ -305,7 +305,7 @@ export default function PublicRegistrationPage() {
               )}
             </div>
 
-            <div className="rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
+            <div className="rounded-[24px] border border-[#b7d0bf]/40 bg-white/72 p-5">
               <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
                 Parcelamento do boleto
               </p>
@@ -323,7 +323,7 @@ export default function PublicRegistrationPage() {
             </div>
           </div>
 
-          <div className="mt-8 rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
+          <div className="mt-8 rounded-[24px] border border-[#b7d0bf]/40 bg-white/72 p-5">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
               Como funciona
             </p>
@@ -338,7 +338,7 @@ export default function PublicRegistrationPage() {
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-[28px] border border-emerald-100/10 bg-[#0d1814]/90 p-6 md:p-8"
+        className="rounded-[28px] border border-[#aac4b3]/40 bg-[#eef5ef]/92 p-6 md:p-8"
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
             <label className="space-y-2 md:col-span-2 xl:col-span-6">
@@ -452,7 +452,7 @@ export default function PublicRegistrationPage() {
             </label>
           </div>
 
-          <section className="mt-6 rounded-[24px] border border-emerald-100/10 bg-[#102019]/72 p-5">
+          <section className="mt-6 rounded-[24px] border border-[#aac4b3]/40 bg-[#dcebe1]/85 p-5">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
@@ -511,11 +511,11 @@ export default function PublicRegistrationPage() {
             ) : null}
           </section>
 
-          <section className="mt-6 rounded-[24px] border border-white/10 bg-white/[0.02] p-5">
+          <section className="mt-6 rounded-[24px] border border-[#b7d0bf]/40 bg-white/72 p-5">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-500">
               Termo de compromisso
             </p>
-            <div className="mt-4 h-56 overflow-y-auto rounded-[20px] border border-emerald-100/10 bg-[#0b1713] p-4 text-sm leading-7 text-slate-300">
+            <div className="mt-4 h-56 overflow-y-auto rounded-[20px] border border-[#b7d0bf]/40 bg-[#f4faf6] p-4 text-sm leading-7 text-slate-700">
               <p>
                 Ao confirmar esta inscrição, declaro que li e concordo com as condições
                 de participação no Retiro da II IPR de Camacan, comprometendo-me a agir
@@ -523,37 +523,37 @@ export default function PublicRegistrationPage() {
               </p>
               <div className="mt-4 space-y-4">
                 <p>
-                  <span className="font-medium text-white">1. Informações prestadas.</span>{' '}
+                  <span className="font-medium text-[#20352a]">1. Informações prestadas.</span>{' '}
                   Declaro que os dados informados nesta inscrição são verdadeiros e
                   atualizados, incluindo informações pessoais, restrições alimentares,
                   necessidades médicas e demais observações relevantes para minha
                   participação.
                 </p>
                 <p>
-                  <span className="font-medium text-white">2. Comunicação prévia.</span>{' '}
+                  <span className="font-medium text-[#20352a]">2. Comunicação prévia.</span>{' '}
                   Comprometo-me a comunicar com antecedência qualquer impossibilidade de
                   comparecimento, alteração importante nas informações prestadas ou
                   necessidade especial que possa impactar minha permanência no evento.
                 </p>
                 <p>
-                  <span className="font-medium text-white">3. Validação da vaga.</span>{' '}
+                  <span className="font-medium text-[#20352a]">3. Validação da vaga.</span>{' '}
                   Estou ciente de que a vaga somente será considerada validada após a
                   conferência do pagamento pela diretoria, inclusive nos casos de PIX,
                   dinheiro, boleto ou cartão de crédito parcelado.
                 </p>
                 <p>
-                  <span className="font-medium text-white">4. Conduta e convivência.</span>{' '}
+                  <span className="font-medium text-[#20352a]">4. Conduta e convivência.</span>{' '}
                   Comprometo-me a seguir as orientações da organização, bem como as
                   normas espirituais, disciplinares, de convivência, horários e uso dos
                   espaços definidos para o retiro.
                 </p>
                 <p>
-                  <span className="font-medium text-white">5. Desistência.</span>{' '}
+                  <span className="font-medium text-[#20352a]">5. Desistência.</span>{' '}
                   Estou ciente de que, em caso de desistência ou cancelamento por minha
                   iniciativa, os valores já pagos não serão devolvidos.
                 </p>
                 <p>
-                  <span className="font-medium text-white">6. Bens pessoais.</span>{' '}
+                  <span className="font-medium text-[#20352a]">6. Bens pessoais.</span>{' '}
                   Estou ciente de que a guarda de bens e pertences pessoais é de minha
                   responsabilidade, não cabendo à comissão organizadora responsabilidade
                   por perdas, extravios, furtos ou danos ocorridos durante o evento.
@@ -561,14 +561,14 @@ export default function PublicRegistrationPage() {
               </div>
             </div>
 
-            <label className="mt-4 flex items-start gap-3 rounded-[20px] border border-emerald-100/10 bg-[#0b1713]/70 p-4">
+            <label className="mt-4 flex items-start gap-3 rounded-[20px] border border-[#b7d0bf]/40 bg-white/78 p-4">
               <input
                 type="checkbox"
                 checked={form.termsAccepted}
                 onChange={(event) => updateField('termsAccepted', event.target.checked)}
                 className="mt-1 h-4 w-4 rounded border-white/20 bg-transparent"
               />
-              <span className="text-sm leading-6 text-slate-300">
+              <span className="text-sm leading-6 text-slate-700">
                 Li e concordo com o termo de compromisso do retiro.
               </span>
             </label>
@@ -583,12 +583,12 @@ export default function PublicRegistrationPage() {
           <div className="mt-6 flex flex-col gap-4 border-t border-white/10 pt-5 md:flex-row md:items-center md:justify-between">
             <p className="text-sm leading-6 text-slate-400">
               Ao enviar, sua inscrição será gravada com status financeiro
-              <span className="text-white"> pendente de validação</span>.
+              <span className="text-[#20352a]"> pendente de validação</span>.
             </p>
             <button
               type="submit"
               disabled={submitting || !isValid}
-              className="rounded-2xl border border-cyan-400/20 bg-cyan-400/8 px-5 py-3 text-sm font-medium text-cyan-100 transition hover:border-cyan-400/30 hover:bg-cyan-400/12 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-2xl border border-[#89b39a]/55 bg-[#dcebe2] px-5 py-3 text-sm font-medium text-[#29513e] transition hover:border-[#6f9f80]/65 hover:bg-[#d2e5d8] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {submitting ? 'Enviando inscrição...' : 'Confirmar inscrição'}
             </button>
