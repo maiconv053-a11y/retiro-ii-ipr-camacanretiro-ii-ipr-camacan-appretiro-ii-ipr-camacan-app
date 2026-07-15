@@ -779,6 +779,8 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
   const pricing = computeRegistrationPricing({
     birthDateIso: input.birthDate,
     paymentMethod: input.paymentMethod,
+    preferredPaymentDay:
+      input.paymentMethod === 'Boleto' ? input.preferredPaymentDay : undefined,
     installmentCount: input.installmentCount,
     baseFee: retreatFee,
   })
@@ -818,6 +820,7 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
   const summary = {
     participantId: data.id,
     paymentMethod: pricing.paymentMethod,
+    preferredPaymentDay: pricing.paymentMethod === 'Boleto' ? input.preferredPaymentDay : null,
     installmentCount: pricing.installmentCount,
     totalAmount: pricing.totalAmount,
     installmentAmounts: pricing.installmentAmounts,

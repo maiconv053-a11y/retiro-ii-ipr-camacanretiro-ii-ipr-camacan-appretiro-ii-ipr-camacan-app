@@ -14,6 +14,7 @@ import {
   EVENT_DATE_ISO,
   getMonthsAvailableUntilEvent,
   PAYMENT_DEADLINE_ISO,
+  PREFERRED_PAYMENT_DAY_OPTIONS,
 } from '@/utils/registrationPricing'
 import { createPublicRegistration, fetchPublicRetreatSettings } from '@/services/retreatApi'
 import logoRetiro from '@/assets/logo-retiro.png'
@@ -36,6 +37,7 @@ const initialForm: PublicRegistrationInput = {
   dietaryRestrictions: '',
   medicalRestrictions: '',
   paymentMethod: 'PIX',
+  preferredPaymentDay: 10,
   installmentCount: 1,
   termsAccepted: false,
 }
@@ -106,13 +108,15 @@ export default function PublicRegistrationPage() {
       return computeRegistrationPricing({
         birthDateIso: form.birthDate,
         paymentMethod: form.paymentMethod,
+        preferredPaymentDay:
+          form.paymentMethod === 'Boleto' ? form.preferredPaymentDay : undefined,
         installmentCount: form.installmentCount,
         baseFee: retreatFee,
       })
     } catch {
       return null
     }
-  }, [form.birthDate, form.installmentCount, form.paymentMethod, retreatFee])
+  }, [form.birthDate, form.installmentCount, form.paymentMethod, form.preferredPaymentDay, retreatFee])
 
   const installmentOptions = useMemo(() => {
     const maxInstallments =
@@ -130,6 +134,8 @@ export default function PublicRegistrationPage() {
           const optionPricing = computeRegistrationPricing({
             birthDateIso: form.birthDate,
             paymentMethod: form.paymentMethod,
+            preferredPaymentDay:
+              form.paymentMethod === 'Boleto' ? form.preferredPaymentDay : undefined,
             installmentCount: count,
             baseFee: retreatFee,
           })
@@ -149,7 +155,7 @@ export default function PublicRegistrationPage() {
         label,
       }
     })
-  }, [form.birthDate, form.paymentMethod, monthsAvailableForBoleto, retreatFee])
+  }, [form.birthDate, form.paymentMethod, form.preferredPaymentDay, monthsAvailableForBoleto, retreatFee])
 
   const isValid = useMemo(
     () =>
@@ -311,7 +317,7 @@ export default function PublicRegistrationPage() {
               </p>
               <div className="mt-3 space-y-2 text-sm leading-6 text-[#4c6457]">
                 <p>
-                  Primeira parcela: mesmo dia da inscrição, no mês seguinte.
+                  Primeira parcela: no dia escolhido por você, a partir do próximo mês.
                 </p>
                 <p>
                   Última parcela: <span className="text-[#20352a]">{formatIsoDatePtBr(PAYMENT_DEADLINE_ISO)}</span>.
@@ -489,6 +495,24 @@ export default function PublicRegistrationPage() {
               ))}
             </div>
 
+            {form.paymentMethod === 'Boleto' ? (
+              <label className="mt-4 block space-y-2">
+                <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
+                  Qual o melhor dia do mês para pagar?
+                </span>
+                <div className="grid gap-3">
+                  <PrettySelect
+                    value={form.preferredPaymentDay}
+                    onChange={(value) => updateField('preferredPaymentDay', value)}
+                    options={PREFERRED_PAYMENT_DAY_OPTIONS.map((day) => ({
+                      value: day,
+                      label: `Dia ${String(day).padStart(2, '0')}`,
+                    }))}
+                  />
+                </div>
+              </label>
+            ) : null}
+
             {requiresInstallments(form.paymentMethod) ? (
               <label className="mt-4 block space-y-2">
                 <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
@@ -504,7 +528,7 @@ export default function PublicRegistrationPage() {
                   <div className="rounded-[20px] border border-[#b7d0bf]/40 bg-white/72 px-4 py-3 text-sm leading-6 text-[#4c6457]">
                     {form.paymentMethod === 'CartaoCredito'
                       ? 'No cartão, a tela de sucesso mostra apenas as parcelas com taxas inclusas.'
-                      : `No boleto, a última parcela sempre vence em ${formatIsoDatePtBr(PAYMENT_DEADLINE_ISO)}.`}
+                      : `No boleto, a última parcela continua limitada por ${formatIsoDatePtBr(PAYMENT_DEADLINE_ISO)}.`}
                   </div>
                 </div>
               </label>

@@ -135,6 +135,11 @@ export default function PublicRegistrationSuccessPage() {
                 O pagamento ficará como pendente de validação até a diretoria confirmar a
                 baixa.
               </p>
+              {payload.paymentMethod === 'Boleto' && payload.preferredPaymentDay ? (
+                <p className="mt-2 text-sm text-[#4c6457]">
+                  Melhor dia escolhido para pagar: dia {String(payload.preferredPaymentDay).padStart(2, '0')}.
+                </p>
+              ) : null}
             </div>
           </div>
 

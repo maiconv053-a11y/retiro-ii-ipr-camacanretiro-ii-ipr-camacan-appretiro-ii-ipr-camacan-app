@@ -98,6 +98,7 @@ export interface PublicRegistrationInput {
   dietaryRestrictions: string
   medicalRestrictions: string
   paymentMethod: PaymentMethod
+  preferredPaymentDay: number
   installmentCount: number
   termsAccepted: boolean
 }
@@ -105,6 +106,7 @@ export interface PublicRegistrationInput {
 export interface PublicRegistrationSuccessSummary {
   participantId: string
   paymentMethod: PaymentMethod
+  preferredPaymentDay: number | null
   installmentCount: number
   totalAmount: number
   installmentAmounts: number[]

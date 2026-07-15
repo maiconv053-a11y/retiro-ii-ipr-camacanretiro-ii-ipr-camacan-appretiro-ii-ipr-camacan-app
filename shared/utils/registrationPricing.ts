@@ -5,6 +5,7 @@ export const EVENT_DATE = new Date(`${EVENT_DATE_ISO}T00:00:00Z`)
 export const PAYMENT_DEADLINE_ISO = '2027-02-04'
 export const PAYMENT_DEADLINE = new Date(`${PAYMENT_DEADLINE_ISO}T00:00:00Z`)
 export const BASE_REGISTRATION_FEE = 750
+export const PREFERRED_PAYMENT_DAY_OPTIONS = [5, 10, 15, 20, 25] as const
 
 export type AgePricingTier = 'Free' | 'Half' | 'Full'
 
@@ -102,6 +103,14 @@ function getDaysInUtcMonth(year: number, month: number) {
   return new Date(Date.UTC(year, month + 1, 0)).getUTCDate()
 }
 
+function normalizePreferredPaymentDay(preferredPaymentDay?: number) {
+  if (!Number.isFinite(preferredPaymentDay)) {
+    return 10
+  }
+
+  return Math.min(31, Math.max(1, Math.trunc(preferredPaymentDay ?? 10)))
+}
+
 export function addUtcMonths(date: Date, months: number) {
   const totalMonths = date.getUTCFullYear() * 12 + date.getUTCMonth() + months
   const nextYear = Math.floor(totalMonths / 12)
@@ -115,27 +124,34 @@ export function toDateIso(date: Date) {
   return date.toISOString().slice(0, 10)
 }
 
-function buildDueDateSlots(now: Date) {
+function buildDueDateSlots(now: Date, preferredPaymentDay?: number) {
   const totalSlots = getMonthsAvailableUntilEvent(now)
+  const safePreferredPaymentDay = normalizePreferredPaymentDay(preferredPaymentDay)
 
   if (totalSlots <= 1) {
     return [PAYMENT_DEADLINE_ISO]
   }
-
-  const firstDueDate = addUtcMonths(now, 1)
 
   return Array.from({ length: totalSlots }, (_, index) => {
     if (index === totalSlots - 1) {
       return PAYMENT_DEADLINE_ISO
     }
 
-    return toDateIso(addUtcMonths(firstDueDate, index))
+    const totalMonths = now.getUTCFullYear() * 12 + now.getUTCMonth() + 1 + index
+    const dueYear = Math.floor(totalMonths / 12)
+    const dueMonth = ((totalMonths % 12) + 12) % 12
+    const dueDay = Math.min(
+      safePreferredPaymentDay,
+      getDaysInUtcMonth(dueYear, dueMonth),
+    )
+
+    return toDateIso(new Date(Date.UTC(dueYear, dueMonth, dueDay)))
   })
 }
 
 function distributeInstallmentIndexes(totalSlots: number, installmentCount: number) {
   if (installmentCount <= 1 || totalSlots <= 1) {
-    return [totalSlots - 1]
+    return [0]
   }
 
   const lastIndex = totalSlots - 1
@@ -151,10 +167,14 @@ function distributeInstallmentIndexes(totalSlots: number, installmentCount: numb
   return indexes
 }
 
-export function computeDueDates(now: Date, installmentCount: number) {
+export function computeDueDates(
+  now: Date,
+  installmentCount: number,
+  preferredPaymentDay?: number,
+) {
   const totalSlots = getMonthsAvailableUntilEvent(now)
   const safeCount = Math.max(1, Math.min(installmentCount, totalSlots))
-  const dueDateSlots = buildDueDateSlots(now)
+  const dueDateSlots = buildDueDateSlots(now, preferredPaymentDay)
 
   return distributeInstallmentIndexes(dueDateSlots.length, safeCount).map(
     (index) => dueDateSlots[index],
@@ -178,6 +198,7 @@ export function computeRegistrationPricing(params: {
   birthDateIso: string
   paymentMethod: PaymentMethod
   installmentCount: number
+  preferredPaymentDay?: number
   baseFee?: number
   now?: Date
 }) {
@@ -199,7 +220,10 @@ export function computeRegistrationPricing(params: {
       installmentCount: 1,
       totalAmount: 0,
       installmentAmounts: [0],
-      dueDates: paymentMethod === 'CartaoCredito' ? null : [PAYMENT_DEADLINE_ISO],
+      dueDates:
+        paymentMethod === 'CartaoCredito'
+          ? null
+          : computeDueDates(now, 1, params.preferredPaymentDay),
       cardInstallmentLabel: paymentMethod === 'CartaoCredito' ? '1x de R$ 0,00' : null,
     } satisfies RegistrationPricingResult
   }
@@ -242,7 +266,7 @@ export function computeRegistrationPricing(params: {
   const installmentAmounts = splitAmountIntoInstallments(discountedFee, safeCount)
   const dueDates =
     paymentMethod === 'Boleto' || paymentMethod === 'PIX' || paymentMethod === 'Dinheiro'
-      ? computeDueDates(now, safeCount)
+      ? computeDueDates(now, safeCount, params.preferredPaymentDay)
       : null
 
   return {
