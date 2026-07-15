@@ -22,6 +22,7 @@ import {
   computeRegistrationPricing,
   EVENT_DATE,
 } from '../../shared/utils/registrationPricing.js'
+import { sendPublicRegistrationConfirmationEmail } from '../lib/registrationConfirmationEmail.js'
 import { assertSupabase } from '../lib/supabase.js'
 
 type ParticipantRow = {
@@ -814,7 +815,7 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
     dueDates: pricing.dueDates,
   })
 
-  return {
+  const summary = {
     participantId: data.id,
     paymentMethod: pricing.paymentMethod,
     installmentCount: pricing.installmentCount,
@@ -824,6 +825,23 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
     cardInstallmentLabel: pricing.cardInstallmentLabel,
     ageAtEvent: pricing.ageAtEvent,
   } satisfies PublicRegistrationSuccessSummary
+
+  try {
+    await sendPublicRegistrationConfirmationEmail({
+      fullName: input.fullName,
+      email: input.email,
+      paymentMethod: summary.paymentMethod,
+      totalAmount: summary.totalAmount,
+      installmentCount: summary.installmentCount,
+      installmentAmounts: summary.installmentAmounts,
+      dueDates: summary.dueDates,
+      cardInstallmentLabel: summary.cardInstallmentLabel,
+    })
+  } catch (error) {
+    console.error('PUBLIC_REGISTRATION_CONFIRMATION_EMAIL_FAILED', error)
+  }
+
+  return summary
 }
 
 export async function updateParticipantRecord(
