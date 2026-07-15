@@ -2,6 +2,7 @@ import { jsPDF } from 'jspdf'
 import type { Installment } from '@shared/types/retreat'
 import logoRetiro from '@/assets/logo-retiro.png'
 import { formatCurrency } from '@/utils/format'
+import { generatePixQrCodeDataUrl } from '@/utils/pix'
 
 interface BoletoPdfInput {
   participantName: string
@@ -12,7 +13,10 @@ interface BoletoPdfInput {
   installments: Installment[]
 }
 
-const PIX_KEY = '(73) 982313389'
+const PIX_PAYMENT_KEY = '+5573991818261'
+const PIX_RECEIPT_PHONE = '(73) 982313389'
+const PIX_MERCHANT_NAME = 'Retiro IPR Camacan'
+const PIX_MERCHANT_CITY = 'Camacan'
 
 const PAGE_COLORS = {
   background: [238, 245, 239] as const,
@@ -196,6 +200,18 @@ export async function downloadBoletoBookletPdf({
     logoDataUrl = null
   }
 
+  const qrCodeDataUrls = await Promise.all(
+    installments.map(async (installment, index) => {
+      return await generatePixQrCodeDataUrl({
+        pixKey: PIX_PAYMENT_KEY,
+        amount: installment.amount,
+        merchantName: PIX_MERCHANT_NAME,
+        merchantCity: PIX_MERCHANT_CITY,
+        txid: `PARCELA${index + 1}`,
+      })
+    }),
+  )
+
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
   const margin = 12
@@ -377,14 +393,15 @@ export async function downloadBoletoBookletPdf({
     })
 
     pdf.setDrawColor(...PAGE_COLORS.cardBorder)
-    pdf.setLineDashPattern([1.4, 1.4], 0)
     pdf.roundedRect(qrBoxX, qrBoxY, qrBoxSize, qrBoxSize, 2.5, 2.5)
-    pdf.setLineDashPattern([], 0)
-    pdf.setFont('helvetica', 'bold')
-    pdf.setFontSize(10)
-    pdf.setTextColor(...PAGE_COLORS.muted)
-    pdf.text('QR CODE', qrBoxX + qrBoxSize / 2, qrBoxY + 17, { align: 'center' })
-    pdf.text('AQUI', qrBoxX + qrBoxSize / 2, qrBoxY + 23, { align: 'center' })
+    pdf.addImage(
+      qrCodeDataUrls[index],
+      'PNG',
+      qrBoxX + 1.5,
+      qrBoxY + 1.5,
+      qrBoxSize - 3,
+      qrBoxSize - 3,
+    )
 
     pdf.setDrawColor(...PAGE_COLORS.softBorder)
     pdf.line(separatorX, pixY + 11, separatorX, pixY + pixH - 11)
@@ -414,7 +431,7 @@ export async function downloadBoletoBookletPdf({
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(12)
     pdf.setTextColor(...PAGE_COLORS.text)
-    pdf.text(PIX_KEY, keyAreaX + keyAreaW / 2, pixY + 45.5, { align: 'center' })
+    pdf.text(PIX_PAYMENT_KEY, keyAreaX + keyAreaW / 2, pixY + 45.5, { align: 'center' })
 
     pdf.setFillColor(4, 44, 34)
     pdf.roundedRect(margin, footerY, pageWidth - margin * 2, footerH, 2.5, 2.5, 'F')
@@ -422,7 +439,7 @@ export async function downloadBoletoBookletPdf({
     pdf.setFontSize(9.4)
     pdf.setTextColor(244, 250, 247)
     pdf.text(
-      'Apos o pagamento, envie o comprovante para o mesmo numero que fez o PIX.',
+      `Apos o pagamento, envie o comprovante para ${PIX_RECEIPT_PHONE}.`,
       margin + 4,
       footerY + 10.8,
     )
