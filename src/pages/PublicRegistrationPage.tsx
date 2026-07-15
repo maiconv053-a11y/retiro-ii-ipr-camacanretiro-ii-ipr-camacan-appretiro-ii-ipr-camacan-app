@@ -277,6 +277,12 @@ export default function PublicRegistrationPage() {
               <p className="mt-3 font-title text-3xl text-white">
                 {formatCurrency(retreatFee)}
               </p>
+              <div className="mt-3 space-y-1 text-sm text-slate-400">
+                <p className="text-slate-200">O valor do retiro inclui:</p>
+                <p>Hospedagem.</p>
+                <p>Alimentação: café da manhã, almoço e janta.</p>
+                <p>Transporte.</p>
+              </div>
               {pricing ? (
                 <div className="mt-3 space-y-1 text-sm text-slate-400">
                   <p>
@@ -511,24 +517,48 @@ export default function PublicRegistrationPage() {
             </p>
             <div className="mt-4 h-56 overflow-y-auto rounded-[20px] border border-emerald-100/10 bg-[#0b1713] p-4 text-sm leading-7 text-slate-300">
               <p>
-                Ao confirmar esta inscrição, declaro que as informações prestadas são
-                verdadeiras e me comprometo a participar do retiro com responsabilidade,
-                respeito à liderança e observância das orientações da organização.
+                Ao confirmar esta inscrição, declaro que li e concordo com as condições
+                de participação no Retiro da II IPR de Camacan, comprometendo-me a agir
+                com responsabilidade, respeito e cooperação durante todo o evento.
               </p>
-              <p className="mt-4">
-                Comprometo-me a comunicar com antecedência qualquer impossibilidade de
-                comparecimento, restrição alimentar ou necessidade médica relevante para
-                minha permanência no evento.
-              </p>
-              <p className="mt-4">
-                Estou ciente de que a vaga somente será considerada validada após a
-                conferência do pagamento pela diretoria, inclusive nos casos de PIX,
-                dinheiro, boleto ou cartão de crédito parcelado.
-              </p>
-              <p className="mt-4">
-                Também concordo em seguir as normas espirituais, disciplinares e de
-                convivência estabelecidas pela organização do Retiro da II IPR de Camacan.
-              </p>
+              <div className="mt-4 space-y-4">
+                <p>
+                  <span className="font-medium text-white">1. Informações prestadas.</span>{' '}
+                  Declaro que os dados informados nesta inscrição são verdadeiros e
+                  atualizados, incluindo informações pessoais, restrições alimentares,
+                  necessidades médicas e demais observações relevantes para minha
+                  participação.
+                </p>
+                <p>
+                  <span className="font-medium text-white">2. Comunicação prévia.</span>{' '}
+                  Comprometo-me a comunicar com antecedência qualquer impossibilidade de
+                  comparecimento, alteração importante nas informações prestadas ou
+                  necessidade especial que possa impactar minha permanência no evento.
+                </p>
+                <p>
+                  <span className="font-medium text-white">3. Validação da vaga.</span>{' '}
+                  Estou ciente de que a vaga somente será considerada validada após a
+                  conferência do pagamento pela diretoria, inclusive nos casos de PIX,
+                  dinheiro, boleto ou cartão de crédito parcelado.
+                </p>
+                <p>
+                  <span className="font-medium text-white">4. Conduta e convivência.</span>{' '}
+                  Comprometo-me a seguir as orientações da organização, bem como as
+                  normas espirituais, disciplinares, de convivência, horários e uso dos
+                  espaços definidos para o retiro.
+                </p>
+                <p>
+                  <span className="font-medium text-white">5. Desistência.</span>{' '}
+                  Estou ciente de que, em caso de desistência ou cancelamento por minha
+                  iniciativa, os valores já pagos não serão devolvidos.
+                </p>
+                <p>
+                  <span className="font-medium text-white">6. Bens pessoais.</span>{' '}
+                  Estou ciente de que a guarda de bens e pertences pessoais é de minha
+                  responsabilidade, não cabendo à comissão organizadora responsabilidade
+                  por perdas, extravios, furtos ou danos ocorridos durante o evento.
+                </p>
+              </div>
             </div>
 
             <label className="mt-4 flex items-start gap-3 rounded-[20px] border border-emerald-100/10 bg-[#0b1713]/70 p-4">
