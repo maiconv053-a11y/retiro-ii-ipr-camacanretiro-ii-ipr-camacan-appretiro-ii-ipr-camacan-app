@@ -1,0 +1,46 @@
+name: Envio Manual de Cobranca
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: Nome do participante
+        required: true
+        type: string
+      installment:
+        description: Numero da parcela (opcional)
+        required: false
+        type: string
+
+jobs:
+  send-manual-charge-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Send manual charge email
+        shell: bash
+        run: |
+          if [ -n "${INSTALLMENT}" ]; then
+            node scripts/send-manual-charge-email.mjs --name "${PARTICIPANT_NAME}" --installment "${INSTALLMENT}"
+          else
+            node scripts/send-manual-charge-email.mjs --name "${PARTICIPANT_NAME}"
+          fi
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          PARTICIPANT_NAME: ${{ inputs.name }}
+          INSTALLMENT: ${{ inputs.installment }}
