@@ -128,23 +128,23 @@ function buildEmailHtml(context) {
       <div style="max-width:620px;margin:0 auto;background:#eef5ef;border:1px solid #b7d0bf;border-radius:20px;overflow:hidden;">
         <div style="padding:24px 24px 12px;text-align:center;background:#d6e8dc;">
           <img src="${EMAIL_LOGO_URL}" alt="Logo do Retiro da II IPR de Camacan" width="88" style="display:block;width:88px;height:auto;margin:0 auto 14px;" />
-          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#5f8a73;">Cobranca de parcela</div>
-          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#20352a;">Sua parcela esta em aberto</h1>
+          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#7ba08a;">Cobranca de parcela</div>
+          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#2d4338;">Sua parcela esta em aberto</h1>
         </div>
         <div style="padding:24px;">
-          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#425d51;">
+          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#4f685c;">
             Olá, <strong>${context.participantName}</strong>! A sua parcela <strong>nº ${context.installmentNumber}</strong> vence em <strong>${context.dueDateLabel}</strong>.
           </p>
           <div style="margin:0 0 16px;padding:16px;border:1px solid #a8c5b3;border-radius:16px;background:#f7fbf8;">
-            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#425d51;"><strong>Valor:</strong> ${formatCurrency(context.installmentAmount)}</p>
-            <p style="margin:0;font-size:14px;line-height:1.6;color:#425d51;"><strong>Forma de acerto:</strong> ${context.paymentMethodLabel}</p>
+            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#4f685c;"><strong>Valor:</strong> ${formatCurrency(context.installmentAmount)}</p>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#4f685c;"><strong>Forma de acerto:</strong> ${context.paymentMethodLabel}</p>
           </div>
           ${boletoHint}
-          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#425d51;">
+          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#4f685c;">
             Para garantir sua vaga e nos ajudar na organização do retiro, realize o pagamento com a diretoria ou envie o comprovante em resposta a esta mensagem.
           </p>
           <div style="text-align:center;">
-            <a href="${buttonHref}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#4a8b63;color:#f7fbf8;font-size:14px;font-weight:700;text-decoration:none;">${buttonLabel}</a>
+            <a href="${buttonHref}" style="display:inline-block;padding:12px 20px;border:1px solid #9fc1ac;border-radius:999px;background:#cfe3d6;color:#2d4338;font-size:14px;font-weight:700;text-decoration:none;">${buttonLabel}</a>
           </div>
         </div>
         <div style="padding:0 24px 22px;text-align:center;font-size:12px;line-height:1.6;color:#6d8277;">
@@ -153,6 +153,75 @@ function buildEmailHtml(context) {
       </div>
     </div>
   `
+}
+
+async function saveChargeLog(context, response, errorMessage = null) {
+  const { error: emailLogError } = await supabase.from('email_cobranca_logs').insert({
+    parcela_id: context.installmentId,
+    participante_id: context.participantId,
+    origem: 'manual',
+    destinatario: context.participantEmail,
+    assunto: buildEmailSubject(context),
+    provider: 'resend',
+    status: errorMessage ? 'erro' : 'enviado',
+    conteudo: {
+      type: 'cobranca_manual',
+      source: 'manual_script',
+      installmentNumber: context.installmentNumber,
+      amount: Number(context.installmentAmount || 0),
+      dueDate: context.dueDateIso,
+    },
+    provider_response: response?.data ?? null,
+    erro: errorMessage,
+  })
+
+  if (emailLogError && emailLogError.code !== '42P01') {
+    throw emailLogError
+  }
+
+  const basePayload = {
+    parcela_id: context.installmentId,
+    participante_id: context.participantId,
+    canal: 'email',
+    data_referencia: new Date().toISOString().slice(0, 10),
+    destinatario: context.participantEmail,
+    provider: 'resend',
+    status: errorMessage ? 'erro' : 'enviado',
+    conteudo: {
+      type: 'cobranca_manual',
+      source: 'manual_script',
+      installmentNumber: context.installmentNumber,
+      amount: Number(context.installmentAmount || 0),
+      dueDate: context.dueDateIso,
+    },
+    provider_response: response?.data ?? null,
+    erro: errorMessage,
+  }
+
+  const { error } = await supabase.from('cobranca_notificacoes').insert({
+    ...basePayload,
+    tipo: 'cobranca_manual',
+  })
+
+  if (!error) {
+    return
+  }
+
+  const isConstraintMismatch =
+    error.code === '23514' || /cobranca_notificacoes.*tipo/i.test(error.message)
+
+  if (!isConstraintMismatch) {
+    throw error
+  }
+
+  const { error: legacyError } = await supabase.from('cobranca_notificacoes').insert({
+    ...basePayload,
+    tipo: 'lembrete_vencimento',
+  })
+
+  if (legacyError && legacyError.code !== '23505') {
+    throw legacyError
+  }
 }
 
 async function loadInstallmentContext() {
@@ -249,6 +318,12 @@ async function main() {
     throw new Error(JSON.stringify(response.error))
   }
 
+  try {
+    await saveChargeLog(context, response, null)
+  } catch (logError) {
+    console.error('SEND_MANUAL_CHARGE_EMAIL_LOG_FAILED', logError)
+  }
+
   console.log(
     JSON.stringify(
       {
@@ -264,7 +339,17 @@ async function main() {
   )
 }
 
-main().catch((error) => {
+main().catch(async (error) => {
+  try {
+    const context = await loadInstallmentContext().catch(() => null)
+
+    if (context) {
+      await saveChargeLog(context, null, error instanceof Error ? error.message : String(error))
+    }
+  } catch (logError) {
+    console.error('SEND_MANUAL_CHARGE_EMAIL_LOG_FAILED', logError)
+  }
+
   console.error('SEND_MANUAL_CHARGE_EMAIL_FAILED', error)
   process.exit(1)
 })

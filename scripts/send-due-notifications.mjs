@@ -176,23 +176,23 @@ function buildEmailHtml(context) {
       <div style="max-width:620px;margin:0 auto;background:#eef5ef;border:1px solid #b7d0bf;border-radius:20px;overflow:hidden;">
         <div style="padding:24px 24px 12px;text-align:center;background:#d6e8dc;">
           <img src="${EMAIL_LOGO_URL}" alt="Logo do Retiro da II IPR de Camacan" width="88" style="display:block;width:88px;height:auto;margin:0 auto 14px;" />
-          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#5f8a73;">Lembrete de vencimento</div>
-          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#20352a;">Sua parcela vence hoje</h1>
+          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#7ba08a;">Lembrete de vencimento</div>
+          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#2d4338;">Sua parcela vence hoje</h1>
         </div>
         <div style="padding:24px;">
-          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#425d51;">
+          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#4f685c;">
             Olá, <strong>${context.participantName}</strong>! Hoje, <strong>${context.dueDateLabel}</strong>, vence a sua parcela <strong>nº ${context.installmentNumber}</strong> do Retiro da II IPR de Camacan.
           </p>
           <div style="margin:0 0 16px;padding:16px;border:1px solid #a8c5b3;border-radius:16px;background:#f7fbf8;">
-            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#425d51;"><strong>Valor:</strong> ${formatCurrency(context.installmentAmount)}</p>
-            <p style="margin:0;font-size:14px;line-height:1.6;color:#425d51;"><strong>Forma de acerto:</strong> ${context.paymentMethodLabel}</p>
+            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#4f685c;"><strong>Valor:</strong> ${formatCurrency(context.installmentAmount)}</p>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#4f685c;"><strong>Forma de acerto:</strong> ${context.paymentMethodLabel}</p>
           </div>
           ${boletoHint}
-          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#425d51;">
+          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#4f685c;">
             Para garantir sua vaga e nos ajudar na organização do retiro, realize o pagamento com a diretoria ou envie o comprovante em resposta a esta mensagem.
           </p>
           <div style="text-align:center;">
-            <a href="${buttonHref}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#4a8b63;color:#f7fbf8;font-size:14px;font-weight:700;text-decoration:none;">${buttonLabel}</a>
+            <a href="${buttonHref}" style="display:inline-block;padding:12px 20px;border:1px solid #9fc1ac;border-radius:999px;background:#cfe3d6;color:#2d4338;font-size:14px;font-weight:700;text-decoration:none;">${buttonLabel}</a>
           </div>
         </div>
         <div style="padding:0 24px 22px;text-align:center;font-size:12px;line-height:1.6;color:#6d8277;">
@@ -401,6 +401,32 @@ async function saveNotificationAttempt({
   })
 }
 
+async function saveChargeEmailLog({
+  context,
+  recipient,
+  subject,
+  content,
+  providerResponse,
+  errorMessage,
+}) {
+  const { error } = await supabase.from('email_cobranca_logs').insert({
+    parcela_id: context.installmentId,
+    participante_id: context.participantId,
+    origem: 'automatica',
+    destinatario: recipient,
+    assunto: subject,
+    provider: 'resend',
+    status: errorMessage ? 'erro' : 'enviado',
+    conteudo: content,
+    provider_response: providerResponse ?? null,
+    erro: errorMessage ?? null,
+  })
+
+  if (error && error.code !== '42P01') {
+    throw error
+  }
+}
+
 async function notifyDueInstallment(item, referenceDate) {
   const baseContext = buildReminderContext(item, referenceDate)
   const context = {
@@ -498,6 +524,14 @@ async function notifyDueInstallment(item, referenceDate) {
             providerResponse,
           })
 
+          await saveChargeEmailLog({
+            context,
+            recipient: context.participantEmail,
+            subject,
+            content: { subject, text, source: 'automatic_due_notification' },
+            providerResponse,
+          })
+
           delivered = true
           console.log(`E-mail enviado para ${context.participantName}`)
         }
@@ -511,6 +545,14 @@ async function notifyDueInstallment(item, referenceDate) {
           provider: 'resend',
           status: 'erro',
           content: { subject, text },
+          errorMessage,
+        })
+
+        await saveChargeEmailLog({
+          context,
+          recipient: context.participantEmail,
+          subject,
+          content: { subject, text, source: 'automatic_due_notification' },
           errorMessage,
         })
 

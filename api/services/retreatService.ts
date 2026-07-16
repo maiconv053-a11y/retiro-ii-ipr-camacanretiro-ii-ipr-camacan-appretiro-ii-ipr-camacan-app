@@ -25,6 +25,7 @@ import {
 import { assertSupabase } from '../lib/supabase.js'
 import { sendPublicRegistrationConfirmationEmail } from '../../server/lib/registrationConfirmationEmail.js'
 import { sendParticipantManualChargeEmail } from '../../server/lib/manualChargeEmail.js'
+import { sendRegistrationAlertEmail } from '../../server/lib/registrationAlertEmail.js'
 
 type ParticipantRow = {
   id: string
@@ -147,6 +148,88 @@ const SETTINGS_ROW_ID = 'principal'
 function toMoney(value: unknown) {
   const numericValue = typeof value === 'number' ? value : Number(value)
   return Number.isFinite(numericValue) ? numericValue : 0
+}
+
+async function saveChargeNotificationLog(params: {
+  installmentId: string
+  participantId: string
+  recipient: string
+  referenceDate: string
+  content: Record<string, unknown>
+  providerResponse?: unknown
+  errorMessage?: string | null
+}) {
+  const supabase = assertSupabase()
+  const basePayload = {
+    parcela_id: params.installmentId,
+    participante_id: params.participantId,
+    canal: 'email',
+    data_referencia: params.referenceDate,
+    destinatario: params.recipient,
+    provider: 'resend',
+    status: params.errorMessage ? 'erro' : 'enviado',
+    conteudo: params.content,
+    provider_response: params.providerResponse ?? null,
+    erro: params.errorMessage ?? null,
+  }
+
+  const { error } = await supabase.from('cobranca_notificacoes').insert({
+    ...basePayload,
+    tipo: 'cobranca_manual',
+  })
+
+  if (!error) {
+    return
+  }
+
+  const isConstraintMismatch =
+    error.code === '23514' || /cobranca_notificacoes.*tipo/i.test(error.message)
+
+  if (!isConstraintMismatch) {
+    throw error
+  }
+
+  const { error: legacyError } = await supabase.from('cobranca_notificacoes').insert({
+    ...basePayload,
+    tipo: 'lembrete_vencimento',
+    conteudo: {
+      ...params.content,
+      source: 'manual_charge',
+    },
+  })
+
+  if (legacyError && legacyError.code !== '23505') {
+    throw legacyError
+  }
+}
+
+async function saveChargeEmailLog(params: {
+  installmentId: string
+  participantId: string
+  source: 'manual' | 'automatica'
+  recipient: string
+  subject?: string
+  content: Record<string, unknown>
+  providerResponse?: unknown
+  errorMessage?: string | null
+}) {
+  const supabase = assertSupabase()
+  const { error } = await supabase.from('email_cobranca_logs').insert({
+    parcela_id: params.installmentId,
+    participante_id: params.participantId,
+    origem: params.source,
+    destinatario: params.recipient,
+    assunto: params.subject ?? null,
+    provider: 'resend',
+    status: params.errorMessage ? 'erro' : 'enviado',
+    conteudo: params.content,
+    provider_response: params.providerResponse ?? null,
+    erro: params.errorMessage ?? null,
+  })
+
+  if (error) {
+    throw error
+  }
 }
 
 function createInstallments(
@@ -733,11 +816,12 @@ export async function sendParticipantChargeEmailRecord(
     throw new Error('A parcela selecionada já está paga.')
   }
 
-  return sendParticipantManualChargeEmail({
+  const chargeContext = {
     installmentId: selectedInstallment.id,
     installmentNumber: selectedInstallment.numero_parcela,
     installmentAmount: Number(selectedInstallment.valor_parcela),
-    installmentStatus: selectedInstallment.status === 'paga' ? 'Paga' : 'Pendente',
+    installmentStatus:
+      selectedInstallment.status === 'paga' ? ('Paga' as const) : ('Pendente' as const),
     dueDateIso: selectedInstallment.vencimento,
     paymentMethod: financial.forma_pagamento,
     totalInstallments: Math.max(1, Number(financial.num_parcelas || 1)),
@@ -746,7 +830,89 @@ export async function sendParticipantChargeEmailRecord(
     participantPhone: participant.telefone,
     participantChurch: participant.igreja,
     participantCity: participant.cidade,
-  })
+  }
+
+  try {
+    const result = await sendParticipantManualChargeEmail(chargeContext)
+
+    try {
+      await saveChargeNotificationLog({
+        installmentId: selectedInstallment.id,
+        participantId: participant.id,
+        recipient: participant.email ?? '',
+        referenceDate: new Date().toISOString().slice(0, 10),
+        content: {
+          type: 'cobranca_manual',
+          installmentNumber: selectedInstallment.numero_parcela,
+          amount: Number(selectedInstallment.valor_parcela),
+          dueDate: selectedInstallment.vencimento,
+        },
+        providerResponse: result.providerResponse ?? null,
+      })
+    } catch (logError) {
+      console.error('MANUAL_CHARGE_LOG_FAILED', logError)
+    }
+
+    try {
+      await saveChargeEmailLog({
+        installmentId: selectedInstallment.id,
+        participantId: participant.id,
+        source: 'manual',
+        recipient: participant.email ?? '',
+        subject: `Cobranca da parcela ${selectedInstallment.numero_parcela} - Retiro II IPR de Camacan`,
+        content: {
+          type: 'cobranca_manual',
+          installmentNumber: selectedInstallment.numero_parcela,
+          amount: Number(selectedInstallment.valor_parcela),
+          dueDate: selectedInstallment.vencimento,
+        },
+        providerResponse: result.providerResponse ?? null,
+      })
+    } catch (logError) {
+      console.error('MANUAL_CHARGE_EMAIL_LOG_FAILED', logError)
+    }
+
+    return result
+  } catch (error) {
+    try {
+      await saveChargeNotificationLog({
+        installmentId: selectedInstallment.id,
+        participantId: participant.id,
+        recipient: participant.email ?? '',
+        referenceDate: new Date().toISOString().slice(0, 10),
+        content: {
+          type: 'cobranca_manual',
+          installmentNumber: selectedInstallment.numero_parcela,
+          amount: Number(selectedInstallment.valor_parcela),
+          dueDate: selectedInstallment.vencimento,
+        },
+        errorMessage: error instanceof Error ? error.message : String(error),
+      })
+    } catch (logError) {
+      console.error('MANUAL_CHARGE_LOG_FAILED', logError)
+    }
+
+    try {
+      await saveChargeEmailLog({
+        installmentId: selectedInstallment.id,
+        participantId: participant.id,
+        source: 'manual',
+        recipient: participant.email ?? '',
+        subject: `Cobranca da parcela ${selectedInstallment.numero_parcela} - Retiro II IPR de Camacan`,
+        content: {
+          type: 'cobranca_manual',
+          installmentNumber: selectedInstallment.numero_parcela,
+          amount: Number(selectedInstallment.valor_parcela),
+          dueDate: selectedInstallment.vencimento,
+        },
+        errorMessage: error instanceof Error ? error.message : String(error),
+      })
+    } catch (logError) {
+      console.error('MANUAL_CHARGE_EMAIL_LOG_FAILED', logError)
+    }
+
+    throw error
+  }
 }
 
 export async function updateRetreatFee(newRetreatFee: number) {
@@ -936,6 +1102,21 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
     })
   } catch (error) {
     console.error('PUBLIC_REGISTRATION_CONFIRMATION_EMAIL_FAILED', error)
+  }
+
+  try {
+    await sendRegistrationAlertEmail({
+      participantName: input.fullName,
+      participantEmail: input.email,
+      participantPhone: input.phone,
+      participantChurch: input.church,
+      participantCity: input.city,
+      paymentMethod: summary.paymentMethod,
+      totalAmount: summary.totalAmount,
+      installmentCount: summary.installmentCount,
+    })
+  } catch (error) {
+    console.error('REGISTRATION_ALERT_EMAIL_FAILED', error)
   }
 
   return summary

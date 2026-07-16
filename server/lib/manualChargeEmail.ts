@@ -184,5 +184,6 @@ export async function sendParticipantManualChargeEmail(
     email: context.participantEmail,
     installmentId: context.installmentId,
     installmentNumber: context.installmentNumber,
+    providerResponse: response.data ?? null,
   }
 }
