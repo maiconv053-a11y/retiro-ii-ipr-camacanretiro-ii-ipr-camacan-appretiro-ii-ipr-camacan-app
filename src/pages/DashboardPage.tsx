@@ -10,6 +10,7 @@ import { PageTopLogo } from '@/components/ui/PageTopLogo'
 import { StatCard } from '@/components/ui/StatCard'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { GoalProgressCard } from '@/components/ui/GoalProgressCard'
 import { useRetreatStore } from '@/store/retreatStore'
 import { formatCurrency, formatPaymentMethodLabel } from '@/utils/format'
 
@@ -24,7 +25,7 @@ export default function DashboardPage() {
     (participant) => participant.registrationStatus !== 'Cancelada',
   )
 
-  const totalCollected = participants.reduce(
+  const totalCollected = activeParticipants.reduce(
     (sum, participant) => sum + participant.financial.amountPaid,
     0,
   )
@@ -32,12 +33,17 @@ export default function DashboardPage() {
     (sum, participant) => sum + participant.financial.totalAmount,
     0,
   )
+  const totalPendingAmount = Math.max(totalExpected - totalCollected, 0)
   const pendingParticipants = activeParticipants.filter(
     (participant) => participant.financial.amountPaid < participant.financial.totalAmount,
   )
   const completedTasks = logisticsTasks.filter(
     (task) => task.status === 'Concluida',
   ).length
+  const logisticsGoalAmount = logisticsTasks.reduce(
+    (sum, task) => sum + (task.actualCost > 0 ? task.actualCost : task.estimatedCost),
+    0,
+  )
 
   useEffect(() => {
     setFeeDraft(retreatFee)
@@ -95,6 +101,15 @@ export default function DashboardPage() {
           ctaLabel="Abrir logística"
         />
       </div>
+
+      <GoalProgressCard
+        eyebrow="Metas de operação"
+        title="Compras + contratos batidos pela arrecadação"
+        description="A meta usa o valor gasto das tarefas e, enquanto ele ainda estiver zerado, considera o valor estimado para não deixar compras e contratos fora da projeção."
+        goalAmount={logisticsGoalAmount}
+        paidAmount={totalCollected}
+        pendingAmount={totalPendingAmount}
+      />
 
       <section className="rounded-[24px] border border-[#aac4b3]/40 bg-[#f2f8f3]/92 p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

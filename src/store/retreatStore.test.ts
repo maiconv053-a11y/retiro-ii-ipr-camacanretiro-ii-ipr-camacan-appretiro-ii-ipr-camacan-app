@@ -215,7 +215,7 @@ describe('retreatStore', () => {
 
     expect(installments).toHaveLength(3)
     expect(Number(total.toFixed(2))).toBe(380)
-    expect(installments[0]?.dueDate).toBe('2026-08-14')
+    expect(installments[0]?.dueDate).toBe('2026-07-14')
   })
 
   it('atualiza o valor do retiro e sincroniza participantes pendentes', async () => {

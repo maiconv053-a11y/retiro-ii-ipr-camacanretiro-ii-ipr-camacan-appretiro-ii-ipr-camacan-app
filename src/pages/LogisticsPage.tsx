@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { LogisticsBoard } from '@/components/logistics/LogisticsBoard'
+import { GoalProgressCard } from '@/components/ui/GoalProgressCard'
 import { PageTopLogo } from '@/components/ui/PageTopLogo'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -8,6 +9,7 @@ import type { LogisticsTask, LogisticsTaskInput } from '@shared/types/retreat'
 
 export default function LogisticsPage() {
   const logisticsTasks = useRetreatStore((state) => state.logisticsTasks)
+  const participants = useRetreatStore((state) => state.participants)
   const addLogisticsTask = useRetreatStore((state) => state.addLogisticsTask)
   const updateLogisticsTask = useRetreatStore((state) => state.updateLogisticsTask)
   const updateLogisticsStatus = useRetreatStore(
@@ -20,6 +22,22 @@ export default function LogisticsPage() {
   const completedTasks = logisticsTasks.filter(
     (task) => task.status === 'Concluida',
   ).length
+  const logisticsGoalAmount = logisticsTasks.reduce(
+    (sum, task) => sum + (task.actualCost > 0 ? task.actualCost : task.estimatedCost),
+    0,
+  )
+  const activeParticipants = participants.filter(
+    (participant) => participant.registrationStatus !== 'Cancelada',
+  )
+  const totalCollected = activeParticipants.reduce(
+    (sum, participant) => sum + participant.financial.amountPaid,
+    0,
+  )
+  const totalExpected = activeParticipants.reduce(
+    (sum, participant) => sum + participant.financial.totalAmount,
+    0,
+  )
+  const totalPendingAmount = Math.max(totalExpected - totalCollected, 0)
 
   async function handleDeleteTask(taskId: string, taskTitle: string) {
     const confirmed = window.confirm(
@@ -72,6 +90,15 @@ export default function LogisticsPage() {
             tone="cyan"
           />
         }
+      />
+
+      <GoalProgressCard
+        eyebrow="Cobertura financeira"
+        title="Meta de logística (gasto) x inscrições"
+        description="A meta considera o valor gasto e, quando a tarefa ainda não teve gasto lançado, usa o valor estimado como previsão. O pago abate a meta; o pendente aparece como cobertura esperada."
+        goalAmount={logisticsGoalAmount}
+        paidAmount={totalCollected}
+        pendingAmount={totalPendingAmount}
       />
 
       <LogisticsBoard

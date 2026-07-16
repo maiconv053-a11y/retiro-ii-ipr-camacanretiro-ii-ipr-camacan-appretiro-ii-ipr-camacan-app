@@ -49,8 +49,8 @@ type ParticipantRow = {
 type FinancialRow = {
   id: string
   participante_id: string
-  valor_total: number
-  valor_pago: number
+  valor_total: number | string
+  valor_pago: number | string
   forma_pagamento: string
   num_parcelas: number
   parcelas_pagas: number
@@ -64,7 +64,7 @@ type FinancialRow = {
 type FinancialInstallmentRow = {
   id: string
   numero_parcela: number
-  valor_parcela: number
+  valor_parcela: number | string
   status: string
   vencimento: string | null
 }
@@ -72,7 +72,7 @@ type FinancialInstallmentRow = {
 type InstallmentBoletoRow = {
   id: string
   numero_parcela: number
-  valor_parcela: number
+  valor_parcela: number | string
   status: string
   vencimento: string | null
   financeiro:
@@ -130,8 +130,8 @@ type LogisticsRow = {
   categoria: string
   tarefa: string
   responsavel: string | null
-  valor_estimado: number
-  valor_gasto: number
+  valor_estimado: number | string
+  valor_gasto: number | string
   status: string
   observacoes: string | null
 }
@@ -143,6 +143,11 @@ type RetreatSettingsRow = {
 
 const DEFAULT_RETREAT_FEE = 750
 const SETTINGS_ROW_ID = 'principal'
+
+function toMoney(value: unknown) {
+  const numericValue = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(numericValue) ? numericValue : 0
+}
 
 function createInstallments(
   totalAmount: number,
@@ -320,17 +325,19 @@ function mapFinancialRecord(financial: FinancialRow | null): FinancialRecord {
   }
 
   const paymentMethod = toPaymentMethod(financial.forma_pagamento)
+  const totalAmount = toMoney(financial.valor_total)
+  const amountPaid = toMoney(financial.valor_pago)
   const installmentCount = normalizeInstallmentCount(paymentMethod, financial.num_parcelas)
-  const baseInstallments = createInstallments(financial.valor_total, installmentCount)
+  const baseInstallments = createInstallments(totalAmount, installmentCount)
   const parcelRows = financial.financeiro_parcelas ?? []
 
   if (parcelRows.length === 0) {
     return {
-      totalAmount: financial.valor_total,
-      amountPaid: financial.valor_pago,
+      totalAmount,
+      amountPaid,
       paymentMethod,
       installmentCount,
-      installments: syncInstallmentsAmountPaid(baseInstallments, financial.valor_pago),
+      installments: syncInstallmentsAmountPaid(baseInstallments, amountPaid),
       validationStatus: toValidationStatus(financial.status_validacao),
     }
   }
@@ -340,14 +347,14 @@ function mapFinancialRecord(financial: FinancialRow | null): FinancialRecord {
     .map<Installment>((parcel) => ({
       id: parcel.id,
       label: `${parcel.numero_parcela}x`,
-      amount: parcel.valor_parcela,
+      amount: toMoney(parcel.valor_parcela),
       status: parcel.status === 'paga' ? 'Paga' : 'Pendente',
       dueDate: parcel.vencimento ?? undefined,
     }))
 
   return {
-    totalAmount: financial.valor_total,
-    amountPaid: financial.valor_pago,
+    totalAmount,
+    amountPaid,
     paymentMethod,
     installmentCount,
     installments,
@@ -440,8 +447,8 @@ function mapLogisticsTask(row: LogisticsRow): LogisticsTask {
     category: row.categoria === 'compras' ? 'Compras' : 'Contratos',
     title: row.tarefa,
     owner: row.responsavel ?? 'Não definido',
-    estimatedCost: row.valor_estimado,
-    actualCost: row.valor_gasto,
+    estimatedCost: toMoney(row.valor_estimado),
+    actualCost: toMoney(row.valor_gasto),
     status: toTaskStatus(row.status),
     notes: row.observacoes ?? '',
   }
