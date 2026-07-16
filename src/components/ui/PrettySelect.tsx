@@ -2,14 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 
 type PrettySelectOption = {
-  value: number
+  value: number | string
   label: string
 }
 
 interface PrettySelectProps {
-  value: number
+  value: number | string
   options: PrettySelectOption[]
-  onChange: (value: number) => void
+  onChange: (value: number | string) => void
   disabled?: boolean
 }
 

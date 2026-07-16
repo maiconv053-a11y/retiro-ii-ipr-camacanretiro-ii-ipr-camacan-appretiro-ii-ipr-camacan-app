@@ -136,9 +136,17 @@ export default function PublicRegistrationSuccessPage() {
                 baixa.
               </p>
               {payload.paymentMethod === 'Boleto' && payload.preferredPaymentDay ? (
-                <p className="mt-2 text-sm text-[#4c6457]">
-                  Melhor dia escolhido para pagar: dia {String(payload.preferredPaymentDay).padStart(2, '0')}.
-                </p>
+                <>
+                  {payload.preferredPaymentStartMonth ? (
+                    <p className="mt-2 text-sm text-[#4c6457]">
+                      Mês escolhido para iniciar: {payload.preferredPaymentStartMonth.slice(5, 7)}/
+                      {payload.preferredPaymentStartMonth.slice(0, 4)}.
+                    </p>
+                  ) : null}
+                  <p className="mt-2 text-sm text-[#4c6457]">
+                    Melhor dia escolhido para pagar: dia {String(payload.preferredPaymentDay).padStart(2, '0')}.
+                  </p>
+                </>
               ) : null}
             </div>
           </div>

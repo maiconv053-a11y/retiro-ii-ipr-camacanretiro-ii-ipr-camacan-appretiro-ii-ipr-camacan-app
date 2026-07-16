@@ -6,6 +6,11 @@ export const PAYMENT_DEADLINE_ISO = '2027-02-04'
 export const PAYMENT_DEADLINE = new Date(`${PAYMENT_DEADLINE_ISO}T00:00:00Z`)
 export const BASE_REGISTRATION_FEE = 750
 export const PREFERRED_PAYMENT_DAY_OPTIONS = [5, 10, 15, 20, 25] as const
+export const PAYMENT_START_MONTH_FORMATTER = new Intl.DateTimeFormat('pt-BR', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
 
 export type AgePricingTier = 'Free' | 'Half' | 'Full'
 
@@ -99,6 +104,89 @@ export function getMonthsAvailableUntilEvent(now: Date) {
   return Math.max(1, deadlineMonth - startMonth)
 }
 
+function getDeadlineMonthIndex() {
+  return PAYMENT_DEADLINE.getUTCFullYear() * 12 + PAYMENT_DEADLINE.getUTCMonth()
+}
+
+function monthIndexFromParts(year: number, month: number) {
+  return year * 12 + month
+}
+
+function monthKeyFromMonthIndex(monthIndex: number) {
+  const year = Math.floor(monthIndex / 12)
+  const month = ((monthIndex % 12) + 12) % 12
+  return `${year}-${String(month + 1).padStart(2, '0')}`
+}
+
+function parseMonthKey(monthKey: string) {
+  const match = /^(\d{4})-(\d{2})$/.exec(monthKey)
+  if (!match) {
+    return null
+  }
+
+  const year = Number(match[1])
+  const month = Number(match[2]) - 1
+
+  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 0 || month > 11) {
+    return null
+  }
+
+  return { year, month }
+}
+
+export function getBoletoStartMonthOptions(now: Date) {
+  const currentMonthIndex = monthIndexFromParts(now.getUTCFullYear(), now.getUTCMonth())
+  const firstStartMonthIndex = currentMonthIndex
+  const deadlineMonthIndex = getDeadlineMonthIndex()
+
+  return Array.from(
+    { length: Math.max(1, deadlineMonthIndex - firstStartMonthIndex + 1) },
+    (_, index) => {
+      const monthIndex = firstStartMonthIndex + index
+      const value = monthKeyFromMonthIndex(monthIndex)
+      const label =
+        PAYMENT_START_MONTH_FORMATTER.format(
+          new Date(Date.UTC(Math.floor(monthIndex / 12), ((monthIndex % 12) + 12) % 12, 1)),
+        )
+          .replace(/^\p{L}/u, (letter) => letter.toUpperCase()) ?? value
+
+      return { value, label }
+    },
+  )
+}
+
+export function getDefaultBoletoStartMonth(now: Date) {
+  return getBoletoStartMonthOptions(now)[0]?.value ?? PAYMENT_DEADLINE_ISO.slice(0, 7)
+}
+
+function normalizePreferredPaymentStartMonth(now: Date, preferredPaymentStartMonth?: string) {
+  const currentMonthIndex = monthIndexFromParts(now.getUTCFullYear(), now.getUTCMonth())
+  const minimumStartMonthIndex = currentMonthIndex
+  const deadlineMonthIndex = getDeadlineMonthIndex()
+  const parsed = preferredPaymentStartMonth ? parseMonthKey(preferredPaymentStartMonth) : null
+
+  if (!parsed) {
+    return monthKeyFromMonthIndex(minimumStartMonthIndex)
+  }
+
+  const parsedIndex = monthIndexFromParts(parsed.year, parsed.month)
+  const clampedIndex = Math.min(deadlineMonthIndex, Math.max(minimumStartMonthIndex, parsedIndex))
+  return monthKeyFromMonthIndex(clampedIndex)
+}
+
+export function getMonthsAvailableFromStartMonth(
+  now: Date,
+  preferredPaymentStartMonth?: string,
+) {
+  const normalizedStartMonth = normalizePreferredPaymentStartMonth(now, preferredPaymentStartMonth)
+  const parsed = parseMonthKey(normalizedStartMonth)
+  const startMonthIndex = parsed
+    ? monthIndexFromParts(parsed.year, parsed.month)
+    : monthIndexFromParts(now.getUTCFullYear(), now.getUTCMonth())
+
+  return Math.max(1, getDeadlineMonthIndex() - startMonthIndex + 1)
+}
+
 function getDaysInUtcMonth(year: number, month: number) {
   return new Date(Date.UTC(year, month + 1, 0)).getUTCDate()
 }
@@ -124,9 +212,20 @@ export function toDateIso(date: Date) {
   return date.toISOString().slice(0, 10)
 }
 
-function buildDueDateSlots(now: Date, preferredPaymentDay?: number) {
-  const totalSlots = getMonthsAvailableUntilEvent(now)
+function buildDueDateSlots(
+  now: Date,
+  preferredPaymentDay?: number,
+  preferredPaymentStartMonth?: string,
+) {
+  const totalSlots = getMonthsAvailableFromStartMonth(now, preferredPaymentStartMonth)
   const safePreferredPaymentDay = normalizePreferredPaymentDay(preferredPaymentDay)
+  const normalizedStartMonth = normalizePreferredPaymentStartMonth(now, preferredPaymentStartMonth)
+  const parsedStartMonth = parseMonthKey(normalizedStartMonth)
+  const startMonthIndex = parsedStartMonth
+    ? monthIndexFromParts(parsedStartMonth.year, parsedStartMonth.month)
+    : monthIndexFromParts(now.getUTCFullYear(), now.getUTCMonth())
+  const currentMonthIndex = monthIndexFromParts(now.getUTCFullYear(), now.getUTCMonth())
+  const currentDay = now.getUTCDate()
 
   if (totalSlots <= 1) {
     return [PAYMENT_DEADLINE_ISO]
@@ -137,13 +236,12 @@ function buildDueDateSlots(now: Date, preferredPaymentDay?: number) {
       return PAYMENT_DEADLINE_ISO
     }
 
-    const totalMonths = now.getUTCFullYear() * 12 + now.getUTCMonth() + 1 + index
+    const totalMonths = startMonthIndex + index
     const dueYear = Math.floor(totalMonths / 12)
     const dueMonth = ((totalMonths % 12) + 12) % 12
-    const dueDay = Math.min(
-      safePreferredPaymentDay,
-      getDaysInUtcMonth(dueYear, dueMonth),
-    )
+    const dueDayBase = Math.min(safePreferredPaymentDay, getDaysInUtcMonth(dueYear, dueMonth))
+    const dueDay =
+      totalMonths === currentMonthIndex ? Math.max(currentDay, dueDayBase) : dueDayBase
 
     return toDateIso(new Date(Date.UTC(dueYear, dueMonth, dueDay)))
   })
@@ -171,10 +269,11 @@ export function computeDueDates(
   now: Date,
   installmentCount: number,
   preferredPaymentDay?: number,
+  preferredPaymentStartMonth?: string,
 ) {
-  const totalSlots = getMonthsAvailableUntilEvent(now)
+  const totalSlots = getMonthsAvailableFromStartMonth(now, preferredPaymentStartMonth)
   const safeCount = Math.max(1, Math.min(installmentCount, totalSlots))
-  const dueDateSlots = buildDueDateSlots(now, preferredPaymentDay)
+  const dueDateSlots = buildDueDateSlots(now, preferredPaymentDay, preferredPaymentStartMonth)
 
   return distributeInstallmentIndexes(dueDateSlots.length, safeCount).map(
     (index) => dueDateSlots[index],
@@ -199,6 +298,7 @@ export function computeRegistrationPricing(params: {
   paymentMethod: PaymentMethod
   installmentCount: number
   preferredPaymentDay?: number
+  preferredPaymentStartMonth?: string
   baseFee?: number
   now?: Date
 }) {
@@ -223,7 +323,12 @@ export function computeRegistrationPricing(params: {
       dueDates:
         paymentMethod === 'CartaoCredito'
           ? null
-          : computeDueDates(now, 1, params.preferredPaymentDay),
+          : computeDueDates(
+              now,
+              1,
+              params.preferredPaymentDay,
+              params.preferredPaymentStartMonth,
+            ),
       cardInstallmentLabel: paymentMethod === 'CartaoCredito' ? '1x de R$ 0,00' : null,
     } satisfies RegistrationPricingResult
   }
@@ -258,7 +363,7 @@ export function computeRegistrationPricing(params: {
           1,
           Math.min(
             Math.trunc(params.installmentCount || 1),
-            Math.min(7, getMonthsAvailableUntilEvent(now)),
+            Math.min(7, getMonthsAvailableFromStartMonth(now, params.preferredPaymentStartMonth)),
           ),
         )
       : 1
@@ -266,7 +371,12 @@ export function computeRegistrationPricing(params: {
   const installmentAmounts = splitAmountIntoInstallments(discountedFee, safeCount)
   const dueDates =
     paymentMethod === 'Boleto' || paymentMethod === 'PIX' || paymentMethod === 'Dinheiro'
-      ? computeDueDates(now, safeCount, params.preferredPaymentDay)
+      ? computeDueDates(
+          now,
+          safeCount,
+          params.preferredPaymentDay,
+          params.preferredPaymentStartMonth,
+        )
       : null
 
   return {

@@ -10,9 +10,11 @@ import {
 } from '@shared/types/retreat'
 import {
   BASE_REGISTRATION_FEE,
+  getBoletoStartMonthOptions,
+  getDefaultBoletoStartMonth,
+  getMonthsAvailableFromStartMonth,
   computeRegistrationPricing,
   EVENT_DATE_ISO,
-  getMonthsAvailableUntilEvent,
   PAYMENT_DEADLINE_ISO,
   PREFERRED_PAYMENT_DAY_OPTIONS,
 } from '@/utils/registrationPricing'
@@ -27,19 +29,22 @@ import {
   parseBrazilianDateInputToIso,
 } from '@/utils/format'
 
-const initialForm: PublicRegistrationInput = {
-  fullName: '',
-  birthDate: '',
-  phone: '',
-  email: '',
-  church: '',
-  city: '',
-  dietaryRestrictions: '',
-  medicalRestrictions: '',
-  paymentMethod: 'PIX',
-  preferredPaymentDay: 10,
-  installmentCount: 1,
-  termsAccepted: false,
+function createInitialForm(now: Date): PublicRegistrationInput {
+  return {
+    fullName: '',
+    birthDate: '',
+    phone: '',
+    email: '',
+    church: '',
+    city: '',
+    dietaryRestrictions: '',
+    medicalRestrictions: '',
+    paymentMethod: 'PIX',
+    preferredPaymentDay: 10,
+    preferredPaymentStartMonth: getDefaultBoletoStartMonth(now),
+    installmentCount: 1,
+    termsAccepted: false,
+  }
 }
 
 const paymentOptions: Array<{
@@ -75,13 +80,58 @@ const paymentOptions: Array<{
 ]
 
 export default function PublicRegistrationPage() {
-  const [form, setForm] = useState<PublicRegistrationInput>(initialForm)
+  const registrationNow = useMemo(() => new Date(), [])
+  const [form, setForm] = useState<PublicRegistrationInput>(() => createInitialForm(registrationNow))
   const [birthDateInput, setBirthDateInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [retreatFee, setRetreatFee] = useState(BASE_REGISTRATION_FEE)
   const navigate = useNavigate()
-  const monthsAvailableForBoleto = useMemo(() => getMonthsAvailableUntilEvent(new Date()), [])
+  const currentMonthKey = useMemo(
+    () =>
+      `${registrationNow.getUTCFullYear()}-${String(registrationNow.getUTCMonth() + 1).padStart(2, '0')}`,
+    [registrationNow],
+  )
+  const currentDayOfMonth = useMemo(() => registrationNow.getUTCDate(), [registrationNow])
+  const boletoStartMonthOptions = useMemo(
+    () => getBoletoStartMonthOptions(registrationNow),
+    [registrationNow],
+  )
+  const filteredBoletoStartMonthOptions = useMemo(() => {
+    const hasRemainingPreferredDayInCurrentMonth = PREFERRED_PAYMENT_DAY_OPTIONS.some(
+      (day) => day >= currentDayOfMonth,
+    )
+
+    return boletoStartMonthOptions.filter(
+      (option) => option.value !== currentMonthKey || hasRemainingPreferredDayInCurrentMonth,
+    )
+  }, [boletoStartMonthOptions, currentDayOfMonth, currentMonthKey])
+  const preferredPaymentDayOptions = useMemo(() => {
+    const allowedDays =
+      form.preferredPaymentStartMonth === currentMonthKey
+        ? PREFERRED_PAYMENT_DAY_OPTIONS.filter((day) => day >= currentDayOfMonth)
+        : PREFERRED_PAYMENT_DAY_OPTIONS
+
+    return allowedDays.map((day) => ({
+      value: day,
+      label: `Dia ${String(day).padStart(2, '0')}`,
+    }))
+  }, [currentDayOfMonth, currentMonthKey, form.preferredPaymentStartMonth])
+  const monthsAvailableForBoleto = useMemo(
+    () =>
+      getMonthsAvailableFromStartMonth(
+        registrationNow,
+        form.paymentMethod === 'Boleto' ? form.preferredPaymentStartMonth : undefined,
+      ),
+    [form.paymentMethod, form.preferredPaymentStartMonth, registrationNow],
+  )
+  const selectedBoletoStartMonthLabel = useMemo(
+    () =>
+      filteredBoletoStartMonthOptions.find(
+        (option) => option.value === form.preferredPaymentStartMonth,
+      )?.label ?? filteredBoletoStartMonthOptions[0]?.label ?? '',
+    [filteredBoletoStartMonthOptions, form.preferredPaymentStartMonth],
+  )
 
   useEffect(() => {
     let active = true
@@ -110,13 +160,22 @@ export default function PublicRegistrationPage() {
         paymentMethod: form.paymentMethod,
         preferredPaymentDay:
           form.paymentMethod === 'Boleto' ? form.preferredPaymentDay : undefined,
+        preferredPaymentStartMonth:
+          form.paymentMethod === 'Boleto' ? form.preferredPaymentStartMonth : undefined,
         installmentCount: form.installmentCount,
         baseFee: retreatFee,
       })
     } catch {
       return null
     }
-  }, [form.birthDate, form.installmentCount, form.paymentMethod, form.preferredPaymentDay, retreatFee])
+  }, [
+    form.birthDate,
+    form.installmentCount,
+    form.paymentMethod,
+    form.preferredPaymentDay,
+    form.preferredPaymentStartMonth,
+    retreatFee,
+  ])
 
   const installmentOptions = useMemo(() => {
     const maxInstallments =
@@ -136,6 +195,8 @@ export default function PublicRegistrationPage() {
             paymentMethod: form.paymentMethod,
             preferredPaymentDay:
               form.paymentMethod === 'Boleto' ? form.preferredPaymentDay : undefined,
+            preferredPaymentStartMonth:
+              form.paymentMethod === 'Boleto' ? form.preferredPaymentStartMonth : undefined,
             installmentCount: count,
             baseFee: retreatFee,
           })
@@ -155,7 +216,70 @@ export default function PublicRegistrationPage() {
         label,
       }
     })
-  }, [form.birthDate, form.paymentMethod, form.preferredPaymentDay, monthsAvailableForBoleto, retreatFee])
+  }, [
+    form.birthDate,
+    form.paymentMethod,
+    form.preferredPaymentDay,
+    form.preferredPaymentStartMonth,
+    monthsAvailableForBoleto,
+    retreatFee,
+  ])
+
+  useEffect(() => {
+    if (form.paymentMethod !== 'Boleto') {
+      return
+    }
+
+    if (
+      filteredBoletoStartMonthOptions.some(
+        (option) => option.value === form.preferredPaymentStartMonth,
+      )
+    ) {
+      return
+    }
+
+    setForm((current) => ({
+      ...current,
+      preferredPaymentStartMonth:
+        filteredBoletoStartMonthOptions[0]?.value ?? current.preferredPaymentStartMonth,
+    }))
+  }, [
+    filteredBoletoStartMonthOptions,
+    form.paymentMethod,
+    form.preferredPaymentStartMonth,
+  ])
+
+  useEffect(() => {
+    if (form.paymentMethod !== 'Boleto') {
+      return
+    }
+
+    if (preferredPaymentDayOptions.some((option) => option.value === form.preferredPaymentDay)) {
+      return
+    }
+
+    setForm((current) => ({
+      ...current,
+      preferredPaymentDay: Number(
+        preferredPaymentDayOptions[0]?.value ?? PREFERRED_PAYMENT_DAY_OPTIONS[0],
+      ),
+    }))
+  }, [form.paymentMethod, form.preferredPaymentDay, preferredPaymentDayOptions])
+
+  useEffect(() => {
+    if (!requiresInstallments(form.paymentMethod)) {
+      return
+    }
+
+    if (installmentOptions.some((option) => option.value === form.installmentCount)) {
+      return
+    }
+
+    setForm((current) => ({
+      ...current,
+      installmentCount: installmentOptions[installmentOptions.length - 1]?.value ?? 1,
+    }))
+  }, [form.installmentCount, form.paymentMethod, installmentOptions])
 
   const isValid = useMemo(
     () =>
@@ -236,7 +360,7 @@ export default function PublicRegistrationPage() {
 
       sessionStorage.setItem('publicRegistrationSummary', JSON.stringify(payload))
       navigate('/sucesso', { replace: true, state: payload })
-      setForm(initialForm)
+      setForm(createInitialForm(registrationNow))
       setBirthDateInput('')
     } catch (submitError) {
       setError(
@@ -317,7 +441,11 @@ export default function PublicRegistrationPage() {
               </p>
               <div className="mt-3 space-y-2 text-sm leading-6 text-[#4c6457]">
                 <p>
-                  Primeira parcela: no dia escolhido por você, a partir do próximo mês.
+                  Primeira parcela: no mês e dia escolhidos por você.
+                </p>
+                <p>
+                  Início disponível atual:{' '}
+                  <span className="text-[#20352a]">{selectedBoletoStartMonthLabel}</span>.
                 </p>
                 <p>
                   Última parcela: <span className="text-[#20352a]">{formatIsoDatePtBr(PAYMENT_DEADLINE_ISO)}</span>.
@@ -496,21 +624,28 @@ export default function PublicRegistrationPage() {
             </div>
 
             {form.paymentMethod === 'Boleto' ? (
-              <label className="mt-4 block space-y-2">
-                <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
-                  Qual o melhor dia do mês para pagar?
-                </span>
-                <div className="grid gap-3">
+              <div className="mt-4 grid gap-4 xl:grid-cols-2">
+                <label className="block space-y-2">
+                  <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
+                    Em qual mês deseja começar a pagar?
+                  </span>
+                  <PrettySelect
+                    value={form.preferredPaymentStartMonth}
+                    onChange={(value) => updateField('preferredPaymentStartMonth', String(value))}
+                    options={filteredBoletoStartMonthOptions}
+                  />
+                </label>
+                <label className="block space-y-2">
+                  <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
+                    Qual o melhor dia do mês para pagar?
+                  </span>
                   <PrettySelect
                     value={form.preferredPaymentDay}
-                    onChange={(value) => updateField('preferredPaymentDay', value)}
-                    options={PREFERRED_PAYMENT_DAY_OPTIONS.map((day) => ({
-                      value: day,
-                      label: `Dia ${String(day).padStart(2, '0')}`,
-                    }))}
+                    onChange={(value) => updateField('preferredPaymentDay', Number(value))}
+                    options={preferredPaymentDayOptions}
                   />
-                </div>
-              </label>
+                </label>
+              </div>
             ) : null}
 
             {requiresInstallments(form.paymentMethod) ? (
@@ -521,7 +656,7 @@ export default function PublicRegistrationPage() {
                 <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.72fr)]">
                   <PrettySelect
                     value={form.installmentCount}
-                    onChange={(value) => updateField('installmentCount', value)}
+                    onChange={(value) => updateField('installmentCount', Number(value))}
                     options={installmentOptions}
                     disabled={!form.birthDate}
                   />

@@ -99,6 +99,7 @@ export interface PublicRegistrationInput {
   medicalRestrictions: string
   paymentMethod: PaymentMethod
   preferredPaymentDay: number
+  preferredPaymentStartMonth: string
   installmentCount: number
   termsAccepted: boolean
 }
@@ -107,6 +108,7 @@ export interface PublicRegistrationSuccessSummary {
   participantId: string
   paymentMethod: PaymentMethod
   preferredPaymentDay: number | null
+  preferredPaymentStartMonth: string | null
   installmentCount: number
   totalAmount: number
   installmentAmounts: number[]

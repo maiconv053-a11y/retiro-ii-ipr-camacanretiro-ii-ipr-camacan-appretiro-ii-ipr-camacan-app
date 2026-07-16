@@ -864,6 +864,8 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
     paymentMethod: input.paymentMethod,
     preferredPaymentDay:
       input.paymentMethod === 'Boleto' ? input.preferredPaymentDay : undefined,
+    preferredPaymentStartMonth:
+      input.paymentMethod === 'Boleto' ? input.preferredPaymentStartMonth : undefined,
     installmentCount: input.installmentCount,
     baseFee: retreatFee,
   })
@@ -904,6 +906,8 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
     participantId: data.id,
     paymentMethod: pricing.paymentMethod,
     preferredPaymentDay: pricing.paymentMethod === 'Boleto' ? input.preferredPaymentDay : null,
+    preferredPaymentStartMonth:
+      pricing.paymentMethod === 'Boleto' ? input.preferredPaymentStartMonth : null,
     installmentCount: pricing.installmentCount,
     totalAmount: pricing.totalAmount,
     installmentAmounts: pricing.installmentAmounts,
