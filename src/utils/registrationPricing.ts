@@ -227,42 +227,20 @@ function buildDueDateSlots(
   const currentMonthIndex = monthIndexFromParts(now.getUTCFullYear(), now.getUTCMonth())
   const currentDay = now.getUTCDate()
 
-  if (totalSlots <= 1) {
-    return [PAYMENT_DEADLINE_ISO]
-  }
-
   return Array.from({ length: totalSlots }, (_, index) => {
-    if (index === totalSlots - 1) {
-      return PAYMENT_DEADLINE_ISO
-    }
-
     const totalMonths = startMonthIndex + index
     const dueYear = Math.floor(totalMonths / 12)
     const dueMonth = ((totalMonths % 12) + 12) % 12
     const dueDayBase = Math.min(safePreferredPaymentDay, getDaysInUtcMonth(dueYear, dueMonth))
-    const dueDay =
-      totalMonths === currentMonthIndex ? Math.max(currentDay, dueDayBase) : dueDayBase
+    const isCurrentMonth = totalMonths === currentMonthIndex
+    const isDeadlineMonth = totalMonths === getDeadlineMonthIndex()
+    const dueDayForCurrentMonth = isCurrentMonth ? Math.max(currentDay, dueDayBase) : dueDayBase
+    const dueDay = isDeadlineMonth
+      ? Math.min(PAYMENT_DEADLINE.getUTCDate(), dueDayForCurrentMonth)
+      : dueDayForCurrentMonth
 
     return toDateIso(new Date(Date.UTC(dueYear, dueMonth, dueDay)))
   })
-}
-
-function distributeInstallmentIndexes(totalSlots: number, installmentCount: number) {
-  if (installmentCount <= 1 || totalSlots <= 1) {
-    return [0]
-  }
-
-  const lastIndex = totalSlots - 1
-  const indexes: number[] = []
-
-  for (let index = 0; index < installmentCount; index += 1) {
-    const rawIndex = Math.round((index * lastIndex) / (installmentCount - 1))
-    const minAllowed = index === 0 ? 0 : indexes[index - 1] + 1
-    const maxAllowed = lastIndex - (installmentCount - 1 - index)
-    indexes.push(Math.min(maxAllowed, Math.max(minAllowed, rawIndex)))
-  }
-
-  return indexes
 }
 
 export function computeDueDates(
@@ -275,9 +253,7 @@ export function computeDueDates(
   const safeCount = Math.max(1, Math.min(installmentCount, totalSlots))
   const dueDateSlots = buildDueDateSlots(now, preferredPaymentDay, preferredPaymentStartMonth)
 
-  return distributeInstallmentIndexes(dueDateSlots.length, safeCount).map(
-    (index) => dueDateSlots[index],
-  )
+  return dueDateSlots.slice(0, safeCount)
 }
 
 export type RegistrationPricingResult = {

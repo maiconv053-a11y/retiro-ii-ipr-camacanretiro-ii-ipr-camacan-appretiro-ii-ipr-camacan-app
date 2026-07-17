@@ -151,6 +151,21 @@ export interface LogisticsTaskInput {
   notes: string
 }
 
+export interface LogisticsSale {
+  id: string
+  saleDate: string
+  itemSold: string
+  revenueAmount: number
+  expenseAmount: number
+}
+
+export interface LogisticsSaleInput {
+  saleDate: string
+  itemSold: string
+  revenueAmount: number
+  expenseAmount: number
+}
+
 export interface DirectorUser {
   id: string
   name: string

@@ -69,7 +69,7 @@ function buildInstallmentLines(input: RegistrationConfirmationEmailInput) {
     .map((amount, index) => {
       const dueDate = input.dueDates?.[index]
       const dueDateLabel = dueDate ? formatDatePtBr(dueDate) : 'A combinar'
-      return `<li style="margin:0 0 8px;color:#425d51;">Parcela ${index + 1}: ${formatCurrency(amount)} - vencimento ${dueDateLabel}</li>`
+      return `<li style="margin:0 0 8px;color:#4f685c;">Parcela ${index + 1}: ${formatCurrency(amount)} - vencimento ${dueDateLabel}</li>`
     })
     .join('')
 }
@@ -126,7 +126,7 @@ function buildEmailHtml(input: RegistrationConfirmationEmailInput) {
       : ''
   const firstDueDateLine =
     firstDueDate && input.paymentMethod !== 'CartaoCredito'
-      ? `<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#425d51;"><strong>Primeiro vencimento:</strong> ${formatDatePtBr(firstDueDate)}</p>`
+      ? `<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#4f685c;"><strong>Primeiro vencimento:</strong> ${formatDatePtBr(firstDueDate)}</p>`
       : ''
 
   return `
@@ -134,20 +134,20 @@ function buildEmailHtml(input: RegistrationConfirmationEmailInput) {
       <div style="max-width:620px;margin:0 auto;background:#eef5ef;border:1px solid #b7d0bf;border-radius:20px;overflow:hidden;">
         <div style="padding:24px 24px 12px;text-align:center;background:#d6e8dc;">
           <img src="${logoUrl}" alt="Logo do Retiro da II IPR de Camacan" width="88" style="display:block;width:88px;height:auto;margin:0 auto 14px;" />
-          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#5f8a73;">Inscrição concluída</div>
-          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#20352a;">Seja bem-vindo ao Retiro</h1>
+          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#7ba08a;">Inscrição concluída</div>
+          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#2d4338;">Seja bem-vindo ao Retiro</h1>
         </div>
         <div style="padding:24px;">
-          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#425d51;">
+          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#4f685c;">
             Olá, <strong>${input.fullName}</strong>! Sua inscrição no <strong>Retiro da II IPR de Camacan</strong> foi concluída com sucesso.
           </p>
-          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#425d51;">
+          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#4f685c;">
             Recebemos seus dados e estamos felizes por ter você conosco. Guarde esta mensagem, pois ela resume as principais informações da sua inscrição.
           </p>
           <div style="margin:0 0 16px;padding:16px;border:1px solid #a8c5b3;border-radius:16px;background:#f7fbf8;">
-            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#425d51;"><strong>Forma de pagamento:</strong> ${paymentMethodLabel}</p>
-            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#425d51;"><strong>Valor total:</strong> ${formatCurrency(input.totalAmount)}</p>
-            <p style="margin:0;font-size:14px;line-height:1.6;color:#425d51;"><strong>Plano de pagamento:</strong> ${installmentsLabel}</p>
+            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#4f685c;"><strong>Forma de pagamento:</strong> ${paymentMethodLabel}</p>
+            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#4f685c;"><strong>Valor total:</strong> ${formatCurrency(input.totalAmount)}</p>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#4f685c;"><strong>Plano de pagamento:</strong> ${installmentsLabel}</p>
             ${firstDueDateLine}
           </div>
           ${installmentList}
@@ -157,11 +157,11 @@ function buildEmailHtml(input: RegistrationConfirmationEmailInput) {
               Hospedagem, alimentação (café da manhã, almoço e janta) e transporte.
             </p>
           </div>
-          <p style="margin:18px 0 18px;font-size:14px;line-height:1.7;color:#425d51;">
+          <p style="margin:18px 0 18px;font-size:14px;line-height:1.7;color:#4f685c;">
             Se precisar de ajuda, tiver dúvidas sobre pagamento ou quiser confirmar algum dado, basta responder este e-mail.
           </p>
           <div style="text-align:center;">
-            <a href="${publicSiteUrl}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#4a8b63;color:#f7fbf8;font-size:14px;font-weight:700;text-decoration:none;">Abrir sistema do retiro</a>
+            <a href="${publicSiteUrl}" style="display:inline-block;padding:12px 20px;border:1px solid #9fc1ac;border-radius:999px;background:#cfe3d6;color:#2d4338;font-size:14px;font-weight:700;text-decoration:none;">Abrir sistema do retiro</a>
           </div>
         </div>
         <div style="padding:0 24px 22px;text-align:center;font-size:12px;line-height:1.6;color:#6d8277;">

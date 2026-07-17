@@ -12,15 +12,15 @@ describe('registrationPricing', () => {
     expect(getMonthsAvailableUntilEvent(now)).toBe(2)
   })
 
-  it('gera a primeira parcela no mes atual quando ele for escolhido e fixa a ultima em 04/02/2027', () => {
+  it('gera vencimentos mensais e so usa 04/02/2027 quando a sequencia chega no prazo limite', () => {
     const now = new Date('2026-07-14T00:00:00Z')
 
     expect(computeDueDates(now, 5, 20)).toEqual([
       '2026-07-20',
+      '2026-08-20',
       '2026-09-20',
+      '2026-10-20',
       '2026-11-20',
-      '2026-12-20',
-      '2027-02-04',
     ])
   })
 
@@ -41,8 +41,8 @@ describe('registrationPricing', () => {
 
     expect(computeDueDates(now, 3, 10, '2026-10')).toEqual([
       '2026-10-10',
+      '2026-11-10',
       '2026-12-10',
-      '2027-02-04',
     ])
   })
 

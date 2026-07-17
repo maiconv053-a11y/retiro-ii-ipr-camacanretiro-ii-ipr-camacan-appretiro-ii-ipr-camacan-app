@@ -13,10 +13,18 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import { GoalProgressCard } from '@/components/ui/GoalProgressCard'
 import { useRetreatStore } from '@/store/retreatStore'
 import { formatCurrency, formatPaymentMethodLabel } from '@/utils/format'
+import {
+  getExpectedAmount,
+  getLogisticsBaseGoalAmount,
+  getLogisticsCoveredAmount,
+  getCollectedAmount,
+  getLogisticsSalesProfit,
+} from '@/utils/logisticsMetrics'
 
 export default function DashboardPage() {
   const participants = useRetreatStore((state) => state.participants)
   const logisticsTasks = useRetreatStore((state) => state.logisticsTasks)
+  const logisticsSales = useRetreatStore((state) => state.logisticsSales)
   const retreatFee = useRetreatStore((state) => state.settings.retreatFee)
   const updateRetreatFee = useRetreatStore((state) => state.updateRetreatFee)
   const syncing = useRetreatStore((state) => state.syncing)
@@ -25,14 +33,9 @@ export default function DashboardPage() {
     (participant) => participant.registrationStatus !== 'Cancelada',
   )
 
-  const totalCollected = activeParticipants.reduce(
-    (sum, participant) => sum + participant.financial.amountPaid,
-    0,
-  )
-  const totalExpected = activeParticipants.reduce(
-    (sum, participant) => sum + participant.financial.totalAmount,
-    0,
-  )
+  const totalCollected = getCollectedAmount(participants)
+  const totalExpected = getExpectedAmount(participants)
+  const totalCoveredAmount = getLogisticsCoveredAmount(participants, logisticsSales)
   const totalPendingAmount = Math.max(totalExpected - totalCollected, 0)
   const pendingParticipants = activeParticipants.filter(
     (participant) => participant.financial.amountPaid < participant.financial.totalAmount,
@@ -40,10 +43,8 @@ export default function DashboardPage() {
   const completedTasks = logisticsTasks.filter(
     (task) => task.status === 'Concluida',
   ).length
-  const logisticsGoalAmount = logisticsTasks.reduce(
-    (sum, task) => sum + (task.actualCost > 0 ? task.actualCost : task.estimatedCost),
-    0,
-  )
+  const logisticsGoalAmount = getLogisticsBaseGoalAmount(logisticsTasks)
+  const salesProfitAmount = getLogisticsSalesProfit(logisticsSales)
 
   useEffect(() => {
     setFeeDraft(retreatFee)
@@ -105,9 +106,9 @@ export default function DashboardPage() {
       <GoalProgressCard
         eyebrow="Metas de operação"
         title="Compras + contratos batidos pela arrecadação"
-        description="A meta usa o valor gasto das tarefas e, enquanto ele ainda estiver zerado, considera o valor estimado para não deixar compras e contratos fora da projeção."
+        description={`A meta permanece cheia em ${formatCurrency(logisticsGoalAmount)}. O lucro líquido das vendas (${formatCurrency(salesProfitAmount)}) entra como valor pago, junto com o que já foi arrecadado nas inscrições.`}
         goalAmount={logisticsGoalAmount}
-        paidAmount={totalCollected}
+        paidAmount={totalCoveredAmount}
         pendingAmount={totalPendingAmount}
       />
 

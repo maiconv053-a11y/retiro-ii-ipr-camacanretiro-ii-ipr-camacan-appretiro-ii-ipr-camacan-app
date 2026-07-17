@@ -202,6 +202,16 @@ create table if not exists public.checklist_organizacao (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+create table if not exists public.vendas_retiro (
+  id uuid primary key default gen_random_uuid(),
+  data_venda date not null,
+  item_vendido text not null,
+  valor_entrada numeric(10, 2) not null default 0 check (valor_entrada >= 0),
+  valor_gasto numeric(10, 2) not null default 0 check (valor_gasto >= 0),
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
 create index if not exists participantes_status_idx
   on public.participantes (status_inscricao);
 
@@ -213,6 +223,9 @@ create unique index if not exists diretoria_usuarios_email_idx
 
 create index if not exists checklist_categoria_idx
   on public.checklist_organizacao (categoria);
+
+create index if not exists vendas_retiro_data_idx
+  on public.vendas_retiro (data_venda desc);
 
 insert into public.configuracoes_retiro (id, valor_inscricao)
 values ('principal', 750)
@@ -250,6 +263,12 @@ before update on public.checklist_organizacao
 for each row
 execute function public.set_updated_at();
 
+drop trigger if exists vendas_retiro_set_updated_at on public.vendas_retiro;
+create trigger vendas_retiro_set_updated_at
+before update on public.vendas_retiro
+for each row
+execute function public.set_updated_at();
+
 drop trigger if exists configuracoes_retiro_set_updated_at on public.configuracoes_retiro;
 create trigger configuracoes_retiro_set_updated_at
 before update on public.configuracoes_retiro
@@ -262,6 +281,7 @@ alter table public.financeiro_parcelas enable row level security;
 alter table public.email_cobranca_logs enable row level security;
 alter table public.cobranca_notificacoes enable row level security;
 alter table public.checklist_organizacao enable row level security;
+alter table public.vendas_retiro enable row level security;
 alter table public.diretoria_usuarios enable row level security;
 alter table public.configuracoes_retiro enable row level security;
 
@@ -271,6 +291,7 @@ revoke all on table public.financeiro_parcelas from anon, authenticated;
 revoke all on table public.email_cobranca_logs from anon, authenticated;
 revoke all on table public.cobranca_notificacoes from anon, authenticated;
 revoke all on table public.checklist_organizacao from anon, authenticated;
+revoke all on table public.vendas_retiro from anon, authenticated;
 revoke all on table public.diretoria_usuarios from anon, authenticated;
 revoke all on table public.configuracoes_retiro from anon, authenticated;
 
@@ -280,5 +301,6 @@ comment on table public.financeiro_parcelas is 'Detalhamento das parcelas de bol
 comment on table public.email_cobranca_logs is 'Histórico de todos os e-mails de cobrança enviados';
 comment on table public.cobranca_notificacoes is 'Histórico de disparos de cobrança automática e manual';
 comment on table public.checklist_organizacao is 'Checklist operacional da organização';
+comment on table public.vendas_retiro is 'Registro de vendas realizadas para ajudar no custeio do retiro';
 comment on table public.diretoria_usuarios is 'Usuarios autorizados a acessar a area privada da diretoria';
 comment on table public.configuracoes_retiro is 'Configuracoes centrais do retiro, incluindo valor fixo da inscricao';

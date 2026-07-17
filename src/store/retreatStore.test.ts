@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { LogisticsTask, Participant } from '@shared/types/retreat'
+import type { LogisticsSale, LogisticsTask, Participant } from '@shared/types/retreat'
 import * as retreatApi from '@/services/retreatApi'
 import { useRetreatStore } from '@/store/retreatStore'
 import { createInstallments } from '@/utils/finance'
@@ -7,6 +7,7 @@ import { createInstallments } from '@/utils/finance'
 vi.mock('@/services/retreatApi', () => ({
   fetchParticipants: vi.fn(),
   fetchLogisticsTasks: vi.fn(),
+  fetchLogisticsSales: vi.fn(),
   fetchRetreatSettings: vi.fn(),
   fetchPublicRetreatSettings: vi.fn(),
   createParticipant: vi.fn(),
@@ -88,12 +89,15 @@ const logisticsFixture: LogisticsTask[] = [
   },
 ]
 
+const logisticsSalesFixture: LogisticsSale[] = []
+
 describe('retreatStore', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useRetreatStore.setState({
       participants: [],
       logisticsTasks: [],
+      logisticsSales: [],
       settings: {
         retreatFee: 380,
       },
@@ -105,6 +109,7 @@ describe('retreatStore', () => {
 
     mockedApi.fetchParticipants.mockResolvedValue(participantsFixture)
     mockedApi.fetchLogisticsTasks.mockResolvedValue(logisticsFixture)
+    mockedApi.fetchLogisticsSales.mockResolvedValue(logisticsSalesFixture)
     mockedApi.fetchRetreatSettings.mockResolvedValue({ retreatFee: 380 })
     mockedApi.createParticipant.mockResolvedValue([
       {
@@ -152,9 +157,11 @@ describe('retreatStore', () => {
 
     expect(mockedApi.fetchParticipants).toHaveBeenCalledTimes(1)
     expect(mockedApi.fetchLogisticsTasks).toHaveBeenCalledTimes(1)
+    expect(mockedApi.fetchLogisticsSales).toHaveBeenCalledTimes(1)
     expect(mockedApi.fetchRetreatSettings).toHaveBeenCalledTimes(1)
     expect(useRetreatStore.getState().participants).toHaveLength(2)
     expect(useRetreatStore.getState().logisticsTasks).toHaveLength(1)
+    expect(useRetreatStore.getState().logisticsSales).toHaveLength(0)
     expect(useRetreatStore.getState().settings.retreatFee).toBe(380)
     expect(useRetreatStore.getState().initialized).toBe(true)
   })

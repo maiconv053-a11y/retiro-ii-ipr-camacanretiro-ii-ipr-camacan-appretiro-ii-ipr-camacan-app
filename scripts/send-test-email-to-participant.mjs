@@ -87,18 +87,18 @@ async function main() {
       <div style="max-width:620px;margin:0 auto;background:#eef5ef;border:1px solid #b7d0bf;border-radius:20px;overflow:hidden;">
         <div style="padding:24px 24px 12px;text-align:center;background:#d6e8dc;">
           <img src="${EMAIL_LOGO_URL}" alt="Logo do Retiro da II IPR de Camacan" width="88" style="display:block;width:88px;height:auto;margin:0 auto 14px;" />
-          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#5f8a73;">Teste de entrega</div>
-          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#20352a;">E-mail funcionando com sucesso</h1>
+          <div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#7ba08a;">Teste de entrega</div>
+          <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#2d4338;">E-mail funcionando com sucesso</h1>
         </div>
         <div style="padding:24px;">
-          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#425d51;">
+          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#4f685c;">
             Olá, <strong>${recipient.name}</strong>! Este é um teste real do sistema de notificações por e-mail do <strong>Retiro II IPR de Camacan</strong>.
           </p>
-          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#425d51;">
+          <p style="margin:0 0 18px;font-size:14px;line-height:1.7;color:#4f685c;">
             Se esta mensagem chegou corretamente, o domínio está validado, o Resend está operacional e o sistema está pronto para disparar e-mails reais.
           </p>
           <div style="text-align:center;">
-            <a href="${PUBLIC_SITE_URL}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#4a8b63;color:#f7fbf8;font-size:14px;font-weight:700;text-decoration:none;">Abrir sistema do retiro</a>
+            <a href="${PUBLIC_SITE_URL}" style="display:inline-block;padding:12px 20px;border:1px solid #9fc1ac;border-radius:999px;background:#cfe3d6;color:#2d4338;font-size:14px;font-weight:700;text-decoration:none;">Abrir sistema do retiro</a>
           </div>
         </div>
         <div style="padding:0 24px 22px;text-align:center;font-size:12px;line-height:1.6;color:#6d8277;">

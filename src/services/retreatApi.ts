@@ -1,5 +1,7 @@
 import type {
   FinancialUpdate,
+  LogisticsSale,
+  LogisticsSaleInput,
   LogisticsTask,
   LogisticsTaskInput,
   Participant,
@@ -152,6 +154,30 @@ export function updateLogisticsStatus(taskId: string, status: TaskStatus) {
 
 export function deleteLogisticsTask(taskId: string) {
   return request<LogisticsTask[]>(`/api/logistics/${taskId}`, {
+    method: 'DELETE',
+  })
+}
+
+export function fetchLogisticsSales() {
+  return request<LogisticsSale[]>('/api/logistics/sales')
+}
+
+export function createLogisticsSale(sale: LogisticsSaleInput) {
+  return request<LogisticsSale[]>('/api/logistics/sales', {
+    method: 'POST',
+    body: JSON.stringify(sale),
+  })
+}
+
+export function updateLogisticsSale(saleId: string, sale: LogisticsSaleInput) {
+  return request<LogisticsSale[]>(`/api/logistics/sales/${saleId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(sale),
+  })
+}
+
+export function deleteLogisticsSale(saleId: string) {
+  return request<LogisticsSale[]>(`/api/logistics/sales/${saleId}`, {
     method: 'DELETE',
   })
 }

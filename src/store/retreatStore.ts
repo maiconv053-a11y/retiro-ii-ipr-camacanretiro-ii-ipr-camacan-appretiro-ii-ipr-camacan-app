@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type {
   FinancialUpdate,
+  LogisticsSale,
+  LogisticsSaleInput,
   LogisticsTask,
   LogisticsTaskInput,
   Participant,
@@ -12,6 +14,7 @@ import * as retreatApi from '@/services/retreatApi'
 interface RetreatState {
   participants: Participant[]
   logisticsTasks: LogisticsTask[]
+  logisticsSales: LogisticsSale[]
   settings: RetreatSettings
   initialized: boolean
   loading: boolean
@@ -45,6 +48,9 @@ interface RetreatState {
     status: LogisticsTask['status'],
   ) => Promise<void>
   deleteLogisticsTask: (taskId: string) => Promise<void>
+  addLogisticsSale: (sale: LogisticsSaleInput) => Promise<void>
+  updateLogisticsSale: (saleId: string, sale: LogisticsSaleInput) => Promise<void>
+  deleteLogisticsSale: (saleId: string) => Promise<void>
 }
 
 function getErrorMessage(error: unknown) {
@@ -54,6 +60,7 @@ function getErrorMessage(error: unknown) {
 export const useRetreatStore = create<RetreatState>((set, get) => ({
   participants: [],
   logisticsTasks: [],
+  logisticsSales: [],
   settings: {
     retreatFee: 750,
   },
@@ -65,6 +72,7 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
     set({
       participants: [],
       logisticsTasks: [],
+      logisticsSales: [],
       settings: {
         retreatFee: 750,
       },
@@ -82,15 +90,17 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
     set({ loading: true, error: null })
 
     try {
-      const [participants, logisticsTasks, settings] = await Promise.all([
+      const [participants, logisticsTasks, logisticsSales, settings] = await Promise.all([
         retreatApi.fetchParticipants(),
         retreatApi.fetchLogisticsTasks(),
+        retreatApi.fetchLogisticsSales(),
         retreatApi.fetchRetreatSettings(),
       ])
 
       set({
         participants,
         logisticsTasks,
+        logisticsSales,
         settings,
         initialized: true,
         loading: false,
@@ -239,6 +249,39 @@ export const useRetreatStore = create<RetreatState>((set, get) => ({
     try {
       const logisticsTasks = await retreatApi.deleteLogisticsTask(taskId)
       set({ logisticsTasks, syncing: false })
+    } catch (error) {
+      set({ syncing: false, error: getErrorMessage(error) })
+      throw error
+    }
+  },
+  addLogisticsSale: async (sale) => {
+    set({ syncing: true, error: null })
+
+    try {
+      const logisticsSales = await retreatApi.createLogisticsSale(sale)
+      set({ logisticsSales, syncing: false })
+    } catch (error) {
+      set({ syncing: false, error: getErrorMessage(error) })
+      throw error
+    }
+  },
+  updateLogisticsSale: async (saleId, sale) => {
+    set({ syncing: true, error: null })
+
+    try {
+      const logisticsSales = await retreatApi.updateLogisticsSale(saleId, sale)
+      set({ logisticsSales, syncing: false })
+    } catch (error) {
+      set({ syncing: false, error: getErrorMessage(error) })
+      throw error
+    }
+  },
+  deleteLogisticsSale: async (saleId) => {
+    set({ syncing: true, error: null })
+
+    try {
+      const logisticsSales = await retreatApi.deleteLogisticsSale(saleId)
+      set({ logisticsSales, syncing: false })
     } catch (error) {
       set({ syncing: false, error: getErrorMessage(error) })
       throw error

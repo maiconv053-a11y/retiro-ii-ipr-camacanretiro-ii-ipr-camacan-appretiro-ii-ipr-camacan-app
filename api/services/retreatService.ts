@@ -2,6 +2,8 @@ import type {
   FinancialRecord,
   FinancialUpdate,
   Installment,
+  LogisticsSale,
+  LogisticsSaleInput,
   LogisticsTask,
   LogisticsTaskInput,
   Participant,
@@ -135,6 +137,14 @@ type LogisticsRow = {
   valor_gasto: number | string
   status: string
   observacoes: string | null
+}
+
+type LogisticsSaleRow = {
+  id: string
+  data_venda: string
+  item_vendido: string
+  valor_entrada: number | string
+  valor_gasto: number | string
 }
 
 type RetreatSettingsRow = {
@@ -534,6 +544,16 @@ function mapLogisticsTask(row: LogisticsRow): LogisticsTask {
     actualCost: toMoney(row.valor_gasto),
     status: toTaskStatus(row.status),
     notes: row.observacoes ?? '',
+  }
+}
+
+function mapLogisticsSale(row: LogisticsSaleRow): LogisticsSale {
+  return {
+    id: row.id,
+    saleDate: row.data_venda,
+    itemSold: row.item_vendido,
+    revenueAmount: toMoney(row.valor_entrada),
+    expenseAmount: toMoney(row.valor_gasto),
   }
 }
 
@@ -1319,6 +1339,61 @@ export async function updateLogisticsTaskStatusRecord(
 export async function deleteLogisticsTaskRecord(taskId: string) {
   const supabase = assertSupabase()
   const { error } = await supabase.from('checklist_organizacao').delete().eq('id', taskId)
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function listLogisticsSales() {
+  const supabase = assertSupabase()
+  const { data, error } = await supabase
+    .from('vendas_retiro')
+    .select('id, data_venda, item_vendido, valor_entrada, valor_gasto')
+    .order('data_venda', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw error
+  }
+
+  return ((data as LogisticsSaleRow[] | null) ?? []).map(mapLogisticsSale)
+}
+
+export async function createLogisticsSaleRecord(sale: LogisticsSaleInput) {
+  const supabase = assertSupabase()
+  const { error } = await supabase.from('vendas_retiro').insert({
+    data_venda: sale.saleDate,
+    item_vendido: sale.itemSold,
+    valor_entrada: sale.revenueAmount,
+    valor_gasto: sale.expenseAmount,
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function updateLogisticsSaleRecord(saleId: string, sale: LogisticsSaleInput) {
+  const supabase = assertSupabase()
+  const { error } = await supabase
+    .from('vendas_retiro')
+    .update({
+      data_venda: sale.saleDate,
+      item_vendido: sale.itemSold,
+      valor_entrada: sale.revenueAmount,
+      valor_gasto: sale.expenseAmount,
+    })
+    .eq('id', saleId)
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function deleteLogisticsSaleRecord(saleId: string) {
+  const supabase = assertSupabase()
+  const { error } = await supabase.from('vendas_retiro').delete().eq('id', saleId)
 
   if (error) {
     throw error
