@@ -26,7 +26,8 @@ export async function assertEmailDomainExistsOrThrow(email: string) {
   const hasAddressRecord = await Promise.allSettled([resolve4(domain), resolve6(domain)]).then(
     (results) =>
       results.some(
-        (result) => result.status === 'fulfilled' && Array.isArray(result.value) && result.value.length > 0,
+        (result) =>
+          result.status === 'fulfilled' && Array.isArray(result.value) && result.value.length > 0,
       ),
   )
 

@@ -26,7 +26,7 @@ import {
 } from '../../shared/utils/registrationPricing.js'
 import { formatCpf, isValidCpf, sanitizeCpf } from '../../shared/utils/cpf.js'
 import { getEmailValidationError, normalizeEmail } from '../../shared/utils/email.js'
-import { assertEmailDomainExistsOrThrow } from '../lib/emailDeliverability.js'
+import { assertEmailDomainExistsOrThrow } from '../../server/lib/emailDeliverability.js'
 import { assertSupabase } from '../lib/supabase.js'
 import { sendPublicRegistrationConfirmationEmail } from '../../server/lib/registrationConfirmationEmail.js'
 import { sendParticipantManualChargeEmail } from '../../server/lib/manualChargeEmail.js'
