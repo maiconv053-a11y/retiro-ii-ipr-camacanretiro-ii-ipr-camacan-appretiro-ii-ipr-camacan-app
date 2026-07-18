@@ -59,6 +59,7 @@ export interface Participant {
   birthDate: string
   ageAtEvent: number
   phone: string
+  cpf: string
   email: string
   church: string
   city: string
@@ -74,6 +75,7 @@ export interface ParticipantInput {
   fullName: string
   birthDate: string
   phone: string
+  cpf: string
   email: string
   church: string
   city: string
@@ -92,6 +94,7 @@ export interface PublicRegistrationInput {
   fullName: string
   birthDate: string
   phone: string
+  cpf: string
   email: string
   church: string
   city: string

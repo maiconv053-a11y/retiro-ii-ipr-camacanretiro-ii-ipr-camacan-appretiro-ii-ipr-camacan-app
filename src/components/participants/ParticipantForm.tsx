@@ -10,6 +10,8 @@ import {
   RegistrationStatus,
 } from '@shared/types/retreat'
 import { formatCurrency, formatIsoDatePtBr, formatPhone } from '@/utils/format'
+import { formatCpf, isValidCpf } from '@shared/utils/cpf'
+import { isValidEmail, normalizeEmail } from '@shared/utils/email'
 
 interface ParticipantFormProps {
   onSubmit: (participant: ParticipantInput) => Promise<void> | void
@@ -31,6 +33,7 @@ function createInitialState(defaultTotalAmount: number): ParticipantInput {
     fullName: '',
     birthDate: '',
     phone: '',
+    cpf: '',
     email: '',
     church: '',
     city: '',
@@ -97,7 +100,8 @@ export function ParticipantForm({
       form.fullName.trim().length > 3 &&
       form.birthDate.trim().length === 10 &&
       form.phone.trim().length >= 14 &&
-      form.email.trim().length >= 5 &&
+      isValidCpf(form.cpf) &&
+      isValidEmail(form.email) &&
       form.church.trim().length >= 2 &&
       form.city.trim().length >= 2 &&
       form.totalAmount >= 0 &&
@@ -127,7 +131,8 @@ export function ParticipantForm({
       await onSubmit({
         ...form,
         fullName: form.fullName.trim(),
-        email: form.email.trim(),
+        cpf: form.cpf.trim(),
+        email: normalizeEmail(form.email),
         church: form.church.trim(),
         city: form.city.trim(),
       })
@@ -241,6 +246,21 @@ export function ParticipantForm({
             onChange={(event) => updateField('phone', formatPhone(event.target.value))}
             className="field-surface w-full"
             placeholder="(73) 99999-9999"
+          />
+        </label>
+
+        <label className="space-y-2">
+          <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
+            CPF
+          </span>
+          <input
+            value={form.cpf}
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={14}
+            onChange={(event) => updateField('cpf', formatCpf(event.target.value))}
+            className="field-surface w-full"
+            placeholder="000.000.000-00"
           />
         </label>
 

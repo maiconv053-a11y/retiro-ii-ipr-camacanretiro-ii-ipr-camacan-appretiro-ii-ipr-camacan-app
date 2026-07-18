@@ -9,6 +9,7 @@ const participants: Participant[] = [
     birthDate: '2002-06-10',
     ageAtEvent: 24,
     phone: '(73) 99999-0001',
+    cpf: '390.533.447-05',
     email: 'joao@email.com',
     church: 'II IPR de Camacan',
     city: 'Camacan - BA',
@@ -34,6 +35,7 @@ const participants: Participant[] = [
     birthDate: '1997-01-10',
     ageAtEvent: 29,
     phone: '(73) 98888-0002',
+    cpf: '111.444.777-35',
     email: 'maria@email.com',
     church: 'IPR Central',
     city: 'Itabuna - BA',
@@ -61,6 +63,7 @@ const participants: Participant[] = [
     birthDate: '1986-03-12',
     ageAtEvent: 40,
     phone: '(73) 97777-0003',
+    cpf: '529.982.247-25',
     email: 'paulo@email.com',
     church: 'IPR Esperança',
     city: 'Canavieiras - BA',
@@ -93,6 +96,12 @@ describe('filterParticipants', () => {
     const result = filterParticipants(participants, 'maria', 'Pendente')
     expect(result).toHaveLength(1)
     expect(result[0].registrationStatus).toBe('Pendente')
+  })
+
+  it('busca participante pelo cpf', () => {
+    const result = filterParticipants(participants, '11144477735', 'Todos')
+    expect(result).toHaveLength(1)
+    expect(result[0].fullName).toBe('Maria Souza')
   })
 
   it('não mostra cancelados no filtro padrão de inscrições', () => {

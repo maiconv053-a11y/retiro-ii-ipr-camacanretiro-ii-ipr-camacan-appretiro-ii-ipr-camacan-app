@@ -3,6 +3,7 @@ import type { PaymentMethod } from '../../shared/types/retreat.js'
 
 type RegistrationAlertEmailInput = {
   participantName: string
+  participantCpf: string
   participantEmail: string
   participantPhone: string
   participantChurch: string
@@ -40,6 +41,7 @@ function buildText(input: RegistrationAlertEmailInput) {
     'Nova inscrição realizada no Retiro da II IPR de Camacan.',
     '',
     `Nome: ${input.participantName}`,
+    `CPF: ${input.participantCpf}`,
     `E-mail: ${input.participantEmail}`,
     `Telefone: ${input.participantPhone}`,
     `Igreja: ${input.participantChurch}`,
@@ -61,6 +63,7 @@ function buildHtml(input: RegistrationAlertEmailInput) {
           Novo participante cadastrado
         </h1>
         <p style="margin:0 0 8px;"><strong>Nome:</strong> ${input.participantName}</p>
+        <p style="margin:0 0 8px;"><strong>CPF:</strong> ${input.participantCpf}</p>
         <p style="margin:0 0 8px;"><strong>E-mail:</strong> ${input.participantEmail}</p>
         <p style="margin:0 0 8px;"><strong>Telefone:</strong> ${input.participantPhone}</p>
         <p style="margin:0 0 8px;"><strong>Igreja:</strong> ${input.participantChurch}</p>
@@ -95,4 +98,3 @@ export async function sendRegistrationAlertEmail(input: RegistrationAlertEmailIn
     throw new Error(JSON.stringify(response.error))
   }
 }
-

@@ -28,12 +28,15 @@ import {
   formatPhone,
   parseBrazilianDateInputToIso,
 } from '@/utils/format'
+import { formatCpf, isValidCpf } from '@shared/utils/cpf'
+import { getEmailValidationError, isValidEmail, normalizeEmail } from '@shared/utils/email'
 
 function createInitialForm(now: Date): PublicRegistrationInput {
   return {
     fullName: '',
     birthDate: '',
     phone: '',
+    cpf: '',
     email: '',
     church: '',
     city: '',
@@ -286,7 +289,8 @@ export default function PublicRegistrationPage() {
       form.fullName.trim().length >= 4 &&
       form.birthDate.trim().length === 10 &&
       form.phone.trim().length >= 14 &&
-      form.email.trim().length >= 5 &&
+      isValidCpf(form.cpf) &&
+      isValidEmail(form.email) &&
       form.church.trim().length >= 2 &&
       form.city.trim().length >= 2 &&
       form.termsAccepted &&
@@ -331,7 +335,10 @@ export default function PublicRegistrationPage() {
     event.preventDefault()
 
     if (!isValid) {
-      setError('Preencha os dados obrigatórios e aceite o termo de compromisso.')
+      setError(
+        getEmailValidationError(form.email) ??
+          'Preencha os dados obrigatórios e aceite o termo de compromisso.',
+      )
       return
     }
 
@@ -342,7 +349,8 @@ export default function PublicRegistrationPage() {
       const response = await createPublicRegistration({
         ...form,
         fullName: form.fullName.trim(),
-        email: form.email.trim(),
+        cpf: form.cpf.trim(),
+        email: normalizeEmail(form.email),
         church: form.church.trim(),
         city: form.city.trim(),
         dietaryRestrictions: form.dietaryRestrictions.trim(),
@@ -353,7 +361,7 @@ export default function PublicRegistrationPage() {
         ...response.summary,
         fullName: form.fullName.trim(),
         participantPhone: form.phone.trim(),
-        participantEmail: form.email.trim(),
+        participantEmail: normalizeEmail(form.email),
         participantChurch: form.church.trim(),
         participantCity: form.city.trim(),
       }
@@ -516,6 +524,24 @@ export default function PublicRegistrationPage() {
                 className="field-surface w-full"
                 placeholder="(73) 99999-9999"
               />
+            </label>
+
+            <label className="space-y-2 xl:col-span-2">
+              <span className="text-xs uppercase tracking-[0.2em] text-[#587264]">
+                CPF
+              </span>
+              <input
+                value={form.cpf}
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={14}
+                onChange={(event) => updateField('cpf', formatCpf(event.target.value))}
+                className="field-surface w-full"
+                placeholder="000.000.000-00"
+              />
+              <span className="text-xs text-[#50675a]">
+                Informe um CPF v&aacute;lido do participante.
+              </span>
             </label>
 
             <label className="space-y-2 xl:col-span-2">

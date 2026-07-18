@@ -37,6 +37,7 @@ export default function ParticipantsPage() {
       fullName: participant.fullName,
       birthDate: participant.birthDate,
       phone: participant.phone,
+      cpf: participant.cpf,
       email: participant.email,
       church: participant.church,
       city: participant.city,

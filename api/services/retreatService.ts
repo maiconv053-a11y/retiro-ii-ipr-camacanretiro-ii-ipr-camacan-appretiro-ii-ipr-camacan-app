@@ -24,6 +24,9 @@ import {
   computeRegistrationPricing,
   EVENT_DATE,
 } from '../../shared/utils/registrationPricing.js'
+import { formatCpf, isValidCpf, sanitizeCpf } from '../../shared/utils/cpf.js'
+import { getEmailValidationError, normalizeEmail } from '../../shared/utils/email.js'
+import { assertEmailDomainExistsOrThrow } from '../lib/emailDeliverability.js'
 import { assertSupabase } from '../lib/supabase.js'
 import { sendPublicRegistrationConfirmationEmail } from '../../server/lib/registrationConfirmationEmail.js'
 import { sendParticipantManualChargeEmail } from '../../server/lib/manualChargeEmail.js'
@@ -35,6 +38,7 @@ type ParticipantRow = {
   idade: number
   birth_date: string | null
   telefone: string
+  cpf: string | null
   email: string | null
   igreja: string | null
   cidade: string | null
@@ -158,6 +162,38 @@ const SETTINGS_ROW_ID = 'principal'
 function toMoney(value: unknown) {
   const numericValue = typeof value === 'number' ? value : Number(value)
   return Number.isFinite(numericValue) ? numericValue : 0
+}
+
+function assertValidCpfOrThrow(cpf: string) {
+  if (!isValidCpf(cpf)) {
+    throw new Error('Informe um CPF valido do participante.')
+  }
+}
+
+async function assertValidEmailOrThrow(email: string) {
+  const emailError = getEmailValidationError(email)
+
+  if (emailError) {
+    throw new Error(emailError)
+  }
+
+  await assertEmailDomainExistsOrThrow(email)
+}
+
+function throwFriendlyParticipantPersistenceError(error: unknown): never {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    error.code === '23505' &&
+    'message' in error &&
+    typeof error.message === 'string' &&
+    /cpf/i.test(error.message)
+  ) {
+    throw new Error('Ja existe um participante cadastrado com este CPF.')
+  }
+
+  throw error instanceof Error ? error : new Error('Erro ao salvar participante.')
 }
 
 async function saveChargeNotificationLog(params: {
@@ -464,6 +500,7 @@ function mapParticipant(row: ParticipantRow): Participant {
     birthDate: row.birth_date ?? '',
     ageAtEvent: row.idade,
     phone: row.telefone,
+    cpf: formatCpf(row.cpf ?? ''),
     email: row.email ?? '',
     church: row.igreja ?? '',
     city: row.cidade ?? '',
@@ -971,6 +1008,7 @@ export async function listParticipants() {
         idade,
         birth_date,
         telefone,
+        cpf,
         email,
         igreja,
         cidade,
@@ -1010,6 +1048,8 @@ export async function listParticipants() {
 
 export async function createParticipantRecord(input: ParticipantInput) {
   const supabase = assertSupabase()
+  assertValidCpfOrThrow(input.cpf)
+  await assertValidEmailOrThrow(input.email)
   const ageAtEvent = calculateAgeOnDate(input.birthDate, EVENT_DATE)
   const { data, error } = await supabase
     .from('participantes')
@@ -1018,7 +1058,8 @@ export async function createParticipantRecord(input: ParticipantInput) {
       idade: ageAtEvent,
       birth_date: input.birthDate,
       telefone: input.phone,
-      email: input.email,
+      cpf: sanitizeCpf(input.cpf),
+      email: normalizeEmail(input.email),
       igreja: input.church,
       cidade: input.city,
       restricoes_medicas: input.medicalRestrictions,
@@ -1032,7 +1073,7 @@ export async function createParticipantRecord(input: ParticipantInput) {
     .single()
 
   if (error) {
-    throw error
+    throwFriendlyParticipantPersistenceError(error)
   }
 
   await persistFinancialRecord(
@@ -1051,6 +1092,8 @@ export async function createParticipantRecord(input: ParticipantInput) {
 
 export async function createPublicRegistrationRecord(input: PublicRegistrationInput) {
   const supabase = assertSupabase()
+  assertValidCpfOrThrow(input.cpf)
+  await assertValidEmailOrThrow(input.email)
   const retreatFee = await loadRetreatFee()
   const pricing = computeRegistrationPricing({
     birthDateIso: input.birthDate,
@@ -1069,7 +1112,8 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
       idade: pricing.ageAtEvent,
       birth_date: input.birthDate,
       telefone: input.phone,
-      email: input.email,
+      cpf: sanitizeCpf(input.cpf),
+      email: normalizeEmail(input.email),
       igreja: input.church,
       cidade: input.city,
       restricoes_medicas: input.medicalRestrictions,
@@ -1083,7 +1127,7 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
     .single()
 
   if (error) {
-    throw error
+    throwFriendlyParticipantPersistenceError(error)
   }
 
   await persistFinancialRecordFromPlan({
@@ -1112,7 +1156,7 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
   try {
     await sendPublicRegistrationConfirmationEmail({
       fullName: input.fullName,
-      email: input.email,
+      email: normalizeEmail(input.email),
       paymentMethod: summary.paymentMethod,
       totalAmount: summary.totalAmount,
       installmentCount: summary.installmentCount,
@@ -1127,7 +1171,8 @@ export async function createPublicRegistrationRecord(input: PublicRegistrationIn
   try {
     await sendRegistrationAlertEmail({
       participantName: input.fullName,
-      participantEmail: input.email,
+      participantCpf: formatCpf(input.cpf),
+      participantEmail: normalizeEmail(input.email),
       participantPhone: input.phone,
       participantChurch: input.church,
       participantCity: input.city,
@@ -1148,6 +1193,8 @@ export async function updateParticipantRecord(
   currentAmountPaid: number,
 ) {
   const supabase = assertSupabase()
+  assertValidCpfOrThrow(input.cpf)
+  await assertValidEmailOrThrow(input.email)
   const ageAtEvent = calculateAgeOnDate(input.birthDate, EVENT_DATE)
   const { error } = await supabase
     .from('participantes')
@@ -1156,7 +1203,8 @@ export async function updateParticipantRecord(
       idade: ageAtEvent,
       birth_date: input.birthDate,
       telefone: input.phone,
-      email: input.email,
+      cpf: sanitizeCpf(input.cpf),
+      email: normalizeEmail(input.email),
       igreja: input.church,
       cidade: input.city,
       restricoes_medicas: input.medicalRestrictions,
@@ -1169,7 +1217,7 @@ export async function updateParticipantRecord(
     .eq('id', participantId)
 
   if (error) {
-    throw error
+    throwFriendlyParticipantPersistenceError(error)
   }
 
   await persistFinancialRecord(

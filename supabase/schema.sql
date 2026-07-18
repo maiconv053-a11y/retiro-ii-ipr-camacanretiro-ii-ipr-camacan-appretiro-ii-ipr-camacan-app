@@ -26,6 +26,7 @@ create table if not exists public.participantes (
   idade integer not null check (idade >= 0),
   birth_date date,
   telefone text not null,
+  cpf text,
   email text,
   igreja text,
   cidade text,
@@ -121,6 +122,7 @@ alter table public.participantes
   add column if not exists igreja text,
   add column if not exists cidade text,
   add column if not exists birth_date date,
+  add column if not exists cpf text,
   add column if not exists termo_aceito boolean not null default false,
   add column if not exists termo_aceito_em timestamptz,
   add column if not exists origem_inscricao text not null default 'diretoria';
@@ -217,6 +219,10 @@ create index if not exists participantes_status_idx
 
 create index if not exists participantes_origem_idx
   on public.participantes (origem_inscricao);
+
+create unique index if not exists participantes_cpf_unique_idx
+  on public.participantes (cpf)
+  where cpf is not null and btrim(cpf) <> '';
 
 create unique index if not exists diretoria_usuarios_email_idx
   on public.diretoria_usuarios (lower(email));

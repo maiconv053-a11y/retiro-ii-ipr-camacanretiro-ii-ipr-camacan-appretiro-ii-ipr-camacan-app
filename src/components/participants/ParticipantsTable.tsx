@@ -1,8 +1,9 @@
-import { Pencil, Search, Trash2 } from 'lucide-react'
+import { Download, Pencil, Search, Trash2 } from 'lucide-react'
 import type { Participant, RegistrationStatus } from '@shared/types/retreat'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { filterParticipants } from '@/components/participants/participantsFilter'
 import { formatCurrency, formatPaymentMethodLabel } from '@/utils/format'
+import { downloadParticipantContractPdf } from '@/utils/participantContractPdf'
 
 interface ParticipantsTableProps {
   participants: Participant[]
@@ -53,6 +54,10 @@ export function ParticipantsTable({
 }: ParticipantsTableProps) {
   const filteredParticipants = filterParticipants(participants, query, statusFilter)
 
+  async function handleDownloadContract(participant: Participant) {
+    await downloadParticipantContractPdf(participant)
+  }
+
   return (
     <section className="rounded-[28px] border border-[#98c5aa]/50 bg-[#e3f2e7]/96 p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -70,7 +75,7 @@ export function ParticipantsTable({
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
               className="w-full bg-transparent text-sm outline-none placeholder:text-[#667d71] md:min-w-64"
-              placeholder="Buscar por nome, telefone, e-mail, igreja ou cidade"
+              placeholder="Buscar por nome, CPF, telefone, e-mail, igreja ou cidade"
             />
           </label>
 
@@ -117,6 +122,7 @@ export function ParticipantsTable({
                 </td>
                 <td className="px-4 py-4 text-slate-700">
                   <p>{participant.phone}</p>
+                  <p className="mt-1 text-xs text-[#587264]">{participant.cpf || 'Sem CPF'}</p>
                   <p className="mt-1 text-xs text-[#587264]">{participant.email || 'Sem e-mail'}</p>
                 </td>
                 <td className="px-4 py-4 text-slate-700">
@@ -144,6 +150,15 @@ export function ParticipantsTable({
                 </td>
                 <td className="px-4 py-4 text-right">
                   <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void handleDownloadContract(participant)}
+                      disabled={isSubmitting}
+                      className="inline-flex items-center gap-2 rounded-2xl border border-[#a2c9b1]/55 bg-white/84 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-700 transition hover:border-[#73a985]/60 hover:bg-[#d1e7d8] hover:text-[#214a34] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Contrato
+                    </button>
                     <button
                       type="button"
                       onClick={() => onEditParticipant(participant)}
@@ -182,6 +197,7 @@ export function ParticipantsTable({
                 <p className="mt-1 text-sm text-[#42594d]">
                   {participant.ageAtEvent} anos · {participant.phone}
                 </p>
+                <p className="mt-1 text-sm text-[#587264]">{participant.cpf || 'Sem CPF'}</p>
                 <p className="mt-1 text-sm text-[#587264]">{participant.email || 'Sem e-mail'}</p>
               </div>
               <StatusBadge
@@ -208,7 +224,16 @@ export function ParticipantsTable({
                 Forma de pagamento:{' '}
                 {formatPaymentMethodLabel(participant.financial.paymentMethod)}
               </p>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-3">
+                <button
+                  type="button"
+                  onClick={() => void handleDownloadContract(participant)}
+                  disabled={isSubmitting}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#a2c9b1]/55 bg-white/84 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-700 transition hover:border-[#73a985]/60 hover:bg-[#d1e7d8] hover:text-[#214a34] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Baixar contrato
+                </button>
                 <button
                   type="button"
                   onClick={() => onEditParticipant(participant)}
