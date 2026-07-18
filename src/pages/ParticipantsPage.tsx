@@ -109,7 +109,7 @@ export default function ParticipantsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-[1120px] space-y-6 2xl:max-w-[1180px]">
       <PageTopLogo />
       <SectionHeader
         eyebrow="Módulo 1"

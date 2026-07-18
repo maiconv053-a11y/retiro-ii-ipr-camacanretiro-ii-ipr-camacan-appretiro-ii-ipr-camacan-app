@@ -98,7 +98,7 @@ export function ParticipantsTable({
         </div>
       </div>
 
-      <div className="mt-6 hidden overflow-hidden rounded-[24px] border border-[#a8ccb6]/45 lg:block">
+      <div className="mt-6 hidden overflow-x-auto rounded-[24px] border border-[#a8ccb6]/45 lg:block">
         <table className="min-w-full divide-y divide-[#bfd9c9] text-left text-sm">
           <thead className="bg-[#d2e8d8] text-xs uppercase tracking-[0.24em] text-[#456653]">
             <tr>
